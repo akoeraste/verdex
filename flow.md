@@ -7,7 +7,7 @@
 - Create `.gitignore` for both Flutter and Laravel
 - Set up project structure for both frontend and backend
 
-### 1.2 Backend Setup (Laravel)
+### 1.2 Backend Setup (Laravel) ✅ Done
 - Create new Laravel project
 - Configure database connection
 - Install required packages:
