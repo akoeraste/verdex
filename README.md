@@ -10,7 +10,7 @@ verdex/
 ├── frontend/          # Flutter Mobile App
 ├── docs/             # Project Documentation
 └── README.md         # This file
-```
+``` 
 
 ## Technology Stack
 
