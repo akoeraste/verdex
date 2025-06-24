@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/favorite_service.dart';
 import 'plant_result_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -28,7 +29,7 @@ class FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Favorites')),
+      appBar: AppBar(title: Text('favorites'.tr())),
       body: RefreshIndicator(
         onRefresh: () async {
           _loadFavorites();
@@ -39,9 +40,9 @@ class FavoritesScreenState extends State<FavoritesScreen> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return const Center(child: Text('Error loading favorites'));
+              return Center(child: Text('error_loading_favorites'.tr()));
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No favorites yet.'));
+              return Center(child: Text('no_favorites'.tr()));
             } else {
               final favorites = snapshot.data!;
               return ListView.builder(
@@ -49,13 +50,19 @@ class FavoritesScreenState extends State<FavoritesScreen> {
                 itemBuilder: (context, index) {
                   final plant = favorites[index];
                   return ListTile(
-                    leading: Image.network(plant['image_url'], width: 50, height: 50, fit: BoxFit.cover),
+                    leading: Image.network(
+                      plant['image_url'],
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    ),
                     title: Text(plant['name']),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PlantResultScreen(plantData: plant),
+                          builder:
+                              (context) => PlantResultScreen(plantData: plant),
                         ),
                       ).then((_) => _loadFavorites());
                     },
@@ -68,4 +75,4 @@ class FavoritesScreenState extends State<FavoritesScreen> {
       ),
     );
   }
-} 
+}

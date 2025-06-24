@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Verdex needs access to your camera to take photos of plants for identification.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Verdex needs access to your photo library to let you select plant images for identification.</string>
 </dict>
 </plist>
