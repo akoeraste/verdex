@@ -18,16 +18,16 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   bool _isSubmitted = false;
 
   final List<String> _feedbackCategories = [
-    'General Feedback',
-    'Bug Report',
-    'Feature Request',
-    'Plant Identification',
-    'User Interface',
-    'Performance',
-    'Other',
+    'general_feedback'.tr(),
+    'bug_report'.tr(),
+    'feature_request'.tr(),
+    'plant_identification'.tr(),
+    'user_interface'.tr(),
+    'performance'.tr(),
+    'other'.tr(),
   ];
 
-  String _selectedCategory = 'General Feedback';
+  String _selectedCategory = 'general_feedback'.tr();
 
   void _setRating(int rating) {
     setState(() {
@@ -42,8 +42,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
     if (_rating == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please provide a rating'),
+        SnackBar(
+          content: Text('please_provide_rating'.tr()),
           backgroundColor: Colors.red,
         ),
       );
@@ -65,9 +65,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Thank you for your feedback!'),
-          backgroundColor: Color(0xFF4CAF50),
+        SnackBar(
+          content: Text('thank_you_feedback'.tr()),
+          backgroundColor: const Color(0xFF4CAF50),
         ),
       );
 
@@ -85,7 +85,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
       _rating = 0;
       _messageController.clear();
       _contactController.clear();
-      _selectedCategory = 'General Feedback';
+      _selectedCategory = 'general_feedback'.tr();
       _isSubmitted = false;
     });
   }
@@ -161,8 +161,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                         const SizedBox(height: 24),
 
                         // Description
-                        const Text(
-                          'We value your feedback! Help us improve Verdex by sharing your thoughts.',
+                        Text(
+                          'we_value_feedback'.tr(),
                           style: TextStyle(fontSize: 16, color: Colors.grey),
                           textAlign: TextAlign.center,
                         ),
@@ -237,8 +237,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Feedback Category',
+        Text(
+          'feedback_category'.tr(),
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,

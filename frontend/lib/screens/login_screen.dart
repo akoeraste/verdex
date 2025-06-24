@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
 import 'signup_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -43,13 +44,11 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
     bool valid = true;
     if (login.isEmpty) {
-      setState(
-        () => _loginError = 'Please enter your username, email, or phone',
-      );
+      setState(() => _loginError = 'login_error_empty'.tr());
       valid = false;
     }
     if (password.isEmpty) {
-      setState(() => _passwordError = 'Please enter your password');
+      setState(() => _passwordError = 'password_error_empty'.tr());
       valid = false;
     }
     if (!valid) {
@@ -66,8 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       setState(() {
         _isLoading = false;
-        _generalError =
-            'Invalid credentials. Try using login: prime, password: Prime123';
+        _generalError = 'invalid_credentials'.tr();
       });
     }
   }
@@ -123,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 40),
                           // Header
                           Text(
-                            'Welcome Back',
+                            'welcome_back'.tr(),
                             style: GoogleFonts.poppins(
                               color: const Color(0xFF2E7D32),
                               fontWeight: FontWeight.bold,
@@ -132,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Log in to your Verdex account',
+                            'login_to_account'.tr(),
                             style: GoogleFonts.poppins(
                               color: Colors.grey.shade700,
                               fontSize: 16,
@@ -158,8 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ).requestFocus(_passwordFocus);
                                     },
                                     decoration: InputDecoration(
-                                      labelText:
-                                          'Login (username, email, or phone)',
+                                      labelText: 'login_field_label'.tr(),
                                       labelStyle: GoogleFonts.poppins(
                                         color: Colors.grey.shade800,
                                       ),
@@ -202,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       if (!_isLoading) _login();
                                     },
                                     decoration: InputDecoration(
-                                      labelText: 'Password',
+                                      labelText: 'password'.tr(),
                                       labelStyle: GoogleFonts.poppins(
                                         color: Colors.grey.shade800,
                                       ),

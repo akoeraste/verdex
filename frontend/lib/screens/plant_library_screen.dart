@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:verdex/services/plant_service.dart';
 import 'package:verdex/widgets/library_plant_card.dart';
 import 'package:verdex/screens/plant_details_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PlantLibraryScreen extends StatefulWidget {
   const PlantLibraryScreen({super.key});
@@ -95,7 +96,7 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Plant Library'),
+        title: Text('plant_library'.tr()),
         elevation: 0,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
@@ -107,7 +108,7 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
                 _isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : _filteredPlants.isEmpty
-                    ? const Center(child: Text('No plants found.'))
+                    ? Center(child: Text('no_plants_found'.tr()))
                     : GridView.builder(
                       padding: const EdgeInsets.all(16),
                       gridDelegate:
@@ -150,7 +151,7 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: 'Search by name...',
+              hintText: 'search_by_name'.tr(),
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
@@ -186,7 +187,9 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
             return DropdownMenuItem<String>(
               value: value,
               child: Text(
-                'Category: ${value[0].toUpperCase()}${value.substring(1)}',
+                'category_label'.tr(
+                  args: [value[0].toUpperCase() + value.substring(1)],
+                ),
               ),
             );
           }).toList(),
@@ -215,7 +218,7 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
                 .join(' ');
             return DropdownMenuItem<String>(
               value: value,
-              child: Text('Sort by: $text'),
+              child: Text('sort_by_label'.tr(args: [text])),
             );
           }).toList(),
     );

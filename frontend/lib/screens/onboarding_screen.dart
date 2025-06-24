@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -14,20 +15,20 @@ class OnboardingScreenState extends State<OnboardingScreen> {
   int _currentPage = 0;
 
   final List<OnboardingPage> _pages = [
-    const OnboardingPage(
+    OnboardingPage(
       image: 'assets/images/splash1.png',
-      title: 'Snap a Plant',
-      subtitle: 'Take a photo or upload one to identify fruits, vegetables, or leaves.',
+      title: 'onboarding_snap_title'.tr(),
+      subtitle: 'onboarding_snap_subtitle'.tr(),
     ),
-    const OnboardingPage(
+    OnboardingPage(
       image: 'assets/images/splash2.png',
-      title: 'Get Instant Info',
-      subtitle: 'Find the plants name, use, and family in just seconds.',
+      title: 'onboarding_info_title'.tr(),
+      subtitle: 'onboarding_info_subtitle'.tr(),
     ),
-    const OnboardingPage(
+    OnboardingPage(
       image: 'assets/images/splash3.png',
-      title: 'Learn in Your Language',
-      subtitle: 'Choose your language and hear plant names aloud.',
+      title: 'onboarding_language_title'.tr(),
+      subtitle: 'onboarding_language_subtitle'.tr(),
     ),
   ];
 
@@ -72,7 +73,10 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                   height: 8.0,
                   width: _currentPage == index ? 24.0 : 8.0,
                   decoration: BoxDecoration(
-                    color: _currentPage == index ? Theme.of(context).primaryColor : Colors.grey.shade300,
+                    color:
+                        _currentPage == index
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(12),
                   ),
                 );
@@ -86,7 +90,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               right: 24,
               child: ElevatedButton(
                 onPressed: _onGetStarted,
-                child: const Text('Get Started'),
+                child: Text('get_started'.tr()),
               ),
             ),
         ],
@@ -115,7 +119,12 @@ class OnboardingPage extends StatelessWidget {
         children: [
           Image.asset(image, height: 300),
           const SizedBox(height: 48),
-          Text(title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 16),
           Text(
             subtitle,
@@ -126,4 +135,4 @@ class OnboardingPage extends StatelessWidget {
       ),
     );
   }
-} 
+}

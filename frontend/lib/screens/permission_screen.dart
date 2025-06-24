@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:verdex/screens/main_screen.dart'; // Assuming this is the main app screen
+import 'package:verdex/screens/splash_screen.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key});
@@ -18,7 +18,11 @@ class _PermissionScreenState extends State<PermissionScreen> {
   }
 
   void _navigateToNextScreen() {
-    Navigator.pushReplacementNamed(context, '/welcome');
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const SplashScreen(permissionsGranted: true),
+      ),
+    );
   }
 
   @override

@@ -7,8 +7,11 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -34,18 +37,15 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+//        $token = $request->session()->regenerate();
         $token = $request->user()->createToken($request->userAgent())->plainTextToken;
 
-        try {
-            activity()
-                ->performedOn($request->user())
-                ->causedBy(auth()->user())
-                ->event('login')
-                ->withProperties(['ip' => $request->ip()])
-                ->log('User login successfully');
-        } catch (Exception $e) {
-            //
-        }
+        activity()
+            ->performedOn($request->user())
+            ->causedBy(auth()->user())
+            ->event('login')
+            ->withProperties(['ip' => $request->ip()])
+            ->log('User login successfully');
 
         if ($request->wantsJson()) {
             return response()->json(['user' => $request->user(), 'token' => $token]);
@@ -62,16 +62,12 @@ class AuthenticatedSessionController extends Controller
      */
     public function logout(Request $request)
     {
-        try {
-            activity()
-                ->performedOn($request->user())
-                ->causedBy(auth()->user())
-                ->event('logout')
-                ->withProperties(['ip' => $request->ip()])
-                ->log('User logout successfully');
-        } catch (Exception $e) {
-            //
-        }
+        activity()
+            ->performedOn($request->user())
+            ->causedBy(auth()->user())
+            ->event('logout')
+            ->withProperties(['ip' => $request->ip()])
+            ->log('User logout successfully');
 
         Auth::guard('web')->logout();
 
@@ -87,9 +83,8 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Create User.
-     *
-     * @param  RegisterRequest  $request
+     * Create User
+     * @param RegisterRequest $request
      * @return JsonResponse
      */
     public function register(RegisterRequest $request)
@@ -100,9 +95,9 @@ class AuthenticatedSessionController extends Controller
         }
 
         $user = User::create([
-            'email'    => $request['email'],
+            'email' => $request['email'],
             'password' => Hash::make($request['password']),
-            'name'     => $request['name'],
+            'name' => $request['name'],
         ]);
 
         return $this->successResponse($user, 'Registration Successfully');

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\ActivityLogs\ActivityLogResource;
+use App\Http\Resources\ActivityLogResource;
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
 
@@ -22,12 +22,13 @@ class ActivityLogController extends Controller
             })
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('description', 'like', '%'.$search.'%')
-                    ->orWhere('event', 'like', '%'.$search.'%');
+                    $q->where('description', 'like', '%' . $search . '%')
+                    ->orWhere('event', 'like', '%' . $search . '%');
                 });
             })
             ->paginate($perPage);
 
         return ActivityLogResource::collection($activity);
     }
+
 }

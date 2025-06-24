@@ -1,223 +1,167 @@
 <template>
-  <div class="sticky top-0 z-40">
-    <div class="flex h-20 w-full items-center justify-between border-b bg-white px-6 dark:bg-slate-800">
-      <div class="flex">
-        <div class="mr-4 flex items-center lg:hidden">
-          <button
-            class="navbar-burger rounded text-gray-600 hover:border-white hover:text-gray-500 focus:outline-none dark:bg-slate-800 dark:hover:bg-slate-800"
-            :class="sideBarOpenGetter ? 'bg-slate-100 text-gray-900 dark:text-gray-100' : ''"
-            @click.prevent="toggleSidebarTrigger()"
-          >
-            <span v-if="!sideBarOpenGetter" class="sr-only">Open menu</span>
-            <span v-if="sideBarOpenGetter" class="sr-only">CLose menu</span>
-            <Bars3Icon v-if="!sideBarOpenGetter" class="h-6 w-6" aria-hidden="true" />
-            <XMarkIcon v-if="sideBarOpenGetter" class="h-6 w-6" aria-hidden="true" />
-          </button>
-        </div>
-
-        <div class="hidden lg:inline-flex">
-          <div class="mr-4 flex items-center">
-            <button
-              class="navbar-burger rounded text-gray-600 hover:border-white hover:text-gray-500 focus:outline-none dark:bg-slate-800 dark:hover:bg-slate-800"
-              @click.prevent="toggleFullScreenSidebarTrigger()"
-            >
-              <span v-if="!fullScreenSideBarOpenGetter" class="sr-only">Open menu</span>
-              <span v-if="fullScreenSideBarOpenGetter" class="sr-only">CLose menu</span>
-              <Bars3Icon v-if="!fullScreenSideBarOpenGetter" class="h-6 w-6" aria-hidden="true" />
-              <Bars3BottomLeftIcon v-if="fullScreenSideBarOpenGetter" class="h-6 w-6" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-
-        <nav as="nav" class="ml-5 space-x-10 hidden md:flex">
-          <NavLink v-if="authenticated" route-name="dashboard" @nav-clicked="closeDrop">
-            <template #iconBefore>
-              <BuildingLibraryIcon class="h-6 w-6" />
-            </template>
-          </NavLink>
-
-          <NavLink route-name="home" @nav-clicked="closeDrop">
-            <template #iconBefore>
-              <HomeIcon class="h-6 w-6" />
-            </template>
-          </NavLink>
-
-          <NavLink route-name="about" @nav-clicked="closeDrop">
-            <template #iconBefore>
-              <InformationCircleIcon class="h-6 w-6" />
-            </template>
-          </NavLink>
-
-          <NavLink route-name="terms" @nav-clicked="closeDrop">
-            <template #iconBefore>
-              <DocumentTextIcon class="h-6 w-6" />
-            </template>
-          </NavLink>
-        </nav>
-      </div>
-
-      <div class="h-6 w-px bg-gray-900/10 lg:hidden" aria-hidden="true" />
-
-      <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-        <div class="grid flex-1 grid-cols-1" />
-        <div class="flex items-center gap-x-4 lg:gap-x-6">
-          <ToggleDarkMode class="-mr-1" />
-          <div class="h-6 w-px bg-gray-200 dark:bg-gray-600" aria-hidden="true" />
-          <div class="relative">
-            <button
-              id="user-menu-button"
-              type="button"
-              class="-m-1.5 flex items-center p-1.5"
-              aria-expanded="false"
-              aria-haspopup="true"
-              @click="dropDownOpen = !dropDownOpen"
-            >
-              <span class="sr-only">Open user menu</span>
-              <img
-                v-if="user && user.avatar"
-                :src="user.avatar"
-                :alt="user.name"
-                class="size-8 rounded-full bg-gray-50 cursor-pointer border shadow-lg dark:border-gray-500"
-              />
-              <UserCircleIcon
-                v-else
-                class="size-9 rounded-full bg-gray-50 cursor-pointer text-gray-700 dark:text-gray-200"
-              />
-              <span class="hidden lg:flex lg:items-center">
-                <span class="ml-4 text-sm/6 font-semibold text-gray-700 dark:text-gray-200" aria-hidden="true">
-                  {{ user && user.name ? user.name : '' }}
-                </span>
-                <svg
-                  class="ml-2 size-5 text-gray-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                  data-slot="icon"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </span>
-            </button>
+  <nav class="navbar2025">
+    <div class="navbar-inner">
+      <router-link to="/admin" class="navbar-brand2025">
+        <img src="/logo.png" alt="Logo" class="navbar-logo" />
+        <span>Verdex Admin</span>
+      </router-link>
+      <div class="navbar-actions">
+        <LocaleSwitcher />
+        <div class="navbar-user">
+          
+          <div class="navbar-dropdown">
+            <span class="navbar-user-greet">Hi, {{ user.name }}</span>
+            <button class="navbar-dropdown-btn">&#x25BC;</button>
+            <div class="navbar-dropdown-menu">
+              <router-link :to="{ name: 'profile.index' }" class="navbar-dropdown-item">Profile</router-link>
+              <a class="navbar-dropdown-item" href="#">Setting</a>
+              <div class="navbar-dropdown-divider"></div>
+              <a class="navbar-dropdown-item" :class="{ 'opacity-25': processing }" :disabled="processing" href="javascript:void(0)" @click="logout">Logout</a>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
-    <div ref="dropMenu" class="relative mt-1 z-50">
-      <div
-        v-show="dropDownOpen"
-        class="absolute right-5 z-10 flex w-auto flex-col whitespace-nowrap rounded border bg-white shadow-md dark:bg-slate-900 transition ease-in-out duration-75"
-        @click="dropDownOpen = !dropDownOpen"
-      >
-        <AdminNavBarLink
-          v-if="authenticated && user"
-          route-name="dashboard"
-          :text="$t('dashboard')"
-          item-class="rounded-t"
-        >
-          <template #icon>
-            <BuildingLibraryIcon class="h-6 w-6" />
-          </template>
-        </AdminNavBarLink>
-
-        <AdminNavBarLink v-if="authenticated && user" route-name="settings.index" :text="$t('settings')">
-          <template #icon>
-            <Cog6ToothIcon class="h-6 w-6" />
-          </template>
-        </AdminNavBarLink>
-
-        <AdminNavBarLink
-          v-if="authenticated && user"
-          :text="$t('logout')"
-          item-class="rounded-b"
-          @nav-clicked="logout()"
-        >
-          <template #icon>
-            <ArrowRightOnRectangleIcon class="h-6 w-6" />
-          </template>
-        </AdminNavBarLink>
-      </div>
-    </div>
-  </div>
+  </nav>
 </template>
 
-<script>
-import { mapStores, mapState, mapActions } from 'pinia';
-import { useAuthStore } from '@store/auth';
-import { useSideBarStore } from '@store/sidebar';
-import useAuth from '@composables/auth';
-import useProfile from '@composables/profile';
-import { parseDisplayDate } from '@services/common';
-import ToggleDarkMode from '@components/ToggleDarkMode.vue';
-import NavLink from '@components/includes/NavLink.vue';
-import AdminNavBarLink from '@components/includes/AdminNavBarLink.vue';
-import {
-  Bars3Icon,
-  XMarkIcon,
-  UserCircleIcon,
-  HomeIcon,
-  BuildingLibraryIcon,
-  InformationCircleIcon,
-  Bars3BottomLeftIcon,
-  DocumentTextIcon,
-  ArrowRightOnRectangleIcon,
-  Cog6ToothIcon,
-} from '@heroicons/vue/24/outline';
+<script setup>
+import {computed, ref, onMounted, onBeforeUnmount} from "vue";
+import useAuth from "@/composables/auth";
+import LocaleSwitcher from "../../components/LocaleSwitcher.vue";
+import {useAuthStore} from "@/store/auth";
 
-export default {
-  name: 'AdminNavBar',
-  components: {
-    Bars3Icon,
-    XMarkIcon,
-    UserCircleIcon,
-    HomeIcon,
-    BuildingLibraryIcon,
-    InformationCircleIcon,
-    Bars3BottomLeftIcon,
-    DocumentTextIcon,
-    ToggleDarkMode,
-    ArrowRightOnRectangleIcon,
-    NavLink,
-    AdminNavBarLink,
-    Cog6ToothIcon,
-  },
-  data() {
-    return {
-      dropDownOpen: false,
-    };
-  },
-  computed: {
-    ...mapState(useAuth, ['processing']),
-    ...mapState(useAuthStore, ['user', 'authenticated']),
-    ...mapState(useSideBarStore, ['sideBarOpenGetter', 'fullScreenSideBarOpenGetter']),
-    currentRouteName() {
-      return this.$route.name;
-    },
-  },
-  methods: {
-    ...mapActions(useAuth, ['logout']),
-    ...mapActions(useSideBarStore, ['toggleSidebar', 'toggleFullScreenSidebar']),
-    toggleSidebarTrigger() {
-      this.toggleSidebar();
-      this.closeDrop();
-    },
-    toggleFullScreenSidebarTrigger() {
-      this.toggleFullScreenSidebar();
-      this.closeDrop();
-    },
-    closeDrop() {
-      this.dropDownOpen = false;
-    },
-    openDrop() {
-      this.dropDownOpen = true;
-    },
-  },
-};
+const auth = useAuthStore()
+const user = computed(() => auth.user)
+const {processing, logout} = useAuth();
+
+// Dropdown logic
+const showDropdown = ref(false);
+function toggleDropdown() { showDropdown.value = !showDropdown.value; }
+function closeDropdown(e) {
+  if (!e.target.closest('.navbar-user')) showDropdown.value = false;
+}
+onMounted(() => { document.addEventListener('click', closeDropdown); });
+onBeforeUnmount(() => { document.removeEventListener('click', closeDropdown); });
 </script>
 
-<style scoped></style>
-<style lang="scss" scoped></style>
+<style scoped>
+.navbar2025 {
+  width: 100%;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f8fafc 100%);
+  border-radius: 0 0 1.5rem 1.5rem;
+  box-shadow: 0 2px 16px rgba(67,233,123,0.07);
+  padding: 0.7rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.navbar-inner {
+  width: 100%;
+  max-width: 1400px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+}
+.navbar-brand2025 {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+}
+.navbar-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 0.7rem;
+  object-fit: contain;
+  box-shadow: 0 2px 8px rgba(67,233,123,0.12);
+}
+.navbar-brand2025 span {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #22223b;
+  letter-spacing: 0.01em;
+}
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.navbar-user {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.navbar-user-greet {
+  font-weight: 600;
+  color: #4a4e69;
+  font-size: 1.1rem;
+}
+.navbar-dropdown {
+  position: relative;
+}
+.navbar-dropdown-btn {
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #43e97b;
+  padding: 0 0.3rem;
+  border-radius: 0.5rem;
+  transition: background 0.18s;
+}
+.navbar-dropdown-btn:hover {
+  background: #e3f2fd;
+}
+.navbar-dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 2.2rem;
+  min-width: 160px;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(67,233,123,0.10);
+  padding: 0.7rem 0;
+  z-index: 10;
+}
+.navbar-dropdown:hover .navbar-dropdown-menu,
+.navbar-dropdown:focus-within .navbar-dropdown-menu {
+  display: block;
+}
+.navbar-dropdown-item {
+  display: block;
+  padding: 0.7rem 1.2rem;
+  color: #22223b;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.05rem;
+  border: none;
+  background: none;
+  transition: background 0.18s, color 0.18s;
+  cursor: pointer;
+}
+.navbar-dropdown-item:hover {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: #fff;
+}
+.navbar-dropdown-divider {
+  height: 1px;
+  background: #e3f2fd;
+  margin: 0.3rem 0;
+}
+@media (max-width: 900px) {
+  .navbar-inner {
+    padding: 0 0.5rem;
+  }
+  .navbar-brand2025 span {
+    font-size: 1.1rem;
+  }
+}
+</style>

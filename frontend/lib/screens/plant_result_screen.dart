@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import '../services/favorite_service.dart';
 import '../widgets/feedback_form.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PlantResultScreen extends StatefulWidget {
   final Map<String, dynamic> plantData;
@@ -24,7 +25,9 @@ class PlantResultScreenState extends State<PlantResultScreen> {
   }
 
   Future<void> _checkFavoriteStatus() async {
-    final isFavorite = await _favoriteService.isFavorite(widget.plantData['name']);
+    final isFavorite = await _favoriteService.isFavorite(
+      widget.plantData['name'],
+    );
     if (mounted) {
       setState(() {
         _isFavorite = isFavorite;
@@ -42,7 +45,9 @@ class PlantResultScreenState extends State<PlantResultScreen> {
   }
 
   Future<void> _speak(String text) async {
-    await _flutterTts.setLanguage("en-US"); // This should be dynamic based on user settings
+    await _flutterTts.setLanguage(
+      "en-US",
+    ); // This should be dynamic based on user settings
     await _flutterTts.speak(text);
   }
 
@@ -77,7 +82,9 @@ class PlantResultScreenState extends State<PlantResultScreen> {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: Icon(_isFavorite ? Icons.favorite : Icons.favorite_border),
+                  icon: Icon(
+                    _isFavorite ? Icons.favorite : Icons.favorite_border,
+                  ),
                   color: _isFavorite ? Colors.red : null,
                   onPressed: _toggleFavorite,
                 ),
@@ -86,17 +93,17 @@ class PlantResultScreenState extends State<PlantResultScreen> {
             const SizedBox(height: 16),
             Text(widget.plantData['description']),
             const SizedBox(height: 24),
-            _buildInfoRow('Family', widget.plantData['family']),
-            _buildInfoRow('Category', widget.plantData['category']),
-            _buildInfoRow('Uses', widget.plantData['uses']),
-            _buildInfoRow('Tags', tags),
+            _buildInfoRow('Family'.tr(), widget.plantData['family']),
+            _buildInfoRow('Category'.tr(), widget.plantData['category']),
+            _buildInfoRow('Uses'.tr(), widget.plantData['uses']),
+            _buildInfoRow('Tags'.tr(), tags),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 TextButton.icon(
                   icon: const Icon(Icons.feedback),
-                  label: const Text('Feedback'),
+                  label: Text('feedback'.tr()),
                   onPressed: () {
                     showModalBottomSheet(
                       context: context,
@@ -106,7 +113,7 @@ class PlantResultScreenState extends State<PlantResultScreen> {
                   },
                 ),
                 ElevatedButton(
-                  child: const Text('Identify Another'),
+                  child: Text('identify_another'.tr()),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -131,4 +138,4 @@ class PlantResultScreenState extends State<PlantResultScreen> {
       ),
     );
   }
-} 
+}

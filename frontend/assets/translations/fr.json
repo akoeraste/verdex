@@ -90,5 +90,20 @@
   "permissions_title": "Autorisations requises",
   "permissions_subtitle": "Pour identifier les plantes depuis votre appareil photo ou votre galerie, Verdex a besoin d'y accéder. Vos données sont en sécurité avec nous.",
   "permissions_button": "Accorder les autorisations",
-  "permissions_skip": "Peut-être plus tard"
+  "permissions_skip": "Peut-être plus tard",
+  "general_feedback": "Avis général",
+  "bug_report": "Signaler un bug",
+  "feature_request": "Demande de fonctionnalité",
+  "plant_identification": "Identification de plante",
+  "user_interface": "Interface utilisateur",
+  "performance": "Performance",
+  "other": "Autre",
+  "thank_you_feedback": "Merci pour votre avis !",
+  "we_value_feedback": "Nous apprécions vos retours ! Aidez-nous à améliorer Verdex en partageant vos idées.",
+  "crop_image": "Rogner l'image",
+  "permission_denied": "Autorisation refusée. Impossible de continuer.",
+  "select_theme": "Sélectionner le thème",
+  "light": "Clair",
+  "dark": "Sombre",
+  "system_default": "Par défaut du système"
 } 

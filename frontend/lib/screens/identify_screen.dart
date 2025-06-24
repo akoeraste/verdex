@@ -112,7 +112,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
         sourcePath: pickedFile.path,
         uiSettings: [
           AndroidUiSettings(
-            toolbarTitle: 'Crop Image',
+            toolbarTitle: 'crop_image'.tr(),
             toolbarColor: Colors.green,
             toolbarWidgetColor: Colors.white,
             initAspectRatio: CropAspectRatioPreset.original,
@@ -125,7 +125,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
               CropAspectRatioPreset.ratio16x9,
             ],
           ),
-          IOSUiSettings(title: 'Crop Image'),
+          IOSUiSettings(title: 'crop_image'.tr()),
         ],
       );
 
@@ -142,9 +142,9 @@ class _IdentifyScreenState extends State<IdentifyScreen>
       }
     } else {
       // Handle the case where the user denies the permission
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Permission denied. Cannot proceed.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('permission_denied'.tr())));
     }
   }
 

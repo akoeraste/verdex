@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -9,19 +10,19 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedFilter = 'All';
+  String _selectedFilter = 'all'.tr();
   bool _isSearching = false;
   List<Map<String, dynamic>> _searchResults = [];
   List<Map<String, dynamic>> _searchHistory = [];
 
   final List<String> _filterOptions = [
-    'All',
-    'Fruits',
-    'Vegetables',
-    'Herbs',
-    'Flowers',
-    'Trees',
-    'Medicinal',
+    'all'.tr(),
+    'fruits'.tr(),
+    'vegetables'.tr(),
+    'herbs'.tr(),
+    'flowers'.tr(),
+    'trees'.tr(),
+    'medicinal'.tr(),
   ];
 
   @override
@@ -122,7 +123,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Search Plants',
+                      'search_plants'.tr(),
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
@@ -161,7 +162,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       }
                     },
                     decoration: InputDecoration(
-                      hintText: 'Search for plants...',
+                      hintText: 'search_for_plants'.tr(),
                       prefixIcon: const Icon(
                         Icons.search,
                         color: Color(0xFF4CAF50),

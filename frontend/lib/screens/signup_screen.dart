@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -46,24 +47,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final confirm = _confirmController.text;
     bool valid = true;
     if (name.isEmpty) {
-      setState(() => _nameError = 'Please enter your name or pseudo');
+      setState(() => _nameError = 'name_error_empty'.tr());
       valid = false;
     }
     if (login.isEmpty) {
-      setState(
-        () => _loginError = 'Please enter your email, phone, or username',
-      );
+      setState(() => _loginError = 'login_error_empty_signup'.tr());
       valid = false;
     }
     if (password.isEmpty) {
-      setState(() => _passwordError = 'Please enter a password');
+      setState(() => _passwordError = 'password_error_empty_signup'.tr());
       valid = false;
     } else if (password.length < 6) {
-      setState(() => _passwordError = 'Password must be at least 6 characters');
+      setState(() => _passwordError = 'password_error_length'.tr());
       valid = false;
     }
     if (confirm != password) {
-      setState(() => _confirmError = 'Passwords do not match');
+      setState(() => _confirmError = 'passwords_do_not_match'.tr());
       valid = false;
     }
     if (!valid) {
@@ -125,7 +124,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         children: [
                           const SizedBox(height: 20),
                           Text(
-                            'Create Account',
+                            'create_account'.tr(),
                             style: GoogleFonts.poppins(
                               color: const Color(0xFF2E7D32),
                               fontWeight: FontWeight.bold,
@@ -134,7 +133,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Join the Verdex community',
+                            'join_verdex_community'.tr(),
                             style: GoogleFonts.poppins(
                               color: Colors.grey.shade700,
                               fontSize: 16,
@@ -148,7 +147,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 TextField(
                                   controller: _nameController,
                                   decoration: InputDecoration(
-                                    labelText: 'Name or Pseudo',
+                                    labelText: 'name_or_pseudo'.tr(),
                                     labelStyle: GoogleFonts.poppins(
                                       color: Colors.grey.shade800,
                                     ),
@@ -184,7 +183,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 TextField(
                                   controller: _loginController,
                                   decoration: InputDecoration(
-                                    labelText: 'Email, Phone, or Username',
+                                    labelText: 'email_phone_username'.tr(),
                                     labelStyle: GoogleFonts.poppins(
                                       color: Colors.grey.shade800,
                                     ),
@@ -221,7 +220,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _passwordController,
                                   obscureText: _obscurePassword,
                                   decoration: InputDecoration(
-                                    labelText: 'Password',
+                                    labelText: 'password'.tr(),
                                     labelStyle: GoogleFonts.poppins(
                                       color: Colors.grey.shade800,
                                     ),

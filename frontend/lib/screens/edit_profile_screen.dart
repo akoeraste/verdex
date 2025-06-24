@@ -23,13 +23,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   File? _profileImage;
   bool _isLoading = false;
 
-  final List<String> _languageOptions = [
-    'English',
-    'French',
-    'Spanish',
-    'German',
-    'Chinese',
-  ];
+  final List<String> _languageOptions = ['english'.tr(), 'french'.tr()];
 
   @override
   void initState() {
@@ -40,7 +34,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void _loadUserData() {
     // Pending: Load user data from API or local storage
     setState(() {
-      _selectedLanguage = 'English';
+      _selectedLanguage = 'english'.tr();
     });
   }
 
@@ -101,7 +95,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     Icons.camera_alt,
                     color: Color(0xFF4CAF50),
                   ),
-                  title: const Text('Take Photo'),
+                  title: Text('take_photo'.tr()),
                   onTap: () {
                     Navigator.pop(context);
                     _takePhoto();
@@ -112,7 +106,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     Icons.photo_library,
                     color: Color(0xFF4CAF50),
                   ),
-                  title: const Text('Choose from Gallery'),
+                  title: Text('choose_from_gallery'.tr()),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage();

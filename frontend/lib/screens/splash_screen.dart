@@ -6,9 +6,12 @@ import '../services/auth_service.dart';
 import 'onboarding_screen.dart';
 import 'login_screen.dart';
 import 'main_screen.dart';
+import 'permission_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final bool permissionsGranted;
+  const SplashScreen({super.key, required this.permissionsGranted});
 
   @override
   SplashScreenState createState() => SplashScreenState();
@@ -31,13 +34,17 @@ class SplashScreenState extends State<SplashScreen> {
 
     final destination = await initFuture;
     if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => destination),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (context) => destination));
     }
   }
 
   Future<Widget> _performInitialization() async {
+    if (!widget.permissionsGranted) {
+      return const PermissionScreen();
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
 
@@ -76,17 +83,17 @@ class SplashScreenState extends State<SplashScreen> {
                 Text(
                   'Verdex',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        color: const Color(0xFF2E7D32),
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: const Color(0xFF2E7D32),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'See. Learn. Grow.',
+                  'splash_tagline'.tr(),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: const Color(0xFF2E7D32),
-                        fontStyle: FontStyle.italic,
-                      ),
+                    color: const Color(0xFF2E7D32),
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ],
             ),
@@ -95,4 +102,4 @@ class SplashScreenState extends State<SplashScreen> {
       ),
     );
   }
-} 
+}

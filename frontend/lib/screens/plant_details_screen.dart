@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PlantDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> plant;
@@ -129,10 +130,10 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
           controller: _tabController,
           labelColor: Theme.of(context).primaryColor,
           unselectedLabelColor: Colors.grey,
-          tabs: const [
-            Tab(text: 'Uses'),
-            Tab(text: 'Tags'),
-            Tab(text: 'Reviews'),
+          tabs: [
+            Tab(text: 'uses_tab'.tr()),
+            Tab(text: 'tags_tab'.tr()),
+            Tab(text: 'reviews_tab'.tr()),
           ],
         ),
         SizedBox(
@@ -142,7 +143,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
             children: [
               _buildDetailsList(widget.plant['uses']),
               _buildTagsList(widget.plant['tags']),
-              const Center(child: Text('Reviews will be here.')),
+              Center(child: Text('reviews_placeholder'.tr())),
             ],
           ),
         ),

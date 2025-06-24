@@ -9,6 +9,8 @@ import 'feedback_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_screen.dart';
 import 'about_us_screen.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:convert';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -22,6 +24,8 @@ class SettingsScreenState extends State<SettingsScreen>
   late List<AnimationController> _controllers;
   final int _sectionCount = 4; // Number of sections to animate
 
+  String _appVersion = '';
+
   @override
   void initState() {
     super.initState();
@@ -34,12 +38,31 @@ class SettingsScreenState extends State<SettingsScreen>
     );
 
     _runAnimations();
+
+    _fetchAppVersionFromPubspec();
   }
 
   void _runAnimations() {
     for (int i = 0; i < _controllers.length; i++) {
       Future.delayed(Duration(milliseconds: 100 + (i * 100)), () {
         if (mounted) _controllers[i].forward();
+      });
+    }
+  }
+
+  Future<void> _fetchAppVersionFromPubspec() async {
+    try {
+      final yamlString = await rootBundle.loadString('pubspec.yaml');
+      final versionLine = yamlString
+          .split('\n')
+          .firstWhere((line) => line.trim().startsWith('version:'));
+      final version = versionLine.split(':').last.trim().split('+').first;
+      setState(() {
+        _appVersion = 'v$version';
+      });
+    } catch (e) {
+      setState(() {
+        _appVersion = '';
       });
     }
   }
@@ -52,8 +75,8 @@ class SettingsScreenState extends State<SettingsScreen>
     super.dispose();
   }
 
-  String _selectedLanguage = 'English';
-  String _selectedTheme = 'System Default';
+  String _selectedLanguage = 'english'.tr();
+  String _selectedTheme = 'light'.tr();
   bool _isDarkMode = false;
   bool _enableSound = true;
   bool _wifiOnly = true;
@@ -114,6 +137,9 @@ class SettingsScreenState extends State<SettingsScreen>
           isSelected ? const Icon(Icons.check, color: Color(0xFF4CAF50)) : null,
       onTap: () {
         context.setLocale(locale);
+        setState(() {
+          _selectedLanguage = name;
+        });
         Navigator.pop(context);
       },
     );
@@ -132,16 +158,16 @@ class SettingsScreenState extends State<SettingsScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Select Theme',
+                  'select_theme'.tr(),
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF2E7D32),
                   ),
                 ),
                 const SizedBox(height: 20),
-                _buildThemeOption('Light', Icons.wb_sunny_outlined),
-                _buildThemeOption('Dark', Icons.nightlight_round),
-                _buildThemeOption('System Default', Icons.settings),
+                _buildThemeOption('light'.tr(), Icons.wb_sunny_outlined),
+                _buildThemeOption('dark'.tr(), Icons.nightlight_round),
+                _buildThemeOption('system_default'.tr(), Icons.settings),
                 const SizedBox(height: 20),
               ],
             ),
@@ -178,70 +204,71 @@ class SettingsScreenState extends State<SettingsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FBE7),
-      body: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Color(0xFF4CAF50), width: 4.0)),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    Text(
-                      'settings'.tr(),
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF2E7D32),
-                        fontFamily: 'Poppins',
-                      ),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Main scrollable content
+            SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  // Header (now scrolls with content)
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        Text(
+                          'settings'.tr(),
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF2E7D32),
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  // 🔝 Top Section: Profile Summary
+                  _buildAnimatedSection(
+                    index: 0,
+                    child: _buildProfileSection(),
+                  ),
+                  const SizedBox(height: 24),
+                  // 🟢 Section 2: Quick Access
+                  _buildAnimatedSection(
+                    index: 1,
+                    child: _buildQuickAccessSection(),
+                  ),
+                  const SizedBox(height: 24),
+                  // 🟩 Section 3: Preferences
+                  _buildAnimatedSection(
+                    index: 2,
+                    child: _buildPreferencesSection(),
+                  ),
+                  const SizedBox(height: 24),
+                  // ⚪ Section 4: About
+                  _buildAnimatedSection(index: 3, child: _buildAboutSection()),
+                  const SizedBox(
+                    height: 80,
+                  ), // Add space so content doesn't hide behind version
+                ],
               ),
-
-              // Settings content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      // 🔝 Top Section: Profile Summary
-                      _buildAnimatedSection(
-                        index: 0,
-                        child: _buildProfileSection(),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // 🟢 Section 2: Quick Access
-                      _buildAnimatedSection(
-                        index: 1,
-                        child: _buildQuickAccessSection(),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // 🟩 Section 3: Preferences
-                      _buildAnimatedSection(
-                        index: 2,
-                        child: _buildPreferencesSection(),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // ⚪ Section 4: About
-                      _buildAnimatedSection(
-                        index: 3,
-                        child: _buildAboutSection(),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
+            ),
+            // Fixed app version at the bottom
+            if (_appVersion.isNotEmpty)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 16,
+                child: Center(
+                  child: Text(
+                    'Version: $_appVersion',
+                    style: TextStyle(color: Colors.grey[500], fontSize: 14),
                   ),
                 ),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -563,21 +590,6 @@ class SettingsScreenState extends State<SettingsScreen>
                 },
               ),
             ],
-          ),
-        ),
-        // App version at bottom center
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Text(
-              'v1.0.0',
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
           ),
         ),
       ],

@@ -20,9 +20,8 @@ class ProfileController extends Controller
         $profile->email = $request->email;
 
         if ($profile->save()) {
-            return $this->successResponse($profile, 'User updated');
+            return $this->successResponse($profile, 'User updated');;
         }
-
         return response()->json(['status' => 403, 'success' => false]);
     }
 
@@ -31,17 +30,5 @@ class ProfileController extends Controller
         $user = $request->user();
 
         return $this->successResponse($user, 'User found');
-    }
-
-    public function darkModeToggle(Request $request)
-    {
-        $user = Auth::user();
-        $user->theme_dark = ! $user->theme_dark;
-
-        if ($user->save()) {
-            return $this->successResponse($user->theme_dark, 'Mode Switched');
-        }
-
-        return response()->json(['status' => 403, 'success' => false]);
     }
 }

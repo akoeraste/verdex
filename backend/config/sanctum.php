@@ -61,7 +61,7 @@ return [
     |
     */
 
-    'token_prefix' => env('SANCTUM_TOKEN_PREFIX', 'mbi_'),
+    'token_prefix' => env('SANCTUM_TOKEN_PREFIX', ''),
 
     /*
     |--------------------------------------------------------------------------
@@ -76,8 +76,8 @@ return [
 
     'middleware' => [
         'authenticate_session' => Laravel\Sanctum\Http\Middleware\AuthenticateSession::class,
-        'encrypt_cookies'      => Illuminate\Cookie\Middleware\EncryptCookies::class,
-        'validate_csrf_token'  => Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+        'encrypt_cookies' => Illuminate\Cookie\Middleware\EncryptCookies::class,
+        'validate_csrf_token' => Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
     ],
 
 ];

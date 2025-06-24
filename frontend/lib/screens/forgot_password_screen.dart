@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({Key? key}) : super(key: key);
@@ -27,7 +28,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
       setState(() {
-        _emailError = 'Please enter a valid email address';
+        _emailError = 'email_error_invalid'.tr();
       });
       return;
     }
@@ -84,7 +85,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         children: [
                           const SizedBox(height: 60),
                           Text(
-                            'Forgot Password?',
+                            'forgot_password'.tr(),
                             style: GoogleFonts.poppins(
                               color: const Color(0xFF2E7D32),
                               fontWeight: FontWeight.bold,
@@ -93,7 +94,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Enter your email to receive a reset link',
+                            'enter_email_reset'.tr(),
                             textAlign: TextAlign.center,
                             style: GoogleFonts.poppins(
                               color: Colors.grey.shade700,
@@ -109,7 +110,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   controller: _emailController,
                                   keyboardType: TextInputType.emailAddress,
                                   decoration: InputDecoration(
-                                    labelText: 'Email Address',
+                                    labelText: 'email_address'.tr(),
                                     labelStyle: GoogleFonts.poppins(
                                       color: Colors.grey.shade800,
                                     ),
@@ -174,7 +175,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                                 color: Colors.white,
                                               ),
                                             )
-                                            : const Text('Send Reset Link'),
+                                            : Text('send_reset_link'.tr()),
                                   ),
                                 ),
                               ],

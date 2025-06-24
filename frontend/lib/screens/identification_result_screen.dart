@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:verdex/services/plant_service.dart';
 import 'package:verdex/screens/plant_details_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class IdentificationResultScreen extends StatefulWidget {
   final File imageFile;
@@ -80,9 +81,9 @@ class _IdentificationResultScreenState extends State<IdentificationResultScreen>
 
   Widget _buildResultContent() {
     if (_result == null) {
-      return const Center(
+      return Center(
         child: Text(
-          'Could not identify plant.',
+          'could_not_identify_plant'.tr(),
           style: TextStyle(color: Colors.white, fontSize: 18),
         ),
       );
@@ -132,8 +133,8 @@ class _IdentificationResultScreenState extends State<IdentificationResultScreen>
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: const Text(
-                  'View Details',
+                child: Text(
+                  'view_details'.tr(),
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),

@@ -3,123 +3,121 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\PersonalDataExportJob;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        try {
-            ob_start('ob_gzhandler');
-        } catch (\Exception $e) {
-            //
-        }
-    }
-
     /**
-     * Tap the guard we need.
+     * Display a listing of the resource.
      *
-     * @param  string  $guard
-     * @return middleware guard
+     * @return AnonymousResourceCollection
      */
-    protected function guard($guard = 'web')
+    public function index()
     {
-        return Auth::guard($guard);
+        $orderColumn = request('order_column', 'created_at');
+        if (!in_array($orderColumn, ['id', 'name', 'created_at'])) {
+            $orderColumn = 'created_at';
+        }
+        $orderDirection = request('order_direction', 'desc');
+        if (!in_array($orderDirection, ['asc', 'desc'])) {
+            $orderDirection = 'desc';
+        }
+        $users = User::
+        when(request('search_id'), function ($query) {
+            $query->where('id', request('search_id'));
+        })
+            ->when(request('search_title'), function ($query) {
+                $query->where('name', 'like', '%'.request('search_title').'%');
+            })
+            ->when(request('search_global'), function ($query) {
+                $query->where(function($q) {
+                    $q->where('id', request('search_global'))
+                        ->orWhere('name', 'like', '%'.request('search_global').'%');
+
+                });
+            })
+            ->orderBy($orderColumn, $orderDirection)
+            ->paginate(50);
+
+        return UserResource::collection($users);
     }
 
     /**
-     * Retreive the user by sanctum middleware.
+     * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return UserResource
      */
-    public function user(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        if (auth('sanctum')->check()) {
-            return response()->json(auth('sanctum')->user());
+        $role = Role::find($request->role_id);
+        $user = new User();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+
+        if ($user->save()) {
+            if ($role) {
+                $user->assignRole($role);
+            }
+            return new UserResource($user);
         }
     }
 
     /**
-     * Retreive the user by sanctum authtoken.
+     * Display the specified resource.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  int  $id
+     * @return UserResource
      */
-    public function userByToken(Request $request)
+    public function show(User $user)
     {
-        $data = $request->validate([
-            'token' => 'required|string|min:40',
-        ]);
-
-        $token = PersonalAccessToken::findToken($data['token']);
-        $user = $token->tokenable;
-
-        auth()->login($user);
-
-        return response()->json($user);
+        $user->load('roles');
+        return new UserResource($user);
     }
 
     /**
-     * Process request to download user data.
+     * Update the specified resource in storage.
      *
-     * @param  \App\Models\User  $user
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param UpdateUserRequest $request
+     * @param User $user
+     * @return UserResource
      */
-    public function exportUserPersonalData(User $user, Request $request)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        if (! auth('sanctum')->check()) {
-            abort(403);
+        $role = Role::find($request->role_id);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        if(!empty($request->password)) {
+            $user->password = Hash::make($request->password) ?? $user->password;
         }
 
-        $currentUser = auth('sanctum')->user();
-
-        if ($currentUser->id != $user->id) {
-            abort(403);
+        if ($user->save()) {
+            if ($role) {
+                $user->syncRoles($role);
+            }
+            return new UserResource($user);
         }
-
-        dispatch(new PersonalDataExportJob($currentUser));
-
-        return response()->json([
-            'status'    => 'success',
-            'user'      => null,
-        ]);
     }
 
     /**
-     * Delete the users account.
+     * Remove the specified resource from storage.
      *
-     * @param  \App\Models\User  $user
-     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function deleteUserAccount(User $user, Request $request)
+    public function destroy(User $user)
     {
-        if (! auth('sanctum')->check()) {
-            abort(403);
-        }
-
-        $currentUser = auth('sanctum')->user();
-
-        if ($currentUser->id != $user->id) {
-            abort(403);
-        }
-
-        // HERE :: TODO :: Trigger goodbye email.
-        // Do we do soft delete and restore user system? Maybe later like in the auth project.
-
-        $user->tokens()->delete();
+        $this->authorize('user-delete');
         $user->delete();
-        $this->guard()->logout();
 
-        return response()->json([
-            'status'    => 'success',
-            'user'      => null,
-        ]);
+        return response()->noContent();
     }
 }

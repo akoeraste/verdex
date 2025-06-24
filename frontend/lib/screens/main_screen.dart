@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:verdex/screens/home_screen.dart';
 import 'package:verdex/screens/identify_screen.dart';
 import 'package:verdex/screens/settings_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -29,96 +30,137 @@ class MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FBE7),
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
 
-      // Floating Action Button (center plant scanner)
-      floatingActionButton: Container(
-        height: 70,
-        width: 70,
-        decoration: BoxDecoration(
-          color: const Color(0xFF4CAF50),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF4CAF50).withAlpha(100),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: FloatingActionButton(
-          onPressed: () => _onItemTapped(1),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: const Icon(
-            Icons.camera_alt_rounded,
-            size: 32,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
-      //  Bottom Navigation Bar
-      bottomNavigationBar: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        child: BottomAppBar(
-          shape: const CircularNotchedRectangle(),
-          notchMargin: 10.0,
-          elevation: 20,
-          color: Colors.white.withOpacity(0.95),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildTabItem(
-                    icon: Icons.home_rounded,
-                    index: 0,
-                    text: 'Home',
-                  ),
-                  _buildTabItem(
-                    icon: Icons.settings_rounded,
-                    index: 2,
-                    text: 'Settings',
-                  ),
-                ],
+      // Modern Floating Bottom Navigation Bar
+      bottomNavigationBar: SizedBox(
+        height: 130,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            // Floating bar background
+            Positioned(
+              bottom: 20,
+              left: 32,
+              right: 32,
+              child: Container(
+                height: 70,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(40),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    // Search Icon (left)
+                    _NavIcon(
+                      icon: Icons.camera_alt_rounded,
+                      selected: _selectedIndex == 1,
+                      onTap: () => _onItemTapped(1),
+                      size: 28,
+                    ),
+                    // Spacer for center icon
+                    const SizedBox(width: 78),
+                    // Settings Icon (right)
+                    _NavIcon(
+                      icon: Icons.settings_rounded,
+                      selected: _selectedIndex == 2,
+                      onTap: () => _onItemTapped(2),
+                      size: 28,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+            // Center Home Icon (floating above bar)
+            Positioned(
+              bottom: 50,
+              left: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: () => _onItemTapped(0),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
+                  width: 78,
+                  height: 78,
+                  decoration: BoxDecoration(
+                    color:
+                        _selectedIndex == 0
+                            ? const Color(0xFF4CAF50)
+                            : Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.10),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                    border: Border.all(
+                      color:
+                          _selectedIndex == 0
+                              ? const Color(0xFF4CAF50)
+                              : Colors.grey.shade200,
+                      width: 3,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.home_rounded,
+                    size: 40,
+                    color:
+                        _selectedIndex == 0
+                            ? Colors.white
+                            : const Color(0xFF4CAF50),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildTabItem({
-    required IconData icon,
-    required int index,
-    required String text,
-  }) {
-    final isSelected = _selectedIndex == index;
+class _NavIcon extends StatelessWidget {
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+  final double size;
+  const _NavIcon({
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+    this.size = 28,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _onItemTapped(index),
+      onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration:
-            isSelected
-                ? BoxDecoration(
-                  color: const Color(0xFFE8F5E9),
-                  borderRadius: BorderRadius.circular(12),
-                )
-                : null,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color:
+              selected
+                  ? const Color(0xFF4CAF50).withOpacity(0.12)
+                  : Colors.transparent,
+          shape: BoxShape.circle,
+        ),
         child: Icon(
           icon,
-          size: isSelected ? 28 : 24,
-          color: isSelected ? const Color(0xFF4CAF50) : Colors.grey.shade600,
+          size: size,
+          color: selected ? const Color(0xFF4CAF50) : Colors.grey.shade500,
         ),
       ),
     );

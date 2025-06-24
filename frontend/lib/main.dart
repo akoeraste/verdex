@@ -32,7 +32,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final bool permissionsGranted;
-  const MyApp({super.key, required this.permissionsGranted});
+  MyApp({super.key, required this.permissionsGranted});
 
   @override
   Widget build(BuildContext context) {
@@ -50,10 +50,9 @@ class MyApp extends StatelessWidget {
           foregroundColor: Colors.white,
         ),
       ),
-      initialRoute: permissionsGranted ? '/welcome' : '/permissions',
+      initialRoute: '/',
       routes: {
-        '/permissions': (context) => const PermissionScreen(),
-        '/welcome': (context) => const WelcomeScreen(),
+        '/': (context) => SplashScreen(permissionsGranted: permissionsGranted),
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/forgot-password': (context) => const ForgotPasswordScreen(),

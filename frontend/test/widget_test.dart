@@ -12,7 +12,7 @@ import 'package:verdex/main.dart';
 void main() {
   testWidgets('Renders splash screen smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(permissionsGranted: true));
 
     // Verify that the splash screen shows the app name and tagline.
     expect(find.text('Verdex'), findsOneWidget);
