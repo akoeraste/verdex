@@ -14,7 +14,7 @@
         <div class="avatar-section">
           <img :src="avatarPreview || profile.avatar_url || 'https://via.placeholder.com/150'" alt="Avatar" class="avatar-image">
           <label for="avatar-upload" class="avatar-upload-label">
-            Change Avatar
+            
           </label>
           <input type="file" id="avatar-upload" @change="handleAvatarUpload" accept="image/*" class="avatar-upload-input">
         </div>

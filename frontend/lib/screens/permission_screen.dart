@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:verdex/screens/splash_screen.dart';
+import 'package:verdex/screens/welcome_screen.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key});
@@ -12,16 +12,54 @@ class PermissionScreen extends StatefulWidget {
 
 class _PermissionScreenState extends State<PermissionScreen> {
   Future<void> _requestPermissions() async {
-    await [Permission.camera, Permission.photos].request();
-
-    _navigateToNextScreen();
+    final statusMap = await [Permission.camera, Permission.photos].request();
+    final allGranted = statusMap.values.every((status) => status.isGranted);
+    if (allGranted) {
+      _navigateToNextScreen();
+    } else {
+      final anyPermanentlyDenied = statusMap.values.any(
+        (status) => status.isPermanentlyDenied,
+      );
+      if (anyPermanentlyDenied) {
+        _showPermissionDialog(permanentlyDenied: true);
+      } else {
+        _showPermissionDialog(permanentlyDenied: false);
+      }
+    }
   }
 
   void _navigateToNextScreen() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const SplashScreen(permissionsGranted: true),
-      ),
+      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+    );
+  }
+
+  void _showPermissionDialog({required bool permanentlyDenied}) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('permissions_dialog_title'.tr()),
+            content: Text(
+              permanentlyDenied
+                  ? 'permissions_dialog_permanently_denied'.tr()
+                  : 'permissions_dialog_denied'.tr(),
+            ),
+            actions: [
+              if (permanentlyDenied)
+                TextButton(
+                  onPressed: () {
+                    openAppSettings();
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('permissions_dialog_open_settings'.tr()),
+                ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('ok'.tr()),
+              ),
+            ],
+          ),
     );
   }
 

@@ -43,7 +43,7 @@
     <div v-if="plants.length === 0 && !loading" class="modern-table-empty">No plants found.</div>
 
     <Pagination
-      :pagination="pagination"
+      :pagination="pagination.value"
       @page-changed="handlePageChange"
     />
 

@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     const EducationalSnippet(),
                     const SizedBox(height: 24),
-                    SectionHeader(title: 'recent_searches'.tr()),
+                    SectionHeader(titleKey: 'recent_searches'),
                     const SizedBox(height: 16),
                     const RecentlyIdentifiedList(),
                     const SizedBox(height: 24),

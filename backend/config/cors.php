@@ -30,5 +30,7 @@ return [
     'max_age' => 0,
 
     'supports_credentials' => false,
+    
+    'allowed_origins' => ['http://192.168.142.105:5173', 'http://localhost:5173'],
 
 ];

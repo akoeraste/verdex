@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ActivityLogController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BrowserSessionController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\PermissionController;
@@ -18,7 +19,11 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 Route::post('forget-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('forget.password.post');
 Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('password.reset');
 
-Route::group(['middleware' => 'auth:web'], function() {
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+
+Route::group(['middleware' => 'auth:sanctum'], function() {
+    Route::post('/logout', [AuthController::class, 'logout']);
     Route::apiResource('users', UserController::class);
     Route::apiResource('posts', PostController::class);
     Route::apiResource('categories', CategoryController::class);

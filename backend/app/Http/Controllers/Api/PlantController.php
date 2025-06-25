@@ -33,7 +33,7 @@ class PlantController extends Controller
             });
         }
 
-        $plants = $query->paginate(50);
+        $plants = $query->paginate(5);
         return PlantResource::collection($plants);
     }
 

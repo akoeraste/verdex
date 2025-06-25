@@ -99,7 +99,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Family: ${widget.plant['family']}',
+                      'family_label'.tr(args: [widget.plant['family']]),
                       style: const TextStyle(
                         fontSize: 18,
                         fontStyle: FontStyle.italic,

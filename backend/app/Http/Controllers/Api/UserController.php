@@ -56,15 +56,18 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        $role = Role::find($request->role_id);
         $user = new User();
         $user->username = $request->username;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
-
+        $user->language_preference = $request->language_preference;
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = '/storage/' . $avatarPath;
+        }
         if ($user->save()) {
-            if ($role) {
-                $user->assignRole($role);
+            if ($request->role_id) {
+                $user->syncRoles($request->role_id);
             }
             return new UserResource($user);
         }

@@ -1,69 +1,82 @@
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import '../constants/api_config.dart';
 
 class AuthService {
-  // --- Simulated Methods for Frontend Prototyping ---
+  static const _tokenKey = 'access_token';
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-  Future<String?> login(String email, String password) async {
-    // Simulate network request
-    await Future.delayed(const Duration(seconds: 1));
-    if (email == 'test@test.com' && password == 'password') {
-      const token = 'dummy_token';
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token);
-      return token;
-    }
-    return null;
-  }
-
-  Future<String?> signup({
-    required String username,
-    required String email,
-    required String password,
-  }) async {
-    // Simulate network request
-    await Future.delayed(const Duration(seconds: 1));
-    const token = 'dummy_token';
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', token);
-    return token;
-  }
-
-  Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-  }
-
-  Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('token') != null;
-  }
-
-  // --- API Methods for Laravel Backend ---
-
-  Future<http.Response> loginWithApi(String email, String password) {
-    return http.post(
+  // Login and store token securely
+  Future<bool> login(String email, String password) async {
+    final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/login'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Accept': 'application/json',
       },
-      body: jsonEncode(<String, String>{
-        'email': email,
-        'password': password,
-      }),
+      body: jsonEncode(<String, String>{'email': email, 'password': password}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final token = data['access_token'];
+      if (token != null) {
+        await _secureStorage.write(key: _tokenKey, value: token);
+        // Optionally store user info here if needed
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Check if user is logged in (token exists)
+  Future<bool> isLoggedIn() async {
+    final token = await _secureStorage.read(key: _tokenKey);
+    return token != null;
+  }
+
+  // Get stored token
+  Future<String?> getToken() async {
+    return await _secureStorage.read(key: _tokenKey);
+  }
+
+  // Logout and remove token
+  Future<void> logout() async {
+    final token = await getToken();
+    if (token != null) {
+      await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/logout'),
+        headers: <String, String>{
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+    }
+    await _secureStorage.delete(key: _tokenKey);
+  }
+
+  // Example: Authenticated GET request
+  Future<http.Response?> getAuthenticated(String endpoint) async {
+    final token = await getToken();
+    if (token == null) return null;
+    return http.get(
+      Uri.parse('${ApiConfig.baseUrl}/$endpoint'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
     );
   }
 
-  Future<http.Response> signupWithApi({
+  // Signup/register method
+  Future<bool> signup({
     required String name,
     required String email,
     required String password,
     required String passwordConfirmation,
-  }) {
-    return http.post(
+  }) async {
+    final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/register'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -76,15 +89,24 @@ class AuthService {
         'password_confirmation': passwordConfirmation,
       }),
     );
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return true;
+    }
+    return false;
   }
 
-  Future<http.Response> logoutWithApi(String token) {
-    return http.post(
-      Uri.parse('${ApiConfig.baseUrl}/logout'),
+  // Password reset method
+  Future<bool> sendPasswordReset(String email) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/forget-password'),
       headers: <String, String>{
-        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json; charset=UTF-8',
         'Accept': 'application/json',
       },
+      body: jsonEncode(<String, String>{'email': email}),
     );
+    return response.statusCode == 200;
   }
-} 
+
+  // You can add signup and other methods as needed, similar to above
+}

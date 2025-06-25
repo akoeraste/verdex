@@ -90,16 +90,16 @@ function onAvatarChange(e) {
 function submitForm() {
   validate().then(form => {
     if (form.valid) {
-      const formData = new FormData()
-      formData.append('username', username.value)
-      formData.append('email', email.value)
-      formData.append('password', password.value)
-      formData.append('language_preference', language_preference.value)
-      formData.append('avatar', avatar.value)
-      formData.append('role_id', role_id.value)
-      storeUser(formData)
+      const formData = new FormData();
+      formData.append('username', username.value);
+      formData.append('email', email.value);
+      formData.append('password', password.value);
+      formData.append('language_preference', language_preference.value);
+      if (avatar.value) formData.append('avatar', avatar.value);
+      (Array.isArray(role_id.value) ? role_id.value : [role_id.value]).forEach(val => formData.append('role_id[]', val));
+      storeUser(formData);
     }
-  })
+  });
 }
 onMounted(() => {
   getRoleList()

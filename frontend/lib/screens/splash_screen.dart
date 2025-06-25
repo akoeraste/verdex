@@ -25,40 +25,34 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    // Start both futures concurrently
-    final timerFuture = Future.delayed(const Duration(seconds: 2));
-    final initFuture = _performInitialization();
-
-    // Wait for both to complete
-    await Future.wait([timerFuture, initFuture]);
-
-    final destination = await initFuture;
+    await Future.delayed(const Duration(seconds: 2));
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
     if (mounted) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (context) => destination));
+      if (!onboardingCompleted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+        );
+      } else {
+        // Check authentication
+        final authService = AuthService();
+        final loggedIn = await authService.isLoggedIn();
+        if (loggedIn) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const MainScreen()),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        }
+      }
     }
   }
 
   Future<Widget> _performInitialization() async {
-    if (!widget.permissionsGranted) {
-      return const PermissionScreen();
-    }
-
-    final prefs = await SharedPreferences.getInstance();
-    final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
-
-    if (!onboardingCompleted) {
-      return const OnboardingScreen();
-    }
-
-    final authService = AuthService();
-    final isLoggedIn = await authService.isLoggedIn();
-    if (isLoggedIn) {
-      return const MainScreen();
-    } else {
-      return const LoginScreen();
-    }
+    // This method is no longer needed, but kept for compatibility.
+    return const PermissionScreen();
   }
 
   @override
@@ -80,21 +74,6 @@ class SplashScreenState extends State<SplashScreen> {
               children: [
                 Image.asset('assets/images/logo.png', width: 150),
                 const SizedBox(height: 20),
-                Text(
-                  'Verdex',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: const Color(0xFF2E7D32),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'splash_tagline'.tr(),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: const Color(0xFF2E7D32),
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
               ],
             ),
           ),

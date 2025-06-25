@@ -55,9 +55,10 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     setState(() => _isLoading = true);
-    // Demo login logic
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (login == 'prime' && password == 'Prime123') {
+    // Use AuthService for real login
+    final authService = AuthService();
+    final success = await authService.login(login, password);
+    if (success) {
       if (mounted) {
         setState(() => _isLoading = false);
         Navigator.of(context).pushReplacementNamed('/home');
@@ -293,7 +294,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                       color: Colors.white,
                                                     ),
                                               )
-                                              : const Text('Log In'),
+                                              : Text('login'.tr()),
                                     ),
                                   ),
                                 ],
@@ -313,7 +314,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 fontSize: 14,
                               ),
                             ),
-                            child: const Text('Forgot Password?'),
+                            child: Text('forgot_password'.tr()),
                           ),
                           const SizedBox(height: 40),
                         ],

@@ -17,17 +17,17 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   bool _isLoading = false;
   bool _isSubmitted = false;
 
-  final List<String> _feedbackCategories = [
-    'general_feedback'.tr(),
-    'bug_report'.tr(),
-    'feature_request'.tr(),
-    'plant_identification'.tr(),
-    'user_interface'.tr(),
-    'performance'.tr(),
-    'other'.tr(),
+  final List<String> _feedbackCategoryKeys = [
+    'general_feedback',
+    'bug_report',
+    'feature_request',
+    'plant_identification',
+    'user_interface',
+    'performance',
+    'other',
   ];
 
-  String _selectedCategory = 'general_feedback'.tr();
+  String _selectedCategoryKey = 'general_feedback';
 
   void _setRating(int rating) {
     setState(() {
@@ -85,7 +85,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
       _rating = 0;
       _messageController.clear();
       _contactController.clear();
-      _selectedCategory = 'general_feedback'.tr();
+      _selectedCategoryKey = 'general_feedback';
       _isSubmitted = false;
     });
   }
@@ -119,7 +119,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Send Feedback'.tr(),
+                      'send_feedback'.tr(),
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
@@ -259,7 +259,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             ],
           ),
           child: DropdownButtonFormField<String>(
-            value: _selectedCategory,
+            value: _selectedCategoryKey,
             decoration: const InputDecoration(
               labelText: 'Select Category',
               prefixIcon: Icon(Icons.category, color: Color(0xFF4CAF50)),
@@ -275,15 +275,15 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ),
             ),
             items:
-                _feedbackCategories.map((String category) {
+                _feedbackCategoryKeys.map((String category) {
                   return DropdownMenuItem<String>(
                     value: category,
-                    child: Text(category),
+                    child: Text(category.tr()),
                   );
                 }).toList(),
             onChanged: (String? newValue) {
               setState(() {
-                _selectedCategory = newValue!;
+                _selectedCategoryKey = newValue!;
               });
             },
           ),

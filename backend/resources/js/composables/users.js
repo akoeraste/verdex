@@ -47,7 +47,11 @@ export default function useUsers() {
         let serializedPost = new FormData()
         for (let item in user) {
             if (user.hasOwnProperty(item)) {
-                serializedPost.append(item, user[item])
+                if (Array.isArray(user[item])) {
+                    user[item].forEach(val => serializedPost.append(item + '[]', val))
+                } else {
+                    serializedPost.append(item, user[item])
+                }
             }
         }
 

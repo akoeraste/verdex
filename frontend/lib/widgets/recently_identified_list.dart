@@ -9,9 +9,9 @@ class RecentlyIdentifiedList extends StatelessWidget {
   Widget build(BuildContext context) {
     // This would typically come from a service or state management
     final recentSearches = [
-      {'name': 'apple'.tr(), 'image': 'assets/images/apple.png'},
-      {'name': 'pear'.tr(), 'image': 'assets/images/pear.png'},
-      {'name': 'banana'.tr(), 'image': 'assets/images/banana.png'},
+      {'nameKey': 'apple', 'image': 'assets/images/apple.png'},
+      {'nameKey': 'pear', 'image': 'assets/images/pear.png'},
+      {'nameKey': 'banana', 'image': 'assets/images/banana.png'},
     ];
 
     return SizedBox(
@@ -21,7 +21,10 @@ class RecentlyIdentifiedList extends StatelessWidget {
         itemCount: recentSearches.length,
         itemBuilder: (context, index) {
           final search = recentSearches[index];
-          return PlantCard(name: search['name']!, imagePath: search['image']!);
+          return PlantCard(
+            name: search['nameKey']!.tr(),
+            imagePath: search['image']!,
+          );
         },
       ),
     );

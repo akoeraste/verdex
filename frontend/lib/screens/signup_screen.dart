@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -69,11 +70,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 800));
+    final authService = AuthService();
+    final success = await authService.signup(
+      name: name,
+      email: login,
+      password: password,
+      passwordConfirmation: confirm,
+    );
     setState(() => _isLoading = false);
-    // Demo: always succeed
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/login');
+    if (success) {
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
+    } else {
+      setState(() => _generalError = 'registration_failed'.tr());
     }
   }
 
@@ -270,7 +280,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _confirmController,
                                   obscureText: _obscureConfirm,
                                   decoration: InputDecoration(
-                                    labelText: 'Confirm Password',
+                                    labelText: 'confirm_new_password'.tr(),
                                     labelStyle: GoogleFonts.poppins(
                                       color: Colors.grey.shade800,
                                     ),
@@ -358,7 +368,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 color: Colors.white,
                                               ),
                                             )
-                                            : const Text('Sign Up'),
+                                            : Text('signup'.tr()),
                                   ),
                                 ),
                               ],
@@ -381,14 +391,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  'Already have an account? ',
+                                  'already_have_account'.tr(),
                                   style: GoogleFonts.poppins(
                                     color: Colors.grey.shade700,
                                     fontSize: 14,
                                   ),
                                 ),
                                 Text(
-                                  'Log In',
+                                  'login'.tr(),
                                   style: GoogleFonts.poppins(
                                     color: const Color(0xFF2E7D32),
                                     fontWeight: FontWeight.w600,

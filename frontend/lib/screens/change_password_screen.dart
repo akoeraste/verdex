@@ -139,7 +139,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Change Password',
+                      'change_password'.tr(),
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
@@ -181,9 +181,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         const SizedBox(height: 24),
 
                         // Description
-                        const Text(
-                          'Update your password to keep your account secure',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        Text(
+                          'update_password_desc'.tr(),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 32),

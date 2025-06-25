@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'permission_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -14,22 +15,22 @@ class OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<OnboardingPage> _pages = [
-    OnboardingPage(
-      image: 'assets/images/splash1.png',
-      title: 'onboarding_snap_title'.tr(),
-      subtitle: 'onboarding_snap_subtitle'.tr(),
-    ),
-    OnboardingPage(
-      image: 'assets/images/splash2.png',
-      title: 'onboarding_info_title'.tr(),
-      subtitle: 'onboarding_info_subtitle'.tr(),
-    ),
-    OnboardingPage(
-      image: 'assets/images/splash3.png',
-      title: 'onboarding_language_title'.tr(),
-      subtitle: 'onboarding_language_subtitle'.tr(),
-    ),
+  final List<Map<String, String>> _pages = [
+    {
+      'image': 'assets/images/splash1.png',
+      'titleKey': 'onboarding_snap_title',
+      'subtitleKey': 'onboarding_snap_subtitle',
+    },
+    {
+      'image': 'assets/images/splash2.png',
+      'titleKey': 'onboarding_info_title',
+      'subtitleKey': 'onboarding_info_subtitle',
+    },
+    {
+      'image': 'assets/images/splash3.png',
+      'titleKey': 'onboarding_language_title',
+      'subtitleKey': 'onboarding_language_subtitle',
+    },
   ];
 
   void _onPageChanged(int page) {
@@ -44,7 +45,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
     if (context.mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        MaterialPageRoute(builder: (context) => const PermissionScreen()),
       );
     }
   }
@@ -58,7 +59,14 @@ class OnboardingScreenState extends State<OnboardingScreen> {
             controller: _pageController,
             itemCount: _pages.length,
             onPageChanged: _onPageChanged,
-            itemBuilder: (context, index) => _pages[index],
+            itemBuilder: (context, index) {
+              final page = _pages[index];
+              return OnboardingPage(
+                image: page['image']!,
+                titleKey: page['titleKey']!,
+                subtitleKey: page['subtitleKey']!,
+              );
+            },
           ),
           Positioned(
             bottom: 80,
@@ -101,14 +109,14 @@ class OnboardingScreenState extends State<OnboardingScreen> {
 
 class OnboardingPage extends StatelessWidget {
   final String image;
-  final String title;
-  final String subtitle;
+  final String titleKey;
+  final String subtitleKey;
 
   const OnboardingPage({
     super.key,
     required this.image,
-    required this.title,
-    required this.subtitle,
+    required this.titleKey,
+    required this.subtitleKey,
   });
 
   @override
@@ -120,14 +128,14 @@ class OnboardingPage extends StatelessWidget {
           Image.asset(image, height: 300),
           const SizedBox(height: 48),
           Text(
-            title,
+            titleKey.tr(),
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Text(
-            subtitle,
+            subtitleKey.tr(),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge,
           ),

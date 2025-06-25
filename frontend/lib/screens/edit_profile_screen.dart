@@ -19,11 +19,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     text: 'Plant enthusiast and nature lover',
   );
 
-  String _selectedLanguage = 'English';
+  String _selectedLanguageKey = 'english';
   File? _profileImage;
   bool _isLoading = false;
 
-  final List<String> _languageOptions = ['english'.tr(), 'french'.tr()];
+  final List<String> _languageOptions = ['english', 'french'];
 
   @override
   void initState() {
@@ -34,7 +34,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void _loadUserData() {
     // Pending: Load user data from API or local storage
     setState(() {
-      _selectedLanguage = 'english'.tr();
+      _selectedLanguageKey = 'english';
     });
   }
 
@@ -455,7 +455,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ],
           ),
           child: DropdownButtonFormField<String>(
-            value: _selectedLanguage,
+            value: _selectedLanguageKey,
             decoration: const InputDecoration(
               labelText: 'Language',
               prefixIcon: Icon(Icons.language, color: Color(0xFF4CAF50)),
@@ -474,12 +474,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 _languageOptions.map((String language) {
                   return DropdownMenuItem<String>(
                     value: language,
-                    child: Text(language),
+                    child: Text(language.tr()),
                   );
                 }).toList(),
             onChanged: (String? newValue) {
               setState(() {
-                _selectedLanguage = newValue!;
+                _selectedLanguageKey = newValue!;
               });
             },
           ),

@@ -31,9 +31,9 @@ class HomeHeader extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // App name instead of leaf icon
-              const Text(
-                'Verdex',
-                style: TextStyle(
+              Text(
+                'app_name'.tr(),
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF2E7D32),

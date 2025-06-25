@@ -11,6 +11,7 @@ import 'terms_screen.dart';
 import 'about_us_screen.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
+import '../widgets/section_header.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -75,8 +76,8 @@ class SettingsScreenState extends State<SettingsScreen>
     super.dispose();
   }
 
-  String _selectedLanguage = 'english'.tr();
-  String _selectedTheme = 'light'.tr();
+  String _selectedLanguageKey = 'english';
+  String _selectedThemeKey = 'light';
   bool _isDarkMode = false;
   bool _enableSound = true;
   bool _wifiOnly = true;
@@ -138,7 +139,8 @@ class SettingsScreenState extends State<SettingsScreen>
       onTap: () {
         context.setLocale(locale);
         setState(() {
-          _selectedLanguage = name;
+          _selectedLanguageKey =
+              locale.languageCode == 'fr' ? 'french' : 'english';
         });
         Navigator.pop(context);
       },
@@ -176,7 +178,7 @@ class SettingsScreenState extends State<SettingsScreen>
   }
 
   Widget _buildThemeOption(String name, IconData icon) {
-    final isSelected = _selectedTheme == name;
+    final isSelected = _selectedThemeKey.tr() == name;
     return ListTile(
       leading: Icon(
         icon,
@@ -193,7 +195,13 @@ class SettingsScreenState extends State<SettingsScreen>
           isSelected ? const Icon(Icons.check, color: Color(0xFF4CAF50)) : null,
       onTap: () {
         setState(() {
-          _selectedTheme = name;
+          if (name == 'light'.tr()) {
+            _selectedThemeKey = 'light';
+          } else if (name == 'dark'.tr()) {
+            _selectedThemeKey = 'dark';
+          } else {
+            _selectedThemeKey = 'system_default';
+          }
         });
         Navigator.pop(context);
       },
@@ -408,7 +416,7 @@ class SettingsScreenState extends State<SettingsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('quick_access'.tr()),
+        _buildSectionHeader('quick_access'),
         const SizedBox(height: 12),
         Card(
           elevation: 2,
@@ -460,7 +468,7 @@ class SettingsScreenState extends State<SettingsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('app_preferences'.tr()),
+        _buildSectionHeader('app_preferences'),
         const SizedBox(height: 12),
         Card(
           elevation: 2,
@@ -473,7 +481,7 @@ class SettingsScreenState extends State<SettingsScreen>
               ListTile(
                 leading: const Icon(Icons.language, color: Color(0xFF4CAF50)),
                 title: Text('language'.tr()),
-                subtitle: Text(_selectedLanguage),
+                subtitle: Text(_selectedLanguageKey.tr()),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: _showLanguageSelector,
               ),
@@ -485,7 +493,7 @@ class SettingsScreenState extends State<SettingsScreen>
                   color: Color(0xFF4CAF50),
                 ),
                 title: Text('theme_mode'.tr()),
-                subtitle: Text(_selectedTheme),
+                subtitle: Text(_selectedThemeKey.tr()),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: _showThemeSelector,
               ),
@@ -534,7 +542,7 @@ class SettingsScreenState extends State<SettingsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('about_verdex'.tr()),
+        _buildSectionHeader('about_verdex'),
         const SizedBox(height: 12),
         Card(
           elevation: 2,
@@ -596,15 +604,8 @@ class SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: Color(0xFF2E7D32),
-      ),
-    );
+  Widget _buildSectionHeader(String titleKey) {
+    return SectionHeader(titleKey: titleKey);
   }
 
   Widget _buildQuickAccessItem({

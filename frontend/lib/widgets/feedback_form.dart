@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class FeedbackForm extends StatefulWidget {
   const FeedbackForm({super.key});
@@ -18,7 +19,7 @@ class FeedbackFormState extends State<FeedbackForm> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Rate this plant\'s info', style: TextStyle(fontSize: 18)),
+          Text('rate_plant_info'.tr(), style: const TextStyle(fontSize: 18)),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(5, (index) {
@@ -37,7 +38,7 @@ class FeedbackFormState extends State<FeedbackForm> {
           ),
           TextField(
             controller: _commentController,
-            decoration: const InputDecoration(labelText: 'Optional comments'),
+            decoration: InputDecoration(labelText: 'optional_comments'.tr()),
             maxLines: 3,
           ),
           const SizedBox(height: 16),
@@ -46,7 +47,7 @@ class FeedbackFormState extends State<FeedbackForm> {
               // pending : Implement feedback submission
               Navigator.of(context).pop();
             },
-            child: const Text('Submit'),
+            child: Text('submit'.tr()),
           ),
         ],
       ),

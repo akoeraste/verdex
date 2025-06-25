@@ -3,7 +3,7 @@
   "home": "Home",
   "settings": "Settings",
   "profile": "Profile",
-  "login": "Login",
+  "login": "Log In",
   "logout": "Logout",
   "search": "Search",
   "identify_plant": "Identify Plant",
@@ -155,5 +155,15 @@
   "uses_tab": "Uses",
   "tags_tab": "Tags",
   "reviews_tab": "Reviews",
-  "reviews_placeholder": "Reviews will be here."
+  "reviews_placeholder": "Reviews will be here.",
+  "permissions_dialog_title": "Permission Required",
+  "permissions_dialog_permanently_denied": "Some permissions are permanently denied. Please open app settings to grant them.",
+  "permissions_dialog_denied": "Please grant all required permissions to continue.",
+  "permissions_dialog_open_settings": "Open Settings",
+  "ok": "OK",
+  "signup": "Sign Up",
+  "already_have_account": "Already have an account? ",
+  "rate_plant_info": "Rate this plant's info",
+  "optional_comments": "Optional comments",
+  "submit": "Submit"
 } 

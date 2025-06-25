@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../services/auth_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({Key? key}) : super(key: key);
@@ -33,9 +34,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 800));
+    final authService = AuthService();
+    final success = await authService.sendPasswordReset(email);
     setState(() => _isLoading = false);
-    if (mounted) Navigator.pop(context);
+    if (success) {
+      if (mounted) Navigator.pop(context);
+    } else {
+      setState(() => _emailError = 'reset_failed'.tr());
+    }
   }
 
   @override
