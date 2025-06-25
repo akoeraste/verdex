@@ -37,8 +37,8 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-//        $token = $request->session()->regenerate();
-        $token = $request->user()->createToken($request->userAgent())->plainTextToken;
+        // Regenerate session for security
+        $request->session()->regenerate();
 
         activity()
             ->performedOn($request->user())
@@ -48,7 +48,7 @@ class AuthenticatedSessionController extends Controller
             ->log('User login successfully');
 
         if ($request->wantsJson()) {
-            return response()->json(['user' => $request->user(), 'token' => $token]);
+            return response()->json(['user' => $request->user()]);
         }
 
         return redirect()->intended(RouteServiceProvider::HOME);
@@ -89,15 +89,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function register(RegisterRequest $request)
     {
-        $user = User::where('email', $request['email'])->first();
+        $user = User::where('email', $request['email'])->orWhere('username', $request['username'])->first();
         if ($user) {
             return response(['error' => 1, 'message' => 'user already exists'], 409);
         }
 
         $user = User::create([
+            'name' => $request['name'],
+            'username' => $request['username'],
             'email' => $request['email'],
             'password' => Hash::make($request['password']),
-            'name' => $request['name'],
         ]);
 
         return $this->successResponse($user, 'Registration Successfully');

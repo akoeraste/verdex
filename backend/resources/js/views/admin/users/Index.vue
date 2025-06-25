@@ -18,9 +18,14 @@
                 <input v-model="search_id" type="text" class="modern-table-filter" placeholder="Filter by ID">
               </th>
               <th>
-                <input v-model="search_title" type="text" class="modern-table-filter" placeholder="Filter by Name">
+                <input v-model="search_username" type="text" class="modern-table-filter" placeholder="Filter by Username">
               </th>
-              <th></th>
+              <th>
+                <input v-model="search_email" type="text" class="modern-table-filter" placeholder="Filter by Email">
+              </th>
+              <th>
+                <input v-model="search_language" type="text" class="modern-table-filter" placeholder="Filter by Language">
+              </th>
               <th></th>
               <th></th>
             </tr>
@@ -32,9 +37,9 @@
                   <span v-else>▼</span>
                 </span>
               </th>
-              <th @click="updateOrdering('title')" :class="{active: orderColumn === 'title'}">
-                <span>Name</span>
-                <span v-if="orderColumn === 'title'">
+              <th @click="updateOrdering('username')" :class="{active: orderColumn === 'username'}">
+                <span>Username</span>
+                <span v-if="orderColumn === 'username'">
                   <span v-if="orderDirection === 'asc'">▲</span>
                   <span v-else>▼</span>
                 </span>
@@ -46,6 +51,14 @@
                   <span v-else>▼</span>
                 </span>
               </th>
+              <th @click="updateOrdering('language_preference')" :class="{active: orderColumn === 'language_preference'}">
+                <span>Language</span>
+                <span v-if="orderColumn === 'language_preference'">
+                  <span v-if="orderDirection === 'asc'">▲</span>
+                  <span v-else>▼</span>
+                </span>
+              </th>
+              <th>Avatar</th>
               <th @click="updateOrdering('created_at')" :class="{active: orderColumn === 'created_at'}">
                 <span>Created at</span>
                 <span v-if="orderColumn === 'created_at'">
@@ -57,13 +70,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="post in users.data" :key="post.id">
-              <td>{{ post.id }}</td>
-              <td>{{ post.name }}</td>
-              <td>{{ post.email }}</td>
-              <td>{{ post.created_at }}</td>
+            <tr v-for="user in users.data" :key="user.id">
+              <td>{{ user.id }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.language_preference }}</td>
+              <td><img v-if="user.avatar" :src="user.avatar" alt="avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover;"></td>
+              <td>{{ user.created_at }}</td>
               <td>
-                <a href="#" v-if="can('user-delete')" @click.prevent="deleteUser(post.id)" class="modern-table-action delete">Delete</a>
+                <a href="#" v-if="can('user-delete')" @click.prevent="deleteUser(user.id)" class="modern-table-action delete">Delete</a>
               </td>
             </tr>
           </tbody>
@@ -71,7 +86,7 @@
       </div>
       <div class="modern-table-footer">
         <Pagination :data="users" :limit="3"
-          @pagination-change-page="page => getUsers(page, search_id, search_title, search_global, orderColumn, orderDirection)"
+          @pagination-change-page="page => getUsers(page, search_id, search_username, search_email, search_language, search_global, orderColumn, orderDirection)"
           class="mt-4"/>
       </div>
     </div>
@@ -84,7 +99,9 @@ import useUsers from "../../../composables/users";
 import {useAbility} from '@casl/vue'
 
 const search_id = ref('')
-const search_title = ref('')
+const search_username = ref('')
+const search_email = ref('')
+const search_language = ref('')
 const search_global = ref('')
 const orderColumn = ref('created_at')
 const orderDirection = ref('desc')
@@ -99,7 +116,9 @@ const updateOrdering = (column) => {
     getUsers(
         1,
         search_id.value,
-        search_title.value,
+        search_username.value,
+        search_email.value,
+        search_language.value,
         search_global.value,
         orderColumn.value,
         orderDirection.value
@@ -109,14 +128,38 @@ watch(search_id, (current, previous) => {
     getUsers(
         1,
         current,
-        search_title.value,
+        search_username.value,
+        search_email.value,
+        search_language.value,
         search_global.value
     )
 })
-watch(search_title, (current, previous) => {
+watch(search_username, (current, previous) => {
     getUsers(
         1,
         search_id.value,
+        current,
+        search_email.value,
+        search_language.value,
+        search_global.value
+    )
+})
+watch(search_email, (current, previous) => {
+    getUsers(
+        1,
+        search_id.value,
+        search_username.value,
+        current,
+        search_language.value,
+        search_global.value
+    )
+})
+watch(search_language, (current, previous) => {
+    getUsers(
+        1,
+        search_id.value,
+        search_username.value,
+        search_email.value,
         current,
         search_global.value
     )
@@ -125,7 +168,9 @@ watch(search_global, _.debounce((current, previous) => {
     getUsers(
         1,
         search_id.value,
-        search_title.value,
+        search_username.value,
+        search_email.value,
+        search_language.value,
         current
     )
 }, 200))

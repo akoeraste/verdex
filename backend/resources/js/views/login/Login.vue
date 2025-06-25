@@ -5,10 +5,10 @@
         <p class="login-welcome"><strong>Welcome back!</strong> <br> Please sign In.</p>
         <form @submit.prevent="submitLogin" class="login-form">
           <div class="login-field">
-            <label for="email" class="login-label">{{ $t('email') }}</label>
-            <input v-model="loginForm.email" id="email" type="email" class="login-input" autofocus autocomplete="username" />
-            <div class="login-error" v-if="validationErrors?.email">
-              <div v-for="message in validationErrors.email" :key="message">{{ message }}</div>
+            <label for="login" class="login-label">{{ $t('email_or_username') }}</label>
+            <input v-model="loginForm.login" id="login" type="text" class="login-input" autofocus autocomplete="username" />
+            <div class="login-error" v-if="validationErrors?.login">
+              <div v-for="message in validationErrors.login" :key="message">{{ message }}</div>
             </div>
           </div>
           <div class="login-field">

@@ -2,53 +2,113 @@
   <nav class="sidebar2025">
     <div class="sidebar-inner">
       <ul id="menu" class="sidebar-menu">
+        <!-- Dashboard -->
         <li>
           <router-link to="/admin" class="sidebar-link" active-class="active">
-            <i class="bi bi-speedometer2"></i>
             <span>Dashboard</span>
           </router-link>
         </li>
-        <li v-if="can('user-list')">
-          <router-link to="/admin/users" class="sidebar-link" active-class="active">
-            <i class="bi bi-people"></i>
-            <span>Users</span>
-          </router-link>
-        </li>
-        <li v-if="can('role-list')">
-          <router-link to="/admin/roles" class="sidebar-link" active-class="active">
-            <i class="bi bi-person-badge"></i>
-            <span>Roles</span>
-          </router-link>
-        </li>
-        <li v-if="can('permission-list')">
-          <router-link to="/admin/permissions" class="sidebar-link" active-class="active">
-            <i class="bi bi-shield-lock"></i>
-            <span>Permissions</span>
-          </router-link>
-        </li>
-        <li v-if="can('post-list')">
-          <router-link to="/admin/posts" class="sidebar-link" active-class="active">
-            <i class="bi bi-file-earmark-text"></i>
-            <span>Posts</span>
-          </router-link>
-        </li>
-        <li v-if="can('category-list')">
-          <router-link to="/admin/categories" class="sidebar-link" active-class="active">
-            <i class="bi bi-tags"></i>
-            <span>Categories</span>
-          </router-link>
-        </li>
+        <!-- Plant Management -->
         <li>
-          <router-link to="/admin/browser-sessions" class="sidebar-link" active-class="active">
-            <i class="bi bi-browser-chrome"></i>
-            <span>Browser Sessions</span>
-          </router-link>
+          <div class="sidebar-section" @click="toggle('plant')">
+            <span>Plant Management</span>
+            <span class="chevron">{{ open === 'plant' ? '▲' : '▼' }}</span>
+          </div>
+          <ul v-show="open === 'plant'" class="sidebar-dropdown">
+            <li v-if="can('plant-list')">
+              <router-link to="/admin/plants" class="sidebar-link" active-class="active">
+                <span class="icon-wrap">🌿</span>
+                <span>Plants</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/admin/plant-categories" class="sidebar-link" active-class="active">
+                <span class="icon-wrap">📁</span>
+                <span>Plant Categories</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/admin/plant-translations" class="sidebar-link" active-class="active">
+                <span class="icon-wrap">🌍</span>
+                <span>Translations</span>
+              </router-link>
+            </li>
+          </ul>
         </li>
+        <!-- User Management -->
         <li>
-          <router-link to="/admin/activity_log" class="sidebar-link" active-class="active">
-            <i class="bi bi-clipboard-data"></i>
-            <span>Activity Logs</span>
-          </router-link>
+          <div class="sidebar-section" @click="toggle('user')">
+            <span>User Management</span>
+            <span class="chevron">{{ open === 'user' ? '▲' : '▼' }}</span>
+          </div>
+          <ul v-show="open === 'user'" class="sidebar-dropdown">
+            <li v-if="can('user-list')">
+              <router-link to="/admin/users" class="sidebar-link" active-class="active">
+                <span class="icon-wrap">👤</span>
+                <span>Users</span>
+              </router-link>
+            </li>
+            <li v-if="can('role-list') || can('permission-list')">
+              <router-link to="/admin/roles" class="sidebar-link" active-class="active">
+                <span class="icon-wrap">🧑‍💼</span>
+                <span>Roles</span>
+              </router-link>
+            </li>
+            <li v-if="can('role-list') || can('permission-list')">
+              <router-link to="/admin/permissions" class="sidebar-link" active-class="active">
+                <span class="icon-wrap">🧑‍💼</span>
+                <span>Permissions</span>
+              </router-link>
+            </li>
+          </ul>
+        </li>
+        <!-- Settings -->
+        <li>
+          <div class="sidebar-section" @click="toggle('settings')">
+            <span>Settings</span>
+            <span class="chevron">{{ open === 'settings' ? '▲' : '▼' }}</span>
+          </div>
+          <ul v-show="open === 'settings'" class="sidebar-dropdown">
+            <li>
+              <router-link to="/admin/languages" class="sidebar-link" active-class="active">
+                <span class="icon-wrap">🌐</span>
+                <span>Languages</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/admin/backup" class="sidebar-link" active-class="active">
+                <span class="icon-wrap">📦</span>
+                <span>Backup & Restore</span>
+              </router-link>
+            </li>
+          </ul>
+        </li>
+        <!-- Analytics -->
+        <li>
+          <div class="sidebar-section" @click="toggle('analytics')">
+            <span>Analytics</span>
+            <span class="chevron">{{ open === 'analytics' ? '▲' : '▼' }}</span>
+          </div>
+          <ul v-show="open === 'analytics'" class="sidebar-dropdown">
+            <li>
+              <router-link to="/admin/usage-stats" class="sidebar-link" active-class="active">
+                <span class="icon-wrap">📈</span>
+                <span>Usage Stats</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/admin/search-trends" class="sidebar-link" active-class="active">
+                <span class="icon-wrap">🔎</span>
+                <span>Search Trends</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/admin/activity-log-logs" class="sidebar-link" active-class="active">
+                <span class="icon-wrap">📝</span>
+                <span>Activity Log</span>
+              </router-link>
+            </li>
+          </ul>
         </li>
       </ul>
     </div>
@@ -56,74 +116,151 @@
 </template>
 
 <script setup>
-import {useAbility} from '@casl/vue'
-const {can} = useAbility();
+import { ref } from 'vue';
+import { useAbility } from '@casl/vue';
+const { can } = useAbility();
+const open = ref(null);
+function toggle(section) {
+  open.value = open.value === section ? null : section;
+}
 </script>
 
 <style scoped>
 .sidebar2025 {
-  min-width: 230px;
-  max-width: 230px;
+  min-width: 220px;
+  max-width: 400px;
+  width: 400px;
   height: 100vh;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f8fafc 100%);
-  border-radius: 1.5rem 0 0 1.5rem;
-  box-shadow: 2px 0 24px rgba(67,233,123,0.07);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px) saturate(1.5);
+  border-right: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  padding: 2rem 0.5rem 2rem 0.5rem;
+  padding: 1.4rem 0.6rem;
+  font-family: 'Inter', sans-serif;
 }
+
 .sidebar-inner {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
 }
+
 .sidebar-menu {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
 }
+
 .sidebar-link {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.9rem 1.2rem;
-  border-radius: 1rem;
-  color: #22223b;
-  font-weight: 600;
-  font-size: 1.08rem;
+  gap: 0.8rem;
+  padding: 0.55rem 1rem;
+  border-radius: 0.8rem;
+  color: #374151;
+  font-weight: 500;
+  font-size: 1.02rem;
   text-decoration: none;
-  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  transition: all 0.15s ease;
 }
-.sidebar-link i {
-  font-size: 1.4rem;
-  color: #43e97b;
-  transition: color 0.18s;
+
+.sidebar-link .icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.6rem;
+  background: #f0fdf4;
+  color: #15803d;
+  font-size: 1.2rem;
+  transition: all 0.15s ease;
 }
-.sidebar-link.active, .sidebar-link:hover {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-  color: #fff;
-  box-shadow: 0 2px 12px rgba(67,233,123,0.10);
+
+.sidebar-link:hover {
+  background: #ecfdf5;
+  color: #166534;
 }
-.sidebar-link.active i, .sidebar-link:hover i {
-  color: #fff;
+
+.sidebar-link:hover .icon-wrap {
+  background: #d1fae5;
 }
-.sidebar-link span {
-  flex: 1;
-  white-space: nowrap;
+
+.sidebar-link.active {
+  background: #d1fae5;
+  color: #166534;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px #34d399;
 }
+
+.sidebar-section {
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #065f46;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.sidebar-section:hover {
+  background-color: #f0fdf4;
+}
+
+.chevron {
+  margin-left: auto;
+  font-size: 1rem;
+  color: #a7f3d0;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-dropdown {
+  padding-left: 1.8rem;
+  display: grid;
+  grid-auto-rows: 1fr;
+  gap: 0.3rem;
+  transition: max-height 0.2s ease-in-out;
+  overflow: hidden;
+}
+
+.sidebar-dropdown li {
+  list-style: none;
+}
+
+.sidebar-dropdown[style*="display: none"] {
+  max-height: 0;
+}
+
+.sidebar-dropdown[style*="display: block"] {
+  max-height: 600px;
+}
+
 @media (max-width: 900px) {
   .sidebar2025 {
-    min-width: 60px;
-    max-width: 60px;
-    padding: 1rem 0.2rem 1rem 0.2rem;
+    max-width: 56px;
+    min-width: 56px;
+    padding: 0.4rem;
   }
-  .sidebar-link span {
+
+  .sidebar-link span,
+  .sidebar-section span,
+  .chevron {
     display: none;
   }
+
+  .sidebar-section {
+    padding: 0.4rem;
+  }
+
+  .sidebar-link .icon-wrap {
+    margin-right: 0;
+  }
 }
+
 </style>

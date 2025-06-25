@@ -164,6 +164,90 @@ export default [
                 component: () => import('../views/admin/activity-log/Index.vue'),
                 meta: { breadCrumb: 'Activity Logs' }
             },
+            {
+                name: 'plants.index',
+                path: 'plants',
+                component: () => import('../views/admin/plants/Index.vue'),
+                meta: { breadCrumb: 'Plants' }
+            },
+            {
+                name: 'plants.create',
+                path: 'plants/create',
+                component: () => import('../views/admin/plants/Create.vue'),
+                meta: { breadCrumb: 'Add new plant' }
+            },
+            {
+                name: 'plants.edit',
+                path: 'plants/edit/:id',
+                component: () => import('../views/admin/plants/Edit.vue'),
+                meta: { breadCrumb: 'Edit plant' }
+            },
+            {
+                name: 'languages.index',
+                path: 'languages',
+                component: () => import('../views/admin/languages/Index.vue'),
+                meta: { breadCrumb: 'Languages' }
+            },
+            {
+                name: 'languages.create',
+                path: 'languages/create',
+                component: () => import('../views/admin/languages/Create.vue'),
+                meta: { breadCrumb: 'Add new language' }
+            },
+            {
+                name: 'languages.edit',
+                path: 'languages/edit/:id',
+                component: () => import('../views/admin/languages/Edit.vue'),
+                meta: { breadCrumb: 'Edit language' }
+            },
+            {
+                name: 'plant_categories.index',
+                path: 'plant-categories',
+                component: () => import('../views/admin/plant_categories/Index.vue'),
+                meta: { breadCrumb: 'Plant Categories' }
+            },
+            {
+                name: 'plant_categories.create',
+                path: 'plant-categories/create',
+                component: () => import('../views/admin/plant_categories/Create.vue'),
+                meta: { breadCrumb: 'Add new plant category' }
+            },
+            {
+                name: 'plant_categories.edit',
+                path: 'plant-categories/edit/:id',
+                component: () => import('../views/admin/plant_categories/Edit.vue'),
+                meta: { breadCrumb: 'Edit plant category' }
+            },
+            {
+                name: 'usage_stats.index',
+                path: 'usage-stats',
+                component: () => import('../views/admin/usage-stats/Index.vue'),
+                meta: { breadCrumb: 'Usage Stats' }
+            },
+            {
+                name: 'search_trends.index',
+                path: 'search-trends',
+                component: () => import('../views/admin/search-trends/Index.vue'),
+                meta: { breadCrumb: 'Search Trends' }
+            },
+            {
+                name: 'plant_translations.index',
+                path: 'plant-translations',
+                component: () => import('../views/admin/plant_translations/Index.vue'),
+                meta: { breadCrumb: 'Plant Translations' }
+            },
+            {
+                name: 'plant_translations.edit',
+                path: 'plant-translations/edit/:id',
+                component: () => import('../views/admin/plant_translations/Edit.vue'),
+                meta: { breadCrumb: 'Edit Plant Translation' }
+            },
+            {
+                name: 'admin/backup',
+                path: 'backup',
+                component: () => import('../views/admin/backup.vue'),
+                meta: { requiresAuth: true },
+            },
         ]
     },
     {

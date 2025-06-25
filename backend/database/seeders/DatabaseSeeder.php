@@ -16,13 +16,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(PermissionTableSeeder::class);
         $this->call(CreateAdminUserSeeder::class);
-
-//        $this->call(RoleSeeder::class);
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        $this->call(RoleSeeder::class);
+        $this->call(NormalUserSeeder::class);
+        $this->call(LanguageSeeder::class);
+        $this->call(PlantCategorySeeder::class);
+        $this->call(PlantSeeder::class);
     }
 }

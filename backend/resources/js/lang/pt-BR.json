@@ -12,6 +12,7 @@
     "go_home": "Inicio",
     "logout": "Sair",
     "email": "Email",
+    "email_or_username": "Email ou nome de usuário",
     "remember_me": "Lembre-me",
     "password": "Senha",
     "forgot_password": "Esqueceu sua senha?",

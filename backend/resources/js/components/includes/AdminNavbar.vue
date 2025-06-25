@@ -1,23 +1,21 @@
 <template>
   <nav class="navbar2025">
     <div class="navbar-inner">
-      <router-link to="/admin" class="navbar-brand2025">
-        <img src="/logo.png" alt="Logo" class="navbar-logo" />
-        <span>Verdex Admin</span>
-      </router-link>
+      <div class="navbar-brand-wrap">
+        <router-link to="/admin" class="navbar-brand2025">
+          <img src="/logo.png" alt="Logo" class="navbar-logo" />
+          <span>Verdex Admin</span>
+        </router-link>
+      </div>
       <div class="navbar-actions">
-        <LocaleSwitcher />
-        <div class="navbar-user">
-          
-          <div class="navbar-dropdown">
-            <span class="navbar-user-greet">Hi, {{ user.name }}</span>
-            <button class="navbar-dropdown-btn">&#x25BC;</button>
-            <div class="navbar-dropdown-menu">
-              <router-link :to="{ name: 'profile.index' }" class="navbar-dropdown-item">Profile</router-link>
-              <a class="navbar-dropdown-item" href="#">Setting</a>
-              <div class="navbar-dropdown-divider"></div>
-              <a class="navbar-dropdown-item" :class="{ 'opacity-25': processing }" :disabled="processing" href="javascript:void(0)" @click="logout">Logout</a>
-            </div>
+        <div class="navbar-user" @click="toggleDropdown">
+          <span class="navbar-user-greet clickable">Hi, {{ username }}</span>
+          <button class="navbar-dropdown-btn" :aria-expanded="showDropdown">&#x25BC;</button>
+          <div class="navbar-dropdown-menu" v-show="showDropdown">
+            <router-link :to="{ name: 'profile.index' }" class="navbar-dropdown-item">Profile</router-link>
+            <a class="navbar-dropdown-item" href="#">Setting</a>
+            <div class="navbar-dropdown-divider"></div>
+            <a class="navbar-dropdown-item" :class="{ 'opacity-25': processing }" :disabled="processing" href="javascript:void(0)" @click="logout">Logout</a>
           </div>
         </div>
       </div>
@@ -26,23 +24,31 @@
 </template>
 
 <script setup>
-import {computed, ref, onMounted, onBeforeUnmount} from "vue";
+import {computed, ref} from "vue";
 import useAuth from "@/composables/auth";
-import LocaleSwitcher from "../../components/LocaleSwitcher.vue";
 import {useAuthStore} from "@/store/auth";
 
 const auth = useAuthStore()
 const user = computed(() => auth.user)
 const {processing, logout} = useAuth();
 
+// Computed property for username with fallback
+const username = computed(() => {
+    if (user.value && user.value.username) {
+        return user.value.username;
+    }
+    if (user.value && user.value.name) {
+        return user.value.name;
+    }
+    if (user.value && user.value.email) {
+        return user.value.email.split('@')[0]; // Use email prefix as fallback
+    }
+    return 'User'; // Final fallback
+});
+
 // Dropdown logic
 const showDropdown = ref(false);
 function toggleDropdown() { showDropdown.value = !showDropdown.value; }
-function closeDropdown(e) {
-  if (!e.target.closest('.navbar-user')) showDropdown.value = false;
-}
-onMounted(() => { document.addEventListener('click', closeDropdown); });
-onBeforeUnmount(() => { document.removeEventListener('click', closeDropdown); });
 </script>
 
 <style scoped>
@@ -54,7 +60,7 @@ onBeforeUnmount(() => { document.removeEventListener('click', closeDropdown); })
   padding: 0.7rem 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -66,6 +72,12 @@ onBeforeUnmount(() => { document.removeEventListener('click', closeDropdown); })
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
+}
+.navbar-brand-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 .navbar-brand2025 {
   display: flex;
@@ -79,6 +91,7 @@ onBeforeUnmount(() => { document.removeEventListener('click', closeDropdown); })
   border-radius: 0.7rem;
   object-fit: contain;
   box-shadow: 0 2px 8px rgba(67,233,123,0.12);
+  background-color: #22223b;
 }
 .navbar-brand2025 span {
   font-size: 1.5rem;
@@ -90,27 +103,29 @@ onBeforeUnmount(() => { document.removeEventListener('click', closeDropdown); })
   display: flex;
   align-items: center;
   gap: 2rem;
+  margin-left: auto;
 }
 .navbar-user {
   position: relative;
   display: flex;
   align-items: center;
   gap: 0.7rem;
+  cursor: pointer;
+  margin-right: 0.5rem;
 }
 .navbar-user-greet {
   font-weight: 600;
   color: #4a4e69;
   font-size: 1.1rem;
 }
-.navbar-dropdown {
-  position: relative;
+.clickable {
+  cursor: pointer;
 }
 .navbar-dropdown-btn {
   cursor: pointer;
   background: none;
   border: none;
   font-size: 1.1rem;
-  cursor: pointer;
   color: #43e97b;
   padding: 0 0.3rem;
   border-radius: 0.5rem;
@@ -120,7 +135,7 @@ onBeforeUnmount(() => { document.removeEventListener('click', closeDropdown); })
   background: #e3f2fd;
 }
 .navbar-dropdown-menu {
-  display: none;
+  display: block;
   position: absolute;
   right: 0;
   top: 2.2rem;
@@ -130,10 +145,7 @@ onBeforeUnmount(() => { document.removeEventListener('click', closeDropdown); })
   box-shadow: 0 4px 24px rgba(67,233,123,0.10);
   padding: 0.7rem 0;
   z-index: 10;
-}
-.navbar-dropdown:hover .navbar-dropdown-menu,
-.navbar-dropdown:focus-within .navbar-dropdown-menu {
-  display: block;
+  margin-right: 0.2rem;
 }
 .navbar-dropdown-item {
   display: block;

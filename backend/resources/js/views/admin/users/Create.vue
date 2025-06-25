@@ -4,26 +4,43 @@
       <h2 class="modern-form-title">Create User</h2>
       <form @submit.prevent="submitForm" class="modern-form">
         <div class="modern-form-group">
-          <label for="post-title" class="modern-form-label">Name</label>
-          <input v-model="post.name" id="post-title" type="text" class="modern-form-input">
-          <div class="modern-form-error" v-if="errors.name">{{ errors.name }}</div>
-          <div class="modern-form-error" v-for="message in validationErrors?.name" :key="message">{{ message }}</div>
+          <label for="username" class="modern-form-label">Username</label>
+          <input v-model="username" id="username" type="text" class="modern-form-input">
+          <div class="modern-form-error" v-if="errors.username">{{ errors.username }}</div>
+          <div class="modern-form-error" v-for="message in validationErrors?.username" :key="message">{{ message }}</div>
         </div>
         <div class="modern-form-group">
           <label for="email" class="modern-form-label">Email</label>
-          <input v-model="post.email" id="email" type="email" class="modern-form-input">
+          <input v-model="email" id="email" type="email" class="modern-form-input">
           <div class="modern-form-error" v-if="errors.email">{{ errors.email }}</div>
           <div class="modern-form-error" v-for="message in validationErrors?.email" :key="message">{{ message }}</div>
         </div>
         <div class="modern-form-group">
           <label for="password" class="modern-form-label">Password</label>
-          <input v-model="post.password" id="password" type="password" class="modern-form-input">
+          <input v-model="password" id="password" type="password" class="modern-form-input">
           <div class="modern-form-error" v-if="errors.password">{{ errors.password }}</div>
           <div class="modern-form-error" v-for="message in validationErrors?.password" :key="message">{{ message }}</div>
         </div>
         <div class="modern-form-group">
+          <label for="language_preference" class="modern-form-label">Language</label>
+          <select v-model="language_preference" id="language_preference" class="modern-form-input">
+            <option value="">Select Language</option>
+            <option value="en">English</option>
+            <option value="fr">French</option>
+          </select>
+          <div class="modern-form-error" v-if="errors.language_preference">{{ errors.language_preference }}</div>
+          <div class="modern-form-error" v-for="message in validationErrors?.language_preference" :key="message">{{ message }}</div>
+        </div>
+        <div class="modern-form-group">
+          <label for="avatar" class="modern-form-label">Avatar</label>
+          <input id="avatar" type="file" class="modern-form-input" @change="onAvatarChange">
+          <img v-if="avatarPreview" :src="avatarPreview" alt="avatar preview" style="width:48px;height:48px;border-radius:50%;object-fit:cover;margin-top:8px;">
+          <div class="modern-form-error" v-if="errors.avatar">{{ errors.avatar }}</div>
+          <div class="modern-form-error" v-for="message in validationErrors?.avatar" :key="message">{{ message }}</div>
+        </div>
+        <div class="modern-form-group">
           <label for="post-category" class="modern-form-label">Role</label>
-          <v-select multiple v-model="post.role_id" :options="roleList" :reduce="role => role.id" label="name" class="modern-form-input" />
+          <v-select multiple v-model="role_id" :options="roleList" :reduce="role => role.id" label="name" class="modern-form-input" />
           <div class="modern-form-error" v-if="errors.role_id">{{ errors.role_id }}</div>
           <div class="modern-form-error" v-for="message in validationErrors?.role_id" :key="message">{{ message }}</div>
         </div>
@@ -38,7 +55,7 @@
   </div>
 </template>
 <script setup>
-import { onMounted, reactive } from "vue";
+import { onMounted, ref } from "vue";
 import useRoles from "@/composables/roles";
 import useUsers from "@/composables/users";
 
@@ -51,24 +68,48 @@ defineRule('required', required);
 defineRule('min', min);
 
 const schema = {
-  name: 'required',
+  username: 'required',
   email: 'required',
   password: 'required|min:8',
+  language_preference: '',
+  avatar: '',
+  role_id: '',
 }
 const { validate, errors } = useForm({ validationSchema: schema })
-const { value: name } = useField('name', null, { initialValue: '' });
+const { value: username } = useField('username', null, { initialValue: '' });
 const { value: email } = useField('email', null, { initialValue: '' });
 const { value: password } = useField('password', null, { initialValue: '' });
+const { value: language_preference } = useField('language_preference', null, { initialValue: '' });
+const { value: avatar } = useField('avatar', null, { initialValue: '' });
 const { value: role_id } = useField('role_id', null, { initialValue: '', label: 'role' });
 
-const post = reactive({
-  name,
-  email,
-  password,
-  role_id,
-})
+const avatarPreview = ref(null)
+
+function onAvatarChange(e) {
+  const file = e.target.files[0]
+  avatar.value = file
+  if (file) {
+    const reader = new FileReader()
+    reader.onload = e => { avatarPreview.value = e.target.result }
+    reader.readAsDataURL(file)
+  } else {
+    avatarPreview.value = null
+  }
+}
+
 function submitForm() {
-  validate().then(form => { if (form.valid) storeUser(post) })
+  validate().then(form => {
+    if (form.valid) {
+      const formData = new FormData()
+      formData.append('username', username.value)
+      formData.append('email', email.value)
+      formData.append('password', password.value)
+      formData.append('language_preference', language_preference.value)
+      formData.append('avatar', avatar.value)
+      formData.append('role_id', role_id.value)
+      storeUser(formData)
+    }
+  })
 }
 onMounted(() => {
   getRoleList()

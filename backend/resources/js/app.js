@@ -11,6 +11,8 @@ import ability from './services/ability';
 import vSelect from "vue-select";
 import useAuth from './composables/auth';
 import i18n from "./plugins/i18n";
+import Toast from 'vue-toastification';
+import 'vue-toastification/dist/index.css';
 
 import 'sweetalert2/dist/sweetalert2.min.css';
 import 'vue-select/dist/vue-select.css';
@@ -35,4 +37,5 @@ app.use(i18n)
 app.use(abilitiesPlugin, ability)
 app.component('Pagination', Bootstrap5Pagination)
 app.component("v-select", vSelect);
+app.use(Toast);
 app.mount('#app')

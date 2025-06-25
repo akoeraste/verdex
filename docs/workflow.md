@@ -37,7 +37,9 @@
 
 ---
 
-## 2. Database Schema (Finalized)
+## 2. Database Schema (Finalized & Enhanced)
+
+This schema is designed for a robust, multilingual system.
 
 ### 2.1. users
 | Column               | Type             | Description                 |
@@ -52,23 +54,50 @@
 | updated_at           | Timestamp        |                             |
 
 ### 2.2. plants
-| Column           | Type             | Description                         |
-|------------------|------------------|-------------------------------------|
-| id               | BigIncrements    | Primary key                         |
-| slug             | String, unique   | Translation JSON lookup key         |
-| scientific_name  | String           | Latin binomial                      |
-| family           | String, nullable | Taxonomic family                    |
-| genus            | String, nullable | Genus                               |
-| species          | String, nullable | Species epithet                     |
-| origin           | String, nullable | Geographic origin                   |
-| image_urls       | JSON             | Array of image URLs                 |
-| habitat          | String, nullable | Natural habitat description         |
-| uses             | JSON, nullable   | Array of uses (e.g. ["Medicinal"]) |
-| toxicity_level   | String, nullable | e.g., "Non-toxic"                   |
-| created_at       | Timestamp        |                                     |
-| updated_at       | Timestamp        |                                     |
+| Column           | Type               | Description                         |
+|------------------|--------------------|-------------------------------------|
+| id               | BigIncrements      | Primary key                         |
+| scientific_name  | String, unique     | Latin binomial                      |
+| plant_category_id| ForeignKey, nullable| References `plant_categories.id`    |
+| family           | String, nullable   | Taxonomic family                    |
+| genus            | String, nullable   | Genus                               |
+| species          | String, nullable   | Species epithet                     |
+| image_urls       | JSON, nullable     | Array of image URLs                 |
+| toxicity_level   | String, nullable   | e.g., "Non-toxic"                   |
+| created_at       | Timestamp          |                                     |
+| updated_at       | Timestamp          |                                     |
 
-### 2.3. favorites
+### 2.3. plant_categories
+| Column     | Type          | Description      |
+|------------|---------------|------------------|
+| id         | BigIncrements | Primary key      |
+| name       | String        | e.g., "Herb"     |
+| created_at | Timestamp     |                  |
+| updated_at | Timestamp     |                  |
+
+### 2.4. plant_translations
+| Column        | Type                 | Description                       |
+|---------------|----------------------|-----------------------------------|
+| id            | BigIncrements        | Primary key                       |
+| plant_id      | ForeignKey plants.id |                                   |
+| language_code | String               | ISO code (e.g., "en", "fr")       |
+| common_name   | String               |                                   |
+| description   | Text                 |                                   |
+| uses          | Text                 |                                   |
+| audio_url     | String, nullable     | URL/path to audio file            |
+| created_at    | Timestamp            |                                   |
+| updated_at    | Timestamp            |                                   |
+
+### 2.5. languages
+| Column     | Type          | Description           |
+|------------|---------------|-----------------------|
+| id         | BigIncrements | Primary key           |
+| code       | String, unique| ISO code (e.g., "en") |
+| name       | String        | e.g., "English"       |
+| created_at | Timestamp     |                       |
+| updated_at | Timestamp     |                       |
+
+### 2.6. favorites
 | Column      | Type                 | Description |
 |-------------|----------------------|-------------|
 | id          | BigIncrements        | Primary key |
@@ -77,7 +106,7 @@
 | created_at  | Timestamp            |             |
 | updated_at  | Timestamp            |             |
 
-### 2.4. feedback
+### 2.7. feedback
 | Column      | Type                          | Description                   |
 |-------------|-------------------------------|-------------------------------|
 | id          | BigIncrements                 | Primary key                   |
@@ -88,7 +117,7 @@
 | created_at  | Timestamp                     |                               |
 | updated_at  | Timestamp                     |                               |
 
-### 2.5. audio_files
+### 2.8. audio_files
 | Column      | Type                 | Description                       |
 |-------------|----------------------|-----------------------------------|
 | id          | BigIncrements        | Primary key                       |
@@ -98,14 +127,14 @@
 | created_at  | Timestamp            |                                   |
 | updated_at  | Timestamp            |                                   |
 
-### 2.6. password_resets
+### 2.9. password_resets
 | Column      | Type    | Description |
 |-------------|---------|-------------|
 | email       | String  |             |
 | token       | String  |             |
 | created_at  | Timestamp |           |
 
-### 2.7. jobs
+### 2.10. jobs
 | Column        | Type         | Description |
 |---------------|-------------|-------------|
 | id            | BigIncrements| Primary key |
@@ -116,7 +145,7 @@
 | available_at  | Integer      |             |
 | created_at    | Integer      |             |
 
-### 2.8. failed_jobs
+### 2.11. failed_jobs
 | Column      | Type      | Description |
 |-------------|-----------|-------------|
 | id          | BigIncrements | Primary key |
@@ -127,7 +156,7 @@
 | exception   | LongText  |             |
 | failed_at   | Timestamp |             |
 
-### 2.9. personal_access_tokens
+### 2.12. personal_access_tokens
 | Column         | Type      | Description |
 |----------------|----------|-------------|
 | id             | BigIncrements | Primary key |
@@ -141,7 +170,7 @@
 | created_at     | Timestamp|             |
 | updated_at     | Timestamp|             |
 
-### 2.10. sessions
+### 2.13. sessions
 | Column      | Type      | Description |
 |-------------|-----------|-------------|
 | id          | String    | Primary key |
@@ -151,7 +180,7 @@
 | payload     | LongText  |             |
 | last_activity | Integer |             |
 
-### 2.11. activity_log
+### 2.14. activity_log
 | Column        | Type      | Description |
 |---------------|-----------|-------------|
 | id            | BigIncrements | Primary key |
@@ -167,7 +196,7 @@
 | created_at    | Timestamp |             |
 | updated_at    | Timestamp |             |
 
-### 2.12. media
+### 2.15. media
 | Column            | Type      | Description |
 |-------------------|-----------|-------------|
 | id                | BigIncrements | Primary key |
@@ -189,7 +218,7 @@
 | created_at        | Timestamp | Nullable    |
 | updated_at        | Timestamp | Nullable    |
 
-### 2.13. permissions/roles (spatie/laravel-permission)
+### 2.16. permissions/roles (spatie/laravel-permission)
 - permissions
 - roles
 - model_has_permissions

@@ -12,6 +12,7 @@
     "go_home": "Ir a Inicio",
     "logout": "Cerrar Sesión",
     "email": "Correo Electrónico",
+    "email_or_username": "Correo electrónico o nombre de usuario",
     "remember_me": "Recuérdame",
     "password": "Contraseña",
     "forgot_password": "¿Olvidaste tu contraseña?",

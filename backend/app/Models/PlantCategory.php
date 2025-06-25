@@ -12,6 +12,7 @@ class PlantCategory extends Model
     use HasFactory, LogsActivity;
 
     protected $fillable = ['name'];
+    protected $table = 'plant_categories';
 
     public function getActivitylogOptions(): LogOptions
     {

@@ -6,24 +6,40 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class Plant extends Model implements HasMedia
+class Plant extends Model
 {
-    use HasFactory, InteractsWithMedia, LogsActivity;
+    use HasFactory, LogsActivity;
 
-    protected $fillable = ['scientific_name', 'plant_category_id', 'image_url'];
+    protected $fillable = [
+        'scientific_name', 
+        'plant_category_id', 
+        'family', 
+        'genus', 
+        'species', 
+        'image_urls', 
+        'toxicity_level'
+    ];
+
+    protected $casts = [
+        'image_urls' => 'array',
+    ];
 
     public function getActivitylogOptions(): LogOptions
     {
-        return LogOptions::defaults()->logOnly(['scientific_name', 'plant_category_id']);
+        return LogOptions::defaults()->logOnly([
+            'scientific_name', 
+            'plant_category_id', 
+            'family', 
+            'genus', 
+            'species', 
+            'toxicity_level'
+        ]);
     }
 
     public function plantCategory()
     {
-        return $this->belongsTo(PlantCategory::class);
+        return $this->belongsTo(PlantCategory::class, 'plant_category_id');
     }
 
     public function translations()
@@ -31,10 +47,8 @@ class Plant extends Model implements HasMedia
         return $this->hasMany(PlantTranslation::class);
     }
 
-    public function registerMediaCollections(): void
+    public function audioFiles()
     {
-        $this->addMediaCollection('images')
-            ->useFallbackUrl('/images/placeholder.jpg')
-            ->useFallbackPath(public_path('/images/placeholder.jpg'));
+        return $this->hasMany(AudioFile::class);
     }
 } 

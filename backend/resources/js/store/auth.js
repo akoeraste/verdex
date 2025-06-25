@@ -8,9 +8,14 @@ export const useAuthStore = defineStore('auth', () => {
 
     const login = (() => {
         return axios.get('/api/user').then(({data}) => {
-            user.value = data
-            authenticated.value = true
-        }).catch(({res}) => {
+            if (data.success) {
+                user.value = data.data
+                authenticated.value = true
+            } else {
+                user.value = {}
+                authenticated.value = false
+            }
+        }).catch((error) => {
             user.value = {}
             authenticated.value = false
         })
@@ -26,7 +31,7 @@ export const useAuthStore = defineStore('auth', () => {
                 user.value = {}
                 authenticated.value = false
             }
-        }).catch(({res}) => {
+        }).catch((error) => {
             user.value = {}
             authenticated.value = false
         })

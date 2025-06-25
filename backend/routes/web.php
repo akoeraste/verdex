@@ -19,8 +19,14 @@ Route::post('login', [AuthenticatedSessionController::class, 'login']);
 Route::post('register', [AuthenticatedSessionController::class, 'register']);
 Route::post('logout', [AuthenticatedSessionController::class, 'logout']);
 
- 
+// Add GET routes for login and admin pages that serve the Vue app
+Route::get('login', function() {
+    return view('main-view');
+})->name('login');
 
+Route::get('admin/{any?}', function() {
+    return view('main-view');
+})->name('admin')->where('any', '.*');
 
 //Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 

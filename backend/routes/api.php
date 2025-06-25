@@ -18,7 +18,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 Route::post('forget-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('forget.password.post');
 Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('password.reset');
 
-Route::group(['middleware' => 'auth:sanctum'], function() {
+Route::group(['middleware' => 'auth:web'], function() {
     Route::apiResource('users', UserController::class);
     Route::apiResource('posts', PostController::class);
     Route::apiResource('categories', CategoryController::class);
@@ -50,9 +50,22 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
     });
 
     Route::apiResource('plants', \App\Http\Controllers\Api\PlantController::class);
+    Route::put('plants/{plant}/translations', [\App\Http\Controllers\Api\PlantController::class, 'updateTranslations']);
+    Route::post('plants/{plant}/translations', [\App\Http\Controllers\Api\PlantController::class, 'storeTranslation']);
+    Route::put('plants/{plant}/translations/{translation}', [\App\Http\Controllers\Api\PlantController::class, 'updateTranslation']);
+    Route::delete('plants/{plant}/translations/{translation}', [\App\Http\Controllers\Api\PlantController::class, 'destroyTranslation']);
+    Route::get('plant-categories-list', [\App\Http\Controllers\Api\PlantController::class, 'getCategories']);
+    Route::get('languages-list', [\App\Http\Controllers\Api\PlantController::class, 'getLanguages']);
+    Route::apiResource('languages', \App\Http\Controllers\Api\LanguageController::class);
+    Route::apiResource('plant-categories', \App\Http\Controllers\Api\PlantCategoryController::class);
+
+    // Database backup
+    Route::get('backup/download', [\App\Http\Controllers\Api\BackupController::class, 'download']);
 });
 
 Route::get('category-list', [CategoryController::class, 'getList']);
 Route::get('get-posts', [PostController::class, 'getPosts']);
 Route::get('get-category-posts/{id}', [PostController::class, 'getCategoryByPosts']);
 Route::get('get-post/{id}', [PostController::class, 'getPost']);
+
+Route::get('dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class, 'stats']);

@@ -19,7 +19,7 @@ class CreateAdminUserSeeder extends Seeder
     public function run()
     {
         $user = User::create([
-            'name' => 'prime',
+            'username' => 'prime',
             'email' => 'prodevtea@gmail.com',
             'password' => bcrypt('Prime123'),
             'email_verified_at' => now(),
@@ -31,7 +31,11 @@ class CreateAdminUserSeeder extends Seeder
             'post-list',
             'post-create',
             'post-edit',
-            'post-delete'
+            'post-delete',
+            'plant-list',
+            'plant-create',
+            'plant-edit',
+            'plant-delete'
             ];
         $role2->syncPermissions($permissions);
         Category::create(['name' => 'Vue.js']);

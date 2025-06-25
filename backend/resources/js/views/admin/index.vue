@@ -5,7 +5,7 @@
       <p class="dashboard-subtitle">Here's a quick overview of your system today.</p>
     </section>
     <section class="dashboard-stats">
-      <div class="stat-card" v-for="stat in stats" :key="stat.label">
+      <div class="stat-card" v-for="stat in stats" :key="stat.label" @click="goTo(stat.link)" style="cursor:pointer;">
         <div class="stat-icon" :style="{ background: stat.bg }">
           <i :class="stat.icon"></i>
         </div>
@@ -39,32 +39,48 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 
+const router = useRouter();
 const userName = 'Admin'; // Replace with actual user data
-const stats = [
-  { label: 'Total Plants', value: 128, icon: 'bi bi-flower1', bg: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
-  { label: 'Users', value: 54, icon: 'bi bi-people', bg: 'linear-gradient(135deg, #fa8bff 0%, #2bd2ff 100%)' },
-  { label: 'Identifications', value: 1024, icon: 'bi bi-search', bg: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)' },
-  { label: 'Feedback', value: 87, icon: 'bi bi-chat-dots', bg: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)' },
-];
+const stats = ref([
+  { label: 'Total Plants', value: 0, icon: 'bi bi-flower1', bg: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', link: '/admin/plants' },
+  { label: 'Users', value: 0, icon: 'bi bi-people', bg: 'linear-gradient(135deg, #fa8bff 0%, #2bd2ff 100%)', link: '/admin/users' },
+  { label: 'Identifications', value: 0, icon: 'bi bi-search', bg: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)', link: '/admin/activity_log' },
+  { label: 'Feedback', value: 0, icon: 'bi bi-chat-dots', bg: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)', link: '/admin/feedback' },
+]);
+const identificationData = ref([0,0,0,0,0,0,0]);
+const feedbackData = ref({ positive: 0, negative: 0, neutral: 0 });
 
-onMounted(() => {
-  // Chart.js example for modern charts
+onMounted(async () => {
+  try {
+    const res = await axios.get('/api/dashboard/stats');
+    const data = res.data;
+    stats.value[0].value = data.total_plants;
+    stats.value[1].value = data.total_users;
+    stats.value[2].value = data.total_identifications;
+    stats.value[3].value = data.total_feedback;
+    identificationData.value = data.identifications_last_7_days;
+    feedbackData.value = data.feedback_overview;
+  } catch (e) { /* handle error */ }
+
   import('chart.js/auto').then(({ default: Chart }) => {
     const ctx1 = document.getElementById('identificationChart');
     if (ctx1) {
+      ctx1.height = 120;
       new Chart(ctx1, {
         type: 'line',
         data: {
           labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
           datasets: [{
             label: 'Identifications',
-            data: [12, 19, 14, 20, 16, 22, 18],
+            data: identificationData.value,
             borderColor: '#43e97b',
             backgroundColor: 'rgba(67,233,123,0.1)',
             tension: 0.4,
             fill: true,
-            pointRadius: 4,
+            pointRadius: 3,
             pointBackgroundColor: '#43e97b',
           }],
         },
@@ -76,12 +92,13 @@ onMounted(() => {
     }
     const ctx2 = document.getElementById('feedbackChart');
     if (ctx2) {
+      ctx2.height = 120;
       new Chart(ctx2, {
         type: 'doughnut',
         data: {
           labels: ['Positive', 'Negative', 'Neutral'],
           datasets: [{
-            data: [60, 25, 15],
+            data: [feedbackData.value.positive, feedbackData.value.negative, feedbackData.value.neutral],
             backgroundColor: ['#43e97b', '#fa8bff', '#f6d365'],
             borderWidth: 0,
           }],
@@ -93,6 +110,10 @@ onMounted(() => {
     }
   });
 });
+
+function goTo(link) {
+  router.push(link);
+}
 </script>
 
 <style scoped>
@@ -177,16 +198,20 @@ onMounted(() => {
   background: #fff;
   border-radius: 1.2rem;
   box-shadow: 0 4px 24px rgba(34,34,59,0.07);
-  padding: 2rem;
-  flex: 1 1 350px;
-  min-width: 350px;
-  max-width: 600px;
+  padding: 1rem;
+  flex: 1 1 220px;
+  min-width: 220px;
+  max-width: 350px;
 }
 .chart-card h3 {
   font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 1.2rem;
   color: #22223b;
+}
+.chart-card canvas {
+  height: 120px !important;
+  max-height: 120px !important;
 }
 .dashboard-quicklinks {
   margin-top: 2.5rem;

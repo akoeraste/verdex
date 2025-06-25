@@ -18,7 +18,7 @@ export default function useAuth() {
     const ability = inject(ABILITY_TOKEN)
 
     const loginForm = reactive({
-        email: '',
+        login: '',
         password: '',
         remember: false
     })
@@ -36,6 +36,7 @@ export default function useAuth() {
 
     const registerForm = reactive({
         name: '',
+        username: '',
         email: '',
         password: '',
         password_confirmation: ''
