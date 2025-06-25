@@ -2,7 +2,15 @@
   <div class="modern-table-container">
     <div class="modern-table-header">
       <h2>Plants</h2>
-      <router-link :to="{ name: 'plants.create' }" class="modern-btn">Add Plant</router-link>
+      <div class="header-actions">
+        <input 
+          type="text" 
+          v-model="search" 
+          placeholder="Search plants..." 
+          class="search-input"
+        />
+        <router-link :to="{ name: 'plants.create' }" class="modern-btn">Add Plant</router-link>
+      </div>
     </div>
     <table class="modern-table">
       <thead>
@@ -34,6 +42,11 @@
     <div v-if="loading" class="modern-table-loading">Loading...</div>
     <div v-if="plants.length === 0 && !loading" class="modern-table-empty">No plants found.</div>
 
+    <Pagination
+      :pagination="pagination"
+      @page-changed="handlePageChange"
+    />
+
     <!-- Delete Modal -->
     <div v-if="showDeleteModal" class="modal-overlay" @click="closeDeleteModal">
       <div class="modal-content" @click.stop>
@@ -51,8 +64,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { usePlants } from '@/composables/plants'
+import Pagination from '@/components/Pagination.vue'
 
 const {
     plants,
@@ -67,6 +81,16 @@ const {
     deletePlant
 } = usePlants()
 
+const search = ref('')
+let debounceTimer = null
+
+watch(search, () => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    getPlants(1, search.value)
+  }, 500)
+})
+
 // Modal states
 const showDeleteModal = ref(false)
 const selectedPlant = ref(null)
@@ -76,7 +100,7 @@ onMounted(async () => {
     console.log('Plants Index component mounted')
     try {
         await Promise.all([
-            getPlants(),
+            getPlants(1),
             getCategories(),
             getLanguages()
         ])
@@ -85,6 +109,15 @@ onMounted(async () => {
         console.error('Error loading data:', error)
     }
 })
+
+// Handle page change
+const handlePageChange = async (page) => {
+    try {
+        await getPlants(page, search.value)
+    } catch (error) {
+        console.error('Error fetching plants for page:', page, error)
+    }
+}
 
 // Modal functions
 const openDeleteModal = (plant) => {
@@ -101,7 +134,7 @@ const handleDelete = async () => {
     try {
         await deletePlant(selectedPlant.value.id)
         closeDeleteModal()
-        await getPlants()
+        await getPlants(pagination.value.current_page)
     } catch (error) {
         console.error('Failed to delete plant:', error)
     }
@@ -307,5 +340,19 @@ const handleDelete = async () => {
   border-radius: 0.5rem;
   cursor: pointer;
   font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.search-input {
+  padding: 0.6rem 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 1.2rem;
+  font-size: 1rem;
+  min-width: 250px;
 }
 </style> 

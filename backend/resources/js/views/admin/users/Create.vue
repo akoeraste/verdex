@@ -22,16 +22,6 @@
           <div class="modern-form-error" v-for="message in validationErrors?.password" :key="message">{{ message }}</div>
         </div>
         <div class="modern-form-group">
-          <label for="language_preference" class="modern-form-label">Language</label>
-          <select v-model="language_preference" id="language_preference" class="modern-form-input">
-            <option value="">Select Language</option>
-            <option value="en">English</option>
-            <option value="fr">French</option>
-          </select>
-          <div class="modern-form-error" v-if="errors.language_preference">{{ errors.language_preference }}</div>
-          <div class="modern-form-error" v-for="message in validationErrors?.language_preference" :key="message">{{ message }}</div>
-        </div>
-        <div class="modern-form-group">
           <label for="avatar" class="modern-form-label">Avatar</label>
           <input id="avatar" type="file" class="modern-form-input" @change="onAvatarChange">
           <img v-if="avatarPreview" :src="avatarPreview" alt="avatar preview" style="width:48px;height:48px;border-radius:50%;object-fit:cover;margin-top:8px;">

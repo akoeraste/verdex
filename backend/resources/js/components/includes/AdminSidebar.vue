@@ -16,19 +16,19 @@
           </div>
           <ul v-show="open === 'plant'" class="sidebar-dropdown">
             <li v-if="can('plant-list')">
-              <router-link to="/admin/plants" class="sidebar-link" active-class="active">
+              <router-link to="/admin/plants" class="sidebar-link" :class="{ active: route.path.startsWith('/admin/plants') }">
                 <span class="icon-wrap">🌿</span>
                 <span>Plants</span>
               </router-link>
             </li>
             <li>
-              <router-link to="/admin/plant-categories" class="sidebar-link" active-class="active">
+              <router-link to="/admin/plant-categories" class="sidebar-link" :class="{ active: route.path.startsWith('/admin/plant-categories') }">
                 <span class="icon-wrap">📁</span>
                 <span>Plant Categories</span>
               </router-link>
             </li>
             <li>
-              <router-link to="/admin/plant-translations" class="sidebar-link" active-class="active">
+              <router-link to="/admin/plant-translations" class="sidebar-link" :class="{ active: route.path.startsWith('/admin/plant-translations') }">
                 <span class="icon-wrap">🌍</span>
                 <span>Translations</span>
               </router-link>
@@ -43,19 +43,19 @@
           </div>
           <ul v-show="open === 'user'" class="sidebar-dropdown">
             <li v-if="can('user-list')">
-              <router-link to="/admin/users" class="sidebar-link" active-class="active">
+              <router-link to="/admin/users" class="sidebar-link" :class="{ active: route.path.startsWith('/admin/users') }">
                 <span class="icon-wrap">👤</span>
                 <span>Users</span>
               </router-link>
             </li>
             <li v-if="can('role-list') || can('permission-list')">
-              <router-link to="/admin/roles" class="sidebar-link" active-class="active">
+              <router-link to="/admin/roles" class="sidebar-link" :class="{ active: route.path.startsWith('/admin/roles') }">
                 <span class="icon-wrap">🧑‍💼</span>
                 <span>Roles</span>
               </router-link>
             </li>
             <li v-if="can('role-list') || can('permission-list')">
-              <router-link to="/admin/permissions" class="sidebar-link" active-class="active">
+              <router-link to="/admin/permissions" class="sidebar-link" :class="{ active: route.path.startsWith('/admin/permissions') }">
                 <span class="icon-wrap">🧑‍💼</span>
                 <span>Permissions</span>
               </router-link>
@@ -70,13 +70,13 @@
           </div>
           <ul v-show="open === 'settings'" class="sidebar-dropdown">
             <li>
-              <router-link to="/admin/languages" class="sidebar-link" active-class="active">
+              <router-link to="/admin/languages" class="sidebar-link" :class="{ active: route.path.startsWith('/admin/languages') }">
                 <span class="icon-wrap">🌐</span>
                 <span>Languages</span>
               </router-link>
             </li>
             <li>
-              <router-link to="/admin/backup" class="sidebar-link" active-class="active">
+              <router-link to="/admin/backup" class="sidebar-link" :class="{ active: route.path.startsWith('/admin/backup') }">
                 <span class="icon-wrap">📦</span>
                 <span>Backup & Restore</span>
               </router-link>
@@ -91,19 +91,19 @@
           </div>
           <ul v-show="open === 'analytics'" class="sidebar-dropdown">
             <li>
-              <router-link to="/admin/usage-stats" class="sidebar-link" active-class="active">
+              <router-link to="/admin/usage-stats" class="sidebar-link" :class="{ active: route.path.startsWith('/admin/usage-stats') }">
                 <span class="icon-wrap">📈</span>
                 <span>Usage Stats</span>
               </router-link>
             </li>
             <li>
-              <router-link to="/admin/search-trends" class="sidebar-link" active-class="active">
+              <router-link to="/admin/search-trends" class="sidebar-link" :class="{ active: route.path.startsWith('/admin/search-trends') }">
                 <span class="icon-wrap">🔎</span>
                 <span>Search Trends</span>
               </router-link>
             </li>
             <li>
-              <router-link to="/admin/activity-log-logs" class="sidebar-link" active-class="active">
+              <router-link to="/admin/activity-log-logs" class="sidebar-link" :class="{ active: route.path.startsWith('/admin/activity-log-logs') }">
                 <span class="icon-wrap">📝</span>
                 <span>Activity Log</span>
               </router-link>
@@ -116,13 +116,36 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { useAbility } from '@casl/vue';
 const { can } = useAbility();
+const route = useRoute();
 const open = ref(null);
+
 function toggle(section) {
   open.value = open.value === section ? null : section;
 }
+
+const setOpenSection = (path) => {
+  if (path.startsWith('/admin/plants') || path.startsWith('/admin/plant-categories') || path.startsWith('/admin/plant-translations')) {
+    open.value = 'plant';
+  } else if (path.startsWith('/admin/users') || path.startsWith('/admin/roles') || path.startsWith('/admin/permissions')) {
+    open.value = 'user';
+  } else if (path.startsWith('/admin/languages') || path.startsWith('/admin/backup')) {
+    open.value = 'settings';
+  } else if (path.startsWith('/admin/usage-stats') || path.startsWith('/admin/search-trends') || path.startsWith('/admin/activity-log-logs')) {
+    open.value = 'analytics';
+  }
+};
+
+watch(() => route.path, (newPath) => {
+  setOpenSection(newPath);
+});
+
+onMounted(() => {
+  setOpenSection(route.path);
+});
 </script>
 
 <style scoped>
@@ -144,6 +167,7 @@ function toggle(section) {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .sidebar-menu {

@@ -10,10 +10,10 @@
       <div class="navbar-actions">
         <div class="navbar-user" @click="toggleDropdown">
           <span class="navbar-user-greet clickable">Hi, {{ username }}</span>
-          <button class="navbar-dropdown-btn" :aria-expanded="showDropdown">&#x25BC;</button>
+          <img :src="avatarUrl" alt="Avatar" class="navbar-user-avatar" />
           <div class="navbar-dropdown-menu" v-show="showDropdown">
             <router-link :to="{ name: 'profile.index' }" class="navbar-dropdown-item">Profile</router-link>
-            <a class="navbar-dropdown-item" href="#">Setting</a>
+            <router-link :to="{ name: 'profile.settings' }" class="navbar-dropdown-item">Setting</router-link>
             <div class="navbar-dropdown-divider"></div>
             <a class="navbar-dropdown-item" :class="{ 'opacity-25': processing }" :disabled="processing" href="javascript:void(0)" @click="logout">Logout</a>
           </div>
@@ -46,6 +46,13 @@ const username = computed(() => {
     return 'User'; // Final fallback
 });
 
+const avatarUrl = computed(() => {
+    if (user.value && user.value.avatar) {
+        return user.value.avatar;
+    }
+    return 'https://via.placeholder.com/40'; // Default avatar
+});
+
 // Dropdown logic
 const showDropdown = ref(false);
 function toggleDropdown() { showDropdown.value = !showDropdown.value; }
@@ -67,10 +74,8 @@ function toggleDropdown() { showDropdown.value = !showDropdown.value; }
 }
 .navbar-inner {
   width: 100%;
-  max-width: 1400px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 2rem;
 }
 .navbar-brand-wrap {
@@ -112,6 +117,14 @@ function toggleDropdown() { showDropdown.value = !showDropdown.value; }
   gap: 0.7rem;
   cursor: pointer;
   margin-right: 0.5rem;
+}
+.navbar-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 .navbar-user-greet {
   font-weight: 600;

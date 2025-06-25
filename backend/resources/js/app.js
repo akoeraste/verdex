@@ -30,12 +30,12 @@ import ExampleComponent from './components/ExampleComponent.vue';
 
 app.component('example-component', ExampleComponent);
 
-app.use(pinia)
-app.use(router)
-app.use(VueSweetalert2)
-app.use(i18n)
-app.use(abilitiesPlugin, ability)
-app.component('Pagination', Bootstrap5Pagination)
+app.use(pinia);
+app.use(router);
+app.use(VueSweetalert2);
+app.use(i18n);
+app.use(abilitiesPlugin, ability);
+app.component('Pagination', Bootstrap5Pagination);
 app.component("v-select", vSelect);
 app.use(Toast);
 app.mount('#app')

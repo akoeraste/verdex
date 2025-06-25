@@ -1,5 +1,5 @@
 import { AbilityBuilder, createMongoAbility } from '@casl/ability'
 
-const { can, cannot, build } = new AbilityBuilder(createMongoAbility);
+const ability = createMongoAbility([]);
 
-export default build();
+export default ability;

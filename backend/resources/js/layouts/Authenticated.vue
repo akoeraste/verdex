@@ -1,16 +1,16 @@
 <template>
     <AdminNavbar />
-    <div class="d-flex align-items-stretch w-100">
-        <AdminSidebar />
-        <div class="container-fluid">
-            <Breadcrumb class="row justify-content-center mt-4" :crumbs="crumbs" @selected="selected" />
+    <div class="admin-layout">
+        <AdminSidebar class="sidebar" />
+        <div class="content-wrapper">
+            <Breadcrumb v-if="route.name !== 'admin.index'" class="row justify-content-center mt-4" :crumbs="crumbs" @selected="selected" />
             <!-- <h2 class="fw-semibold">
                 {{ crumbs }}
             </h2> -->
             <!-- Page Content -->
             <div class="main">
                 <Suspense>
-                <router-view></router-view>
+                    <router-view></router-view>
                 </Suspense>
             </div>
         </div>
@@ -59,6 +59,24 @@ function selected(crumb) {
 </script>
 
 <style scoped>
+.admin-layout {
+    display: flex;
+    height: calc(100vh - 56px); /* Adjust based on navbar height */
+}
+
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh; /* Make sidebar full height */
+    overflow-y: auto; /* Allow scrolling within the sidebar if content overflows */
+}
+
+.content-wrapper {
+    flex-grow: 1;
+    overflow-y: auto; /* Allow content to scroll */
+    padding: 20px;
+}
+
 .navbar-brand {
     padding-top: .2rem;
     padding-bottom: .2rem;

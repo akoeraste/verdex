@@ -256,7 +256,8 @@ async function saveTranslation() {
 
     if (translation?.id) {
       // Update existing translation
-      response = await axios.put(`/api/plants/${plant.value.id}/translations/${translation.id}`, formDataToSend, {
+      formDataToSend.append('_method', 'PUT')
+      response = await axios.post(`/api/plants/${plant.value.id}/translations/${translation.id}`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

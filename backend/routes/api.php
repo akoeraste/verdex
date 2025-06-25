@@ -30,6 +30,7 @@ Route::group(['middleware' => 'auth:web'], function() {
     Route::get('category-list', [CategoryController::class, 'getList']);
     Route::get('/user', [ProfileController::class, 'user']);
     Route::put('/user', [ProfileController::class, 'update']);
+    Route::post('/change-password', [ProfileController::class, 'changePassword']);
 
     // Browser Sessions
     Route::get('browser-sessions', [BrowserSessionController::class, 'index']);

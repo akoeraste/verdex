@@ -14,9 +14,26 @@ use Illuminate\Support\Facades\DB;
 
 class PlantController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $plants = Plant::with(['plantCategory', 'translations'])->paginate(50);
+        $query = Plant::with(['plantCategory', 'translations']);
+
+        if ($request->has('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('scientific_name', 'like', "%{$searchTerm}%")
+                    ->orWhere('family', 'like', "%{$searchTerm}%")
+                    ->orWhere('genus', 'like', "%{$searchTerm}%")
+                    ->orWhere('species', 'like', "%{$searchTerm}%")
+                    ->orWhereHas('translations', function ($translationQuery) use ($searchTerm) {
+                        $translationQuery->where('common_name', 'like', "%{$searchTerm}%")
+                            ->orWhere('description', 'like', "%{$searchTerm}%")
+                            ->orWhere('uses', 'like', "%{$searchTerm}%");
+                    });
+            });
+        }
+
+        $plants = $query->paginate(50);
         return PlantResource::collection($plants);
     }
 

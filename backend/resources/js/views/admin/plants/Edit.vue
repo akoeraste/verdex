@@ -18,21 +18,6 @@
 
     <!-- Form -->
     <div v-if="plant" class="form-container">
-      <!-- Debug section -->
-      <div class="debug-section" style="background: #f0f0f0; padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem;">
-        <h4>Debug Info</h4>
-        <p><strong>Plant ID:</strong> {{ plantId }}</p>
-        <p><strong>Plant Loaded:</strong> {{ plant ? 'Yes' : 'No' }}</p>
-        <p><strong>Form Data Scientific Name:</strong> {{ formData.scientific_name || 'EMPTY' }}</p>
-        <p><strong>Form Data Category ID:</strong> {{ formData.plant_category_id || 'EMPTY' }}</p>
-        <p><strong>Translations Count:</strong> {{ formData.translations.length }}</p>
-        <button @click="debugFormData" type="button" style="background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.25rem; margin-right: 0.5rem;">
-          Debug Form Data
-        </button>
-        <button @click="reloadPlantData" type="button" style="background: #28a745; color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.25rem;">
-          Reload Plant Data
-        </button>
-      </div>
 
       <form @submit.prevent="handleSubmit">
         <!-- Basic Plant Information -->

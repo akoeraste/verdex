@@ -1,7 +1,7 @@
 <template>
   <main class="dashboard-content">
     <section class="dashboard-header">
-      <h1 class="dashboard-title">Welcome back, {{ userName }}!</h1>
+      <h1 class="dashboard-title">Welcome, {{ username }}!</h1>
       <p class="dashboard-subtitle">Here's a quick overview of your system today.</p>
     </section>
     <section class="dashboard-stats">
@@ -38,12 +38,15 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useAuthStore } from '@/store/auth';
 
 const router = useRouter();
-const userName = 'Admin'; // Replace with actual user data
+const auth = useAuthStore();
+const username = computed(() => auth.user?.username || 'Admin');
+
 const stats = ref([
   { label: 'Total Plants', value: 0, icon: 'bi bi-flower1', bg: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', link: '/admin/plants' },
   { label: 'Users', value: 0, icon: 'bi bi-people', bg: 'linear-gradient(135deg, #fa8bff 0%, #2bd2ff 100%)', link: '/admin/users' },
@@ -137,7 +140,7 @@ function goTo(link) {
   margin-bottom: 2rem;
 }
 .dashboard-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #22223b;
   margin-bottom: 0.5rem;

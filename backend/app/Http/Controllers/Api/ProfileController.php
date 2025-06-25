@@ -7,22 +7,50 @@ use App\Http\Requests\UpdateProfileRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
     /**
      * @throws ValidationException
      */
-    public function update(UpdateProfileRequest $request)
+    public function update(Request $request)
     {
-        $profile = Auth::user();
-        $profile->name = $request->name;
-        $profile->email = $request->email;
+        $user = Auth::user();
 
-        if ($profile->save()) {
-            return $this->successResponse($profile, 'User updated');;
+        $validatedData = $request->validate([
+            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'language_preference' => 'nullable|string|max:10',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = '/storage/' . $avatarPath;
         }
-        return response()->json(['status' => 403, 'success' => false]);
+
+        $user->username = $validatedData['username'];
+        $user->email = $validatedData['email'];
+        $user->language_preference = $validatedData['language_preference'];
+        
+        $user->save();
+
+        return response()->json($user);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|current_password',
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = Auth::user();
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json(['message' => 'Password changed successfully.']);
     }
 
     public function user(Request $request)

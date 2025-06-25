@@ -23,12 +23,16 @@ export function usePlants() {
     })
 
     // Get all plants
-    const getPlants = async (page = 1) => {
+    const getPlants = async (page = 1, search = '') => {
         loading.value = true
         error.value = null
         try {
             console.log('Fetching plants from API...')
-            const response = await axios.get(`/api/plants?page=${page}`)
+            let url = `/api/plants?page=${page}`
+            if (search) {
+                url += `&search=${search}`
+            }
+            const response = await axios.get(url)
             console.log('API Response:', response.data)
             plants.value = response.data.data
             pagination.value = {
@@ -199,11 +203,14 @@ export function usePlants() {
                     data.append(`translations[${index}][audio_file]`, translation.audio_file)
                 }
             })
+            // Add method spoofing for PUT request
+            data.append('_method', 'PUT');
+
             // Log the actual FormData contents
             for (let [key, value] of data.entries()) {
                 console.log('FormData entry:', key, value)
             }
-            const response = await axios.put(`/api/plants/${id}`, data, {
+            const response = await axios.post(`/api/plants/${id}`, data, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }

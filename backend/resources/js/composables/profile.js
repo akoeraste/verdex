@@ -29,16 +29,38 @@ export default function useProfile() {
         isLoading.value = true
         validationErrors.value = {}
 
-        axios.put('/api/user', profile)
+        axios.post('/api/user', profile, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
             .then(({data}) => {
-                if (data.success) {
-                    store.user = data.data
-                    // router.push({name: 'profile.index'})
-                    swal({
-                        icon: 'success',
-                        title: 'Profile updated successfully'
-                    })
+                store.user = data
+                swal({
+                    icon: 'success',
+                    title: 'Profile updated successfully'
+                })
+            })
+            .catch(error => {
+                if (error.response?.data) {
+                    validationErrors.value = error.response.data.errors
                 }
+            })
+            .finally(() => isLoading.value = false)
+    }
+
+    const changePassword = async (passwords) => {
+        if (isLoading.value) return;
+
+        isLoading.value = true
+        validationErrors.value = {}
+
+        return axios.post('/api/change-password', passwords)
+            .then(() => {
+                swal({
+                    icon: 'success',
+                    title: 'Password changed successfully'
+                })
             })
             .catch(error => {
                 if (error.response?.data) {
@@ -52,6 +74,7 @@ export default function useProfile() {
         profile,
         getProfile,
         updateProfile,
+        changePassword,
         validationErrors,
         isLoading
     }
