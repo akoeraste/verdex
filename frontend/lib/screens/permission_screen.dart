@@ -3,9 +3,22 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:verdex/screens/welcome_screen.dart';
 import '../services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key});
+
+  // Call this before showing the screen to check if it should be shown
+  static Future<bool> shouldShow() async {
+    final prefs = await SharedPreferences.getInstance();
+    return !(prefs.getBool('permissions_screen_shown') ?? false);
+  }
+
+  // Call this after showing the screen to mark it as shown
+  static Future<void> markShown() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('permissions_screen_shown', true);
+  }
 
   @override
   State<PermissionScreen> createState() => _PermissionScreenState();
@@ -13,75 +26,50 @@ class PermissionScreen extends StatefulWidget {
 
 class _PermissionScreenState extends State<PermissionScreen> {
   bool _requested = false;
-  String? _errorMessage;
 
-  Future<void> _requestPermissions() async {
+  Future<void> _grantPermissionsAndContinue() async {
     setState(() {
       _requested = true;
-      _errorMessage = null;
     });
-    final statusMap =
-        await [
-          Permission.camera,
-          Permission.photos,
-          Permission.storage,
-        ].request();
-    final allGranted = statusMap.values.every((status) => status.isGranted);
-    if (allGranted) {
-      _navigateToNextScreen();
+    final permissions = [
+      Permission.camera,
+      Permission.photos,
+      Permission.storage,
+    ];
+    final statusMap = await permissions.request();
+    final anyPermanentlyDenied = statusMap.values.any(
+      (status) => status.isPermanentlyDenied,
+    );
+    await PermissionScreen.markShown();
+    if (anyPermanentlyDenied) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Some permissions are permanently denied. Please enable them in app settings.',
+            ),
+          ),
+        );
+        await openAppSettings();
+      }
     } else {
-      setState(() {
-        _errorMessage = 'permissionRequestError'.tr();
-      });
+      _navigateToNextScreen();
     }
   }
 
   void _navigateToNextScreen() async {
-    // Check if the user is properly authenticated before proceeding.
     final user = AuthService.currentUser;
     final hasUsername =
         user != null && (user['username']?.toString().isNotEmpty ?? false);
-
     if (mounted) {
       if (hasUsername) {
-        // If logged in, go to the main app.
         Navigator.of(context).pushReplacementNamed('/home');
       } else {
-        // Otherwise, go to the welcome screen.
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const WelcomeScreen()),
         );
       }
     }
-  }
-
-  void _showPermissionDialog({required bool permanentlyDenied}) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('permissions_dialog_title'.tr()),
-            content: Text(
-              permanentlyDenied
-                  ? 'permissions_dialog_permanently_denied'.tr()
-                  : 'permissions_dialog_denied'.tr(),
-            ),
-            actions: [
-              if (permanentlyDenied)
-                TextButton(
-                  onPressed: () {
-                    openAppSettings();
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('permissions_dialog_open_settings'.tr()),
-                ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('ok'.tr()),
-              ),
-            ],
-          ),
-    );
   }
 
   @override
@@ -118,20 +106,9 @@ class _PermissionScreenState extends State<PermissionScreen> {
                 height: 1.5,
               ),
             ),
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 20),
-              Text(
-                _errorMessage!,
-                style: const TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
             const Spacer(flex: 3),
             ElevatedButton(
-              onPressed: _requestPermissions,
+              onPressed: _requested ? null : _grantPermissionsAndContinue,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -141,20 +118,12 @@ class _PermissionScreenState extends State<PermissionScreen> {
                 elevation: 5,
               ),
               child: Text(
-                'ok'.tr(),
+                'continue'.tr(),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextButton(
-              onPressed: _navigateToNextScreen,
-              child: Text(
-                'skipButton'.tr(),
-                style: TextStyle(color: Colors.grey[600]),
               ),
             ),
             const Spacer(),
