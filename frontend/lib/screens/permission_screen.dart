@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:verdex/screens/welcome_screen.dart';
+import '../services/auth_service.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key});
@@ -11,27 +12,47 @@ class PermissionScreen extends StatefulWidget {
 }
 
 class _PermissionScreenState extends State<PermissionScreen> {
+  bool _requested = false;
+  String? _errorMessage;
+
   Future<void> _requestPermissions() async {
-    final statusMap = await [Permission.camera, Permission.photos].request();
+    setState(() {
+      _requested = true;
+      _errorMessage = null;
+    });
+    final statusMap =
+        await [
+          Permission.camera,
+          Permission.photos,
+          Permission.storage,
+        ].request();
     final allGranted = statusMap.values.every((status) => status.isGranted);
     if (allGranted) {
       _navigateToNextScreen();
     } else {
-      final anyPermanentlyDenied = statusMap.values.any(
-        (status) => status.isPermanentlyDenied,
-      );
-      if (anyPermanentlyDenied) {
-        _showPermissionDialog(permanentlyDenied: true);
-      } else {
-        _showPermissionDialog(permanentlyDenied: false);
-      }
+      setState(() {
+        _errorMessage = 'permissionRequestError'.tr();
+      });
     }
   }
 
-  void _navigateToNextScreen() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-    );
+  void _navigateToNextScreen() async {
+    // Check if the user is properly authenticated before proceeding.
+    final user = AuthService.currentUser;
+    final hasUsername =
+        user != null && (user['username']?.toString().isNotEmpty ?? false);
+
+    if (mounted) {
+      if (hasUsername) {
+        // If logged in, go to the main app.
+        Navigator.of(context).pushReplacementNamed('/home');
+      } else {
+        // Otherwise, go to the welcome screen.
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+        );
+      }
+    }
   }
 
   void _showPermissionDialog({required bool permanentlyDenied}) {
@@ -88,7 +109,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
             ),
             const SizedBox(height: 15),
             Text(
-              'permissions_subtitle'.tr(),
+              'permissionsRequiredBody'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Poppins',
@@ -97,6 +118,17 @@ class _PermissionScreenState extends State<PermissionScreen> {
                 height: 1.5,
               ),
             ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 20),
+              Text(
+                _errorMessage!,
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
             const Spacer(flex: 3),
             ElevatedButton(
               onPressed: _requestPermissions,
@@ -109,8 +141,8 @@ class _PermissionScreenState extends State<PermissionScreen> {
                 elevation: 5,
               ),
               child: Text(
-                'permissions_button'.tr(),
-                style: const TextStyle(
+                'ok'.tr(),
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -121,7 +153,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
             TextButton(
               onPressed: _navigateToNextScreen,
               child: Text(
-                'permissions_skip'.tr(),
+                'skipButton'.tr(),
                 style: TextStyle(color: Colors.grey[600]),
               ),
             ),

@@ -5,7 +5,7 @@
         <p class="login-welcome"><strong>Welcome back!</strong> <br> Please sign In.</p>
         <form @submit.prevent="submitLogin" class="login-form">
           <div class="login-field">
-            <label for="login" class="login-label">{{ $t('email_or_username') }}</label>
+            <label for="login" class="login-label">Username</label>
             <input v-model="loginForm.login" id="login" type="text" class="login-input" autofocus autocomplete="username" />
             <div class="login-error" v-if="validationErrors?.login">
               <div v-for="message in validationErrors.login" :key="message">{{ message }}</div>

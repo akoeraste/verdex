@@ -19,22 +19,14 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         $validatedData = $request->validate([
-            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'language_preference' => 'nullable|string|max:10',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($request->hasFile('avatar')) {
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
             $user->avatar = '/storage/' . $avatarPath;
+            $user->save();
         }
-
-        $user->username = $validatedData['username'];
-        $user->email = $validatedData['email'];
-        $user->language_preference = $validatedData['language_preference'];
-        
-        $user->save();
 
         return response()->json($user);
     }

@@ -35,10 +35,60 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
     setState(() => _isLoading = true);
     final authService = AuthService();
-    final success = await authService.sendPasswordReset(email);
+    final success = await authService.sendTempPassword(email);
     setState(() => _isLoading = false);
     if (success) {
-      if (mounted) Navigator.pop(context);
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                title: Text(
+                  'success'.tr(),
+                  style: TextStyle(
+                    color: Color(0xFF2E7D32), // Verdex green
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                  ),
+                ),
+                content: Text(
+                  'reset_email_sent'.tr(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[800],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Color(0xFF4CAF50), // Verdex green
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 10,
+                      ),
+                      textStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close dialog
+                      Navigator.of(context).pop(); // Pop forgot password screen
+                    },
+                    child: Text('ok'.tr()),
+                  ),
+                ],
+              ),
+        );
+      }
     } else {
       setState(() => _emailError = 'reset_failed'.tr());
     }

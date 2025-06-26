@@ -14,15 +14,36 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'login' => 'required|string',
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $login = $request->login;
+        $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $user = User::where($field, $login)->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        if (! $user) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are not correct.'],
+                'login' => ['The provided credentials are not correct.'],
+            ]);
+        }
+
+        $usedTempPass = false;
+        // Check if temp_pass is set and not expired
+        if ($user->temp_pass && $user->temp_pass_created_at && now()->diffInMinutes($user->temp_pass_created_at) <= 60) {
+            if (Hash::check($request->password, $user->temp_pass)) {
+                $usedTempPass = true;
+                // Clear temp_pass after use
+                $user->temp_pass = null;
+                $user->temp_pass_created_at = null;
+                $user->save();
+            }
+        }
+
+        // If not using temp_pass, check main password
+        if (!$usedTempPass && !Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'login' => ['The provided credentials are not correct.'],
             ]);
         }
 
@@ -31,7 +52,8 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user
+            'user' => $user,
+            'used_temp_pass' => $usedTempPass,
         ]);
     }
 
@@ -45,15 +67,27 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|min:6|max:255|unique:users,username',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => [
+                'required',
+                'string',
+                'min:6',
+                'confirmed',
+                'regex:/[A-Z]/', // at least one capital letter
+                'regex:/[0-9]/', // at least one number
+            ],
+        ], [
+            'name.min' => 'Username must be at least 6 characters.',
+            'name.unique' => 'Username already taken.',
+            'password.regex' => 'Password must contain at least one number and one capital letter.',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
+            'username' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'avatar' => '/storage/avatars/default.png',
         ]);
 
         $token = $user->createToken('auth-token')->plainTextToken;

@@ -11,8 +11,11 @@ return new class extends Migration
         Schema::create('feedback', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->foreignId('plant_id')->constrained('plants')->onDelete('cascade');
-            $table->boolean('is_correct');
+            $table->foreignId('plant_id')->nullable()->constrained('plants')->onDelete('cascade');
+            $table->string('category')->nullable();
+            $table->integer('rating')->nullable();
+            $table->text('message')->nullable();
+            $table->string('contact')->nullable();
             $table->text('comment')->nullable();
             $table->timestamps();
         });

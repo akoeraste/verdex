@@ -8,6 +8,7 @@ import 'login_screen.dart';
 import 'main_screen.dart';
 import 'permission_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'welcome_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   final bool permissionsGranted;
@@ -25,27 +26,45 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    await Future.delayed(const Duration(seconds: 2));
-    final prefs = await SharedPreferences.getInstance();
-    final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
-    if (mounted) {
-      if (!onboardingCompleted) {
+    print('Splash: Starting initialization');
+    try {
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Initialize user data from token
+      await AuthService().initializeUser();
+      final user = AuthService.currentUser;
+      final hasUsername =
+          user != null && (user['username']?.toString().isNotEmpty ?? false);
+
+      final prefs = await SharedPreferences.getInstance();
+      final onboardingCompleted =
+          prefs.getBool('onboarding_completed') ?? false;
+      print('Splash: Onboarding completed? $onboardingCompleted');
+      if (mounted) {
+        if (!hasUsername) {
+          print('Splash: No valid user, redirecting to WelcomeScreen');
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+          );
+        } else if (!onboardingCompleted) {
+          print('Splash: Navigating to OnboardingScreen');
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+          );
+        } else {
+          print('Splash: Navigating to PermissionScreen');
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const PermissionScreen()),
+          );
+        }
+      }
+    } catch (e, stack) {
+      print('Splash: Error during initialization: $e');
+      print(stack);
+      if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const OnboardingScreen()),
         );
-      } else {
-        // Check authentication
-        final authService = AuthService();
-        final loggedIn = await authService.isLoggedIn();
-        if (loggedIn) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const MainScreen()),
-          );
-        } else {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-          );
-        }
       }
     }
   }

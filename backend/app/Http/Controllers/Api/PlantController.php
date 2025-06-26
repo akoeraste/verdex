@@ -37,6 +37,41 @@ class PlantController extends Controller
         return PlantResource::collection($plants);
     }
 
+    /**
+     * Get all plants for Flutter app (no pagination)
+     */
+    public function getAllForApp()
+    {
+        $plants = Plant::with(['plantCategory', 'translations'])->get();
+        return PlantResource::collection($plants);
+    }
+
+    /**
+     * Search plants for Flutter app (no pagination)
+     */
+    public function searchForApp(Request $request)
+    {
+        $query = Plant::with(['plantCategory', 'translations']);
+
+        if ($request->has('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('scientific_name', 'like', "%{$searchTerm}%")
+                    ->orWhere('family', 'like', "%{$searchTerm}%")
+                    ->orWhere('genus', 'like', "%{$searchTerm}%")
+                    ->orWhere('species', 'like', "%{$searchTerm}%")
+                    ->orWhereHas('translations', function ($translationQuery) use ($searchTerm) {
+                        $translationQuery->where('common_name', 'like', "%{$searchTerm}%")
+                            ->orWhere('description', 'like', "%{$searchTerm}%")
+                            ->orWhere('uses', 'like', "%{$searchTerm}%");
+                    });
+            });
+        }
+
+        $plants = $query->get();
+        return PlantResource::collection($plants);
+    }
+
     public function store(StorePlantRequest $request)
     {
         // Comprehensive debugging
@@ -625,5 +660,82 @@ class PlantController extends Controller
                 'details' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Sync: Download all plants (flat, basic fields only)
+     */
+    public function syncDownload()
+    {
+        $plants = Plant::with(['plantCategory', 'translations'])->get();
+        
+        $plants = $plants->map(function ($plant) {
+            // Get English translation for common name
+            $englishTranslation = $plant->translations->where('language_code', 'en')->first();
+            $commonName = $englishTranslation ? $englishTranslation->common_name : $plant->scientific_name;
+            
+            return [
+                'id' => $plant->id,
+                'scientific_name' => $plant->scientific_name,
+                'name' => $commonName,
+                'description' => $englishTranslation ? $englishTranslation->description : '',
+                'family' => $plant->family ?? '',
+                'category' => $plant->plantCategory ? $plant->plantCategory->name : '',
+                'genus' => $plant->genus ?? '',
+                'species' => $plant->species ?? '',
+                'toxicity_level' => $plant->toxicity_level ?? '',
+                'uses' => $englishTranslation ? $englishTranslation->uses : '',
+                'tags' => [], // Tags not implemented in backend yet
+                'image_url' => $plant->image_urls && count($plant->image_urls) > 0 ? $plant->image_urls[0] : '',
+                'created_at' => $plant->created_at,
+                'updated_at' => $plant->updated_at,
+            ];
+        });
+        return response()->json($plants);
+    }
+
+    /**
+     * Sync: Upload plants (basic fields only)
+     */
+    public function syncUpload(Request $request)
+    {
+        $plants = $request->input('plants', []);
+        foreach ($plants as $plantData) {
+            $plant = Plant::find($plantData['id']) ?? new Plant();
+            $plant->id = $plantData['id'];
+            $plant->scientific_name = $plantData['scientific_name'] ?? $plantData['name'] ?? '';
+            $plant->family = $plantData['family'] ?? '';
+            $plant->genus = $plantData['genus'] ?? '';
+            $plant->species = $plantData['species'] ?? '';
+            $plant->toxicity_level = $plantData['toxicity_level'] ?? '';
+            
+            // Handle category mapping
+            if (isset($plantData['category']) && $plantData['category']) {
+                $category = PlantCategory::where('name', $plantData['category'])->first();
+                $plant->plant_category_id = $category ? $category->id : null;
+            }
+            
+            $plant->save();
+            
+            // Handle translations if provided
+            if (isset($plantData['description']) || isset($plantData['uses'])) {
+                $englishTranslation = $plant->translations()->where('language_code', 'en')->first();
+                if ($englishTranslation) {
+                    $englishTranslation->update([
+                        'common_name' => $plantData['name'] ?? $plant->scientific_name,
+                        'description' => $plantData['description'] ?? $englishTranslation->description,
+                        'uses' => $plantData['uses'] ?? $englishTranslation->uses,
+                    ]);
+                } else {
+                    $plant->translations()->create([
+                        'language_code' => 'en',
+                        'common_name' => $plantData['name'] ?? $plant->scientific_name,
+                        'description' => $plantData['description'] ?? '',
+                        'uses' => $plantData['uses'] ?? '',
+                    ]);
+                }
+            }
+        }
+        return response()->json(['success' => true]);
     }
 } 

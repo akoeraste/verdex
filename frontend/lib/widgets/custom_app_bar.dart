@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget {
@@ -33,9 +34,9 @@ class CustomAppBar extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Verdex',
-                style: TextStyle(
+              Text(
+                'app_name'.tr(),
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF2E7D32),

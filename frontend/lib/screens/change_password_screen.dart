@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../services/auth_service.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -19,6 +20,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
   bool _isPasswordValid = false;
+
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -81,10 +84,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
     if (!_isPasswordValid) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Please ensure your new password meets all requirements',
-          ),
+        SnackBar(
+          content: Text('passwordRequirementsNotMet'.tr()),
           backgroundColor: Colors.red,
         ),
       );
@@ -95,22 +96,31 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       _isLoading = true;
     });
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
+    final result = await _authService.changePassword(
+      currentPassword: _currentPasswordController.text,
+      newPassword: _newPasswordController.text,
+      newPasswordConfirmation: _confirmPasswordController.text,
+    );
 
     if (mounted) {
       setState(() {
         _isLoading = false;
       });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('password_changed'.tr()),
-          backgroundColor: Color(0xFF4CAF50),
-        ),
-      );
-
-      Navigator.pop(context);
+      if (result['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('password_changed'.tr()),
+            backgroundColor: const Color(0xFF4CAF50),
+          ),
+        );
+        Navigator.pop(context);
+      } else {
+        String errorMsg =
+            result['message']?.toString() ?? 'failedToChangePassword'.tr();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -204,7 +214,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your current password';
+                              return 'enter_current_password'.tr();
                             }
                             return null;
                           },
@@ -223,10 +233,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter a new password';
+                              return 'enter_new_password'.tr();
                             }
                             if (!_isPasswordValid) {
-                              return 'Password does not meet requirements';
+                              return 'password_does_not_meet_requirements'.tr();
                             }
                             return null;
                           },
@@ -252,10 +262,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please confirm your new password';
+                              return 'confirmNewPasswordPrompt'.tr();
                             }
                             if (value != _newPasswordController.text) {
-                              return 'Passwords do not match';
+                              return 'passwords_do_not_match'.tr();
                             }
                             return null;
                           },
@@ -291,7 +301,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                       ),
                                     )
                                     : Text(
-                                      'Change Password',
+                                      'changePasswordButton'.tr(),
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
@@ -370,8 +380,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Password Strength:',
+            Text(
+              'passwordStrength'.tr(),
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
             Text(
@@ -414,8 +424,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Password Requirements:',
+          Text(
+            'passwordRequirements'.tr(),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -423,21 +433,21 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          _buildRequirement('At least 8 characters', password.length >= 8),
+          _buildRequirement('atLeast8Chars'.tr(), password.length >= 8),
           _buildRequirement(
-            'At least one uppercase letter',
+            'atLeastOneUppercase'.tr(),
             password.contains(RegExp(r'[A-Z]')),
           ),
           _buildRequirement(
-            'At least one lowercase letter',
+            'atLeastOneLowercase'.tr(),
             password.contains(RegExp(r'[a-z]')),
           ),
           _buildRequirement(
-            'At least one number',
+            'atLeastOneNumber'.tr(),
             password.contains(RegExp(r'[0-9]')),
           ),
           _buildRequirement(
-            'At least one special character',
+            'atLeastOneSpecialChar'.tr(),
             password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]')),
           ),
         ],

@@ -57,11 +57,15 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
     // Use AuthService for real login
     final authService = AuthService();
-    final success = await authService.login(login, password);
-    if (success) {
+    final result = await authService.login(login, password);
+    if (result['success'] == true) {
       if (mounted) {
         setState(() => _isLoading = false);
-        Navigator.of(context).pushReplacementNamed('/home');
+        if (result['usedTempPass'] == true) {
+          Navigator.of(context).pushReplacementNamed('/change-password');
+        } else {
+          Navigator.of(context).pushReplacementNamed('/home');
+        }
       }
     } else {
       setState(() {

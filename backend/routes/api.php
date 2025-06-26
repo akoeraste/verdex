@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 
 Route::post('forget-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('forget.password.post');
 Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('password.reset');
+Route::post('send-temp-password', [ForgotPasswordController::class, 'sendTempPassword']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
@@ -67,7 +68,24 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 
     // Database backup
     Route::get('backup/download', [\App\Http\Controllers\Api\BackupController::class, 'download']);
+
+    // Plant sync endpoints
+    Route::get('plants/sync', [\App\Http\Controllers\Api\PlantController::class, 'syncDownload']);
+    Route::post('plants/sync', [\App\Http\Controllers\Api\PlantController::class, 'syncUpload']);
+
+    // Unified sync endpoints
+    Route::get('sync/all', [\App\Http\Controllers\Api\SyncController::class, 'allDownload']);
+    Route::post('sync/all', [\App\Http\Controllers\Api\SyncController::class, 'allUpload']);
+
+    // Favorites
+    Route::get('favorites', [\App\Http\Controllers\Api\FavoriteController::class, 'index']);
+    Route::post('favorites', [\App\Http\Controllers\Api\FavoriteController::class, 'store']);
+    Route::delete('favorites/{plant_id}', [\App\Http\Controllers\Api\FavoriteController::class, 'destroy']);
+    Route::get('favorites/{plant_id}', [\App\Http\Controllers\Api\FavoriteController::class, 'show']);
 });
+
+// Feedback route for unauthenticated users
+Route::post('feedback', [\App\Http\Controllers\Api\FeedbackController::class, 'store']);
 
 Route::get('category-list', [CategoryController::class, 'getList']);
 Route::get('get-posts', [PostController::class, 'getPosts']);
@@ -75,3 +93,7 @@ Route::get('get-category-posts/{id}', [PostController::class, 'getCategoryByPost
 Route::get('get-post/{id}', [PostController::class, 'getPost']);
 
 Route::get('dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class, 'stats']);
+
+// Public plant endpoints for Flutter app
+Route::get('plants/app/all', [\App\Http\Controllers\Api\PlantController::class, 'getAllForApp']);
+Route::get('plants/app/search', [\App\Http\Controllers\Api\PlantController::class, 'searchForApp']);

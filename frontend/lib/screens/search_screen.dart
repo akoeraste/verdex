@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:verdex/services/plant_service.dart';
+import 'package:verdex/screens/plant_details_screen.dart';
+import '../widgets/bottom_nav_bar.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -10,19 +13,20 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedFilter = 'all'.tr();
+  final PlantService _plantService = PlantService();
+  String _selectedFilter = 'all';
   bool _isSearching = false;
   List<Map<String, dynamic>> _searchResults = [];
   List<Map<String, dynamic>> _searchHistory = [];
 
   final List<String> _filterOptions = [
-    'all'.tr(),
-    'fruits'.tr(),
-    'vegetables'.tr(),
-    'herbs'.tr(),
-    'flowers'.tr(),
-    'trees'.tr(),
-    'medicinal'.tr(),
+    'all',
+    'fruits',
+    'vegetables',
+    'herbs',
+    'flowers',
+    'trees',
+    'medicinal',
   ];
 
   @override
@@ -40,7 +44,7 @@ class _SearchScreenState extends State<SearchScreen> {
     ];
   }
 
-  void _performSearch(String query) {
+  void _performSearch(String query) async {
     if (query.isEmpty) {
       setState(() {
         _searchResults = [];
@@ -53,40 +57,39 @@ class _SearchScreenState extends State<SearchScreen> {
       _isSearching = true;
     });
 
-    // Simulate API call
-    Future.delayed(const Duration(milliseconds: 800), () {
+    try {
+      final results = await _plantService.searchPlants(query);
+
       if (mounted) {
         setState(() {
           _isSearching = false;
           _searchResults =
-              [
-                {
-                  'name': 'Apple',
-                  'scientificName': 'Malus domestica',
-                  'type': 'Fruit',
-                  'image': 'assets/images/apple.png',
-                },
-                {
-                  'name': 'Banana',
-                  'scientificName': 'Musa acuminata',
-                  'type': 'Fruit',
-                  'image': 'assets/images/banana.png',
-                },
-                {
-                  'name': 'Pear',
-                  'scientificName': 'Pyrus communis',
-                  'type': 'Fruit',
-                  'image': 'assets/images/pear.png',
-                },
-              ].where((plant) {
-                if (_selectedFilter != 'All') {
-                  return plant['type'] == _selectedFilter;
+              results.where((plant) {
+                if (_selectedFilter != 'all') {
+                  return plant['category']?.toString().toLowerCase() ==
+                      _selectedFilter.toLowerCase();
                 }
                 return true;
               }).toList();
         });
       }
-    });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSearching = false;
+          _searchResults = [];
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'searchFailed'.tr(namedArgs: {'error': e.toString()}),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _onFilterChanged(String filter) {
@@ -204,7 +207,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     return Container(
                       margin: const EdgeInsets.only(right: 12),
                       child: FilterChip(
-                        label: Text(filter),
+                        label: Text(filter.tr()),
                         selected: isSelected,
                         onSelected: (selected) => _onFilterChanged(filter),
                         backgroundColor: Colors.white,
@@ -242,19 +245,31 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: BottomNavBar(
+        selectedIndex: 1,
+        onTabSelected: (index) {
+          if (index == 0) {
+            Navigator.pushReplacementNamed(context, '/home');
+          } else if (index == 1) {
+            // Already here
+          } else if (index == 2) {
+            Navigator.pushReplacementNamed(context, '/settings');
+          }
+        },
+      ),
     );
   }
 
   Widget _buildResultsContent() {
     if (_isSearching) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(color: Color(0xFF4CAF50)),
             SizedBox(height: 16),
             Text(
-              'Searching...',
+              'searching'.tr(),
               style: TextStyle(color: Color(0xFF2E7D32), fontSize: 16),
             ),
           ],
@@ -275,15 +290,15 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildSearchHistory() {
     if (_searchHistory.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search, size: 64, color: Color(0xFF4CAF50)),
-            SizedBox(height: 16),
+            const Icon(Icons.search, size: 64, color: Color(0xFF4CAF50)),
+            const SizedBox(height: 16),
             Text(
-              'Search for plants to identify',
-              style: TextStyle(
+              'searchForPlantsToIdentify'.tr(),
+              style: const TextStyle(
                 color: Color(0xFF2E7D32),
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
@@ -297,9 +312,9 @@ class _SearchScreenState extends State<SearchScreen> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       children: [
-        const Text(
-          'Recent Searches',
-          style: TextStyle(
+        Text(
+          'recent_searches'.tr(),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Color(0xFF2E7D32),
@@ -328,14 +343,14 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildNoResults() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.search_off, size: 64, color: Color(0xFF4CAF50)),
           SizedBox(height: 16),
           Text(
-            'No plants found',
+            'no_plants_found'.tr(),
             style: TextStyle(
               color: Color(0xFF2E7D32),
               fontSize: 18,
@@ -344,7 +359,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           SizedBox(height: 8),
           Text(
-            'Try different keywords or filters',
+            'tryDifferentKeywords'.tr(),
             style: TextStyle(color: Colors.grey, fontSize: 14),
           ),
         ],
@@ -364,7 +379,17 @@ class _SearchScreenState extends State<SearchScreen> {
       itemCount: _searchResults.length,
       itemBuilder: (context, index) {
         final plant = _searchResults[index];
-        return _buildPlantCard(plant);
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PlantDetailsScreen(plant: plant),
+              ),
+            );
+          },
+          child: _buildPlantCard(plant),
+        );
       },
     );
   }
@@ -384,11 +409,35 @@ class _SearchScreenState extends State<SearchScreen> {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
-                image: DecorationImage(
-                  image: AssetImage(plant['image']),
-                  fit: BoxFit.cover,
-                ),
+                color: const Color(0xFFF1F8E9),
               ),
+              child:
+                  plant['image_url'] != null && plant['image_url'].isNotEmpty
+                      ? ClipRRect(
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(16),
+                        ),
+                        child: Image.network(
+                          plant['image_url'],
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(
+                              child: Icon(
+                                Icons.eco,
+                                size: 40,
+                                color: Color(0xFF4CAF50),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                      : const Center(
+                        child: Icon(
+                          Icons.eco,
+                          size: 40,
+                          color: Color(0xFF4CAF50),
+                        ),
+                      ),
             ),
           ),
           Expanded(
@@ -399,7 +448,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    plant['name'],
+                    plant['name'] ?? 'unknownPlant'.tr(),
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
@@ -410,7 +459,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    plant['scientificName'],
+                    plant['scientific_name'] ?? '',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -432,7 +481,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      plant['type'],
+                      plant['category'] ?? '',
                       style: const TextStyle(
                         fontSize: 10,
                         color: Color(0xFF4CAF50),

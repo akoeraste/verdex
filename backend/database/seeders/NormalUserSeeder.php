@@ -12,8 +12,9 @@ class NormalUserSeeder extends Seeder
     {
         $user = User::firstOrCreate(
             [
-                'username' => 'primes',
+                'username' => 'prime',
                 'email' => 'primerenny@gmail.com',
+                'avatar' => '/storage/avatars/default.png',
                 'password' => bcrypt('Prime123'),
                 'email_verified_at' => now(),
             ]

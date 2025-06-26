@@ -42,24 +42,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _confirmError = null;
       _generalError = null;
     });
-    final name = _nameController.text.trim();
-    final login = _loginController.text.trim();
+    final username = _nameController.text.trim();
+    final email = _loginController.text.trim();
     final password = _passwordController.text;
     final confirm = _confirmController.text;
     bool valid = true;
-    if (name.isEmpty) {
-      setState(() => _nameError = 'name_error_empty'.tr());
+    if (username.isEmpty) {
+      setState(() => _nameError = 'usernameRequired'.tr());
+      valid = false;
+    } else if (username.length < 6) {
+      setState(() => _nameError = 'usernameMinLength'.tr());
       valid = false;
     }
-    if (login.isEmpty) {
-      setState(() => _loginError = 'login_error_empty_signup'.tr());
+    if (email.isEmpty || !email.contains('@')) {
+      setState(() => _loginError = 'invalidEmail'.tr());
       valid = false;
     }
     if (password.isEmpty) {
-      setState(() => _passwordError = 'password_error_empty_signup'.tr());
+      setState(() => _passwordError = 'passwordRequired'.tr());
       valid = false;
     } else if (password.length < 6) {
-      setState(() => _passwordError = 'password_error_length'.tr());
+      setState(() => _passwordError = 'passwordMinLength'.tr());
+      valid = false;
+    } else if (!RegExp(r'^(?=.*[A-Z])(?=.*\d)').hasMatch(password)) {
+      setState(() => _passwordError = 'passwordRequirements'.tr());
       valid = false;
     }
     if (confirm != password) {
@@ -72,18 +78,66 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() => _isLoading = true);
     final authService = AuthService();
     final success = await authService.signup(
-      name: name,
-      email: login,
+      name: username,
+      email: email,
       password: password,
       passwordConfirmation: confirm,
     );
     setState(() => _isLoading = false);
     if (success) {
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/login');
+        showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                title: Text(
+                  'success'.tr(),
+                  style: TextStyle(
+                    color: Color(0xFF2E7D32),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                  ),
+                ),
+                content: Text(
+                  'registration_success_message'.tr(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[800],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Color(0xFF4CAF50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 10,
+                      ),
+                      textStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close dialog
+                      Navigator.of(context).pushReplacementNamed('/login');
+                    },
+                    child: Text('ok'.tr()),
+                  ),
+                ],
+              ),
+        );
       }
     } else {
-      setState(() => _generalError = 'registration_failed'.tr());
+      setState(() => _generalError = 'registrationFailed'.tr());
     }
   }
 
@@ -157,7 +211,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 TextField(
                                   controller: _nameController,
                                   decoration: InputDecoration(
-                                    labelText: 'name_or_pseudo'.tr(),
+                                    labelText: 'username'.tr(),
                                     labelStyle: GoogleFonts.poppins(
                                       color: Colors.grey.shade800,
                                     ),
@@ -193,7 +247,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 TextField(
                                   controller: _loginController,
                                   decoration: InputDecoration(
-                                    labelText: 'email_phone_username'.tr(),
+                                    labelText: 'email'.tr(),
                                     labelStyle: GoogleFonts.poppins(
                                       color: Colors.grey.shade800,
                                     ),

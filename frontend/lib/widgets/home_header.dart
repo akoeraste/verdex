@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
+import '../screens/plant_library_screen.dart';
 
 class HomeHeader extends StatelessWidget {
   final Function onLanguageButtonPressed;
@@ -56,14 +58,14 @@ class HomeHeader extends StatelessWidget {
             const SizedBox(height: 16),
             // Dynamic greeting message
             Text(
-              'greeting_message'.tr(args: ['Renny']),
+              '${'hi'.tr()} ${AuthService.currentUser?['username'] ?? AuthService.currentUser?['name'] ?? 'User'} ${'greeting_message'.tr()}',
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF2E7D32),
                 fontFamily: 'Poppins',
               ),
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.left,
             ),
           ],
           if (showSearchBar) ...[
@@ -72,8 +74,12 @@ class HomeHeader extends StatelessWidget {
             // Rounded search bar
             GestureDetector(
               onTap: () {
-                // Pending: Open full search screen
-                print('Search bar tapped - open search screen');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PlantLibraryScreen(),
+                  ),
+                );
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(

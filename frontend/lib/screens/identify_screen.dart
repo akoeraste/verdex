@@ -7,6 +7,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:verdex/screens/plant_library_screen.dart';
 import 'package:verdex/widgets/home_header.dart';
 import 'package:verdex/screens/identification_result_screen.dart';
+import '../services/language_service.dart';
+import 'package:provider/provider.dart';
 
 class IdentifyScreen extends StatefulWidget {
   const IdentifyScreen({super.key});
@@ -40,50 +42,166 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }
 
   void _showLanguageSelector() {
+    final languageService = Provider.of<LanguageService>(
+      context,
+      listen: false,
+    );
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder:
-          (context) => Container(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'select_language'.tr(),
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 20),
-                _buildLanguageOption(
-                  'english'.tr(),
-                  '🇺🇸',
-                  const Locale('en'),
-                ),
-                _buildLanguageOption('french'.tr(), '🇫🇷', const Locale('fr')),
-              ],
-            ),
-          ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'select_language'.tr(),
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 20),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children:
+                        languageService.availableLanguages.map((lang) {
+                          return _buildLanguageButton(
+                            lang,
+                            languageService,
+                            setModalState,
+                          );
+                        }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
-  Widget _buildLanguageOption(String name, String flag, Locale locale) {
-    final isSelected = context.locale == locale;
-    return ListTile(
-      leading: Text(flag, style: const TextStyle(fontSize: 24)),
-      title: Text(
-        name,
-        style: TextStyle(
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+  Widget _buildLanguageButton(
+    Language lang,
+    LanguageService service,
+    StateSetter setModalState,
+  ) {
+    final isSelected =
+        service.majorLanguageCode == lang.code &&
+        service.minorLanguageCode == null;
+    final hasMinor = lang.minorLanguages.isNotEmpty;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                isSelected ? Theme.of(context).primaryColor : Colors.grey[200],
+            foregroundColor: isSelected ? Colors.white : Colors.black87,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            elevation: isSelected ? 4 : 0,
+          ),
+          onPressed: () async {
+            await service.setLanguage(lang.code, minorCode: null);
+            await context.setLocale(Locale(lang.code));
+            Navigator.pop(context);
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                lang.name,
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 16,
+                ),
+              ),
+              if (isSelected)
+                const Padding(
+                  padding: EdgeInsets.only(left: 6),
+                  child: Icon(Icons.check, size: 18, color: Colors.white),
+                ),
+            ],
+          ),
         ),
-      ),
-      trailing:
-          isSelected ? const Icon(Icons.check, color: Colors.green) : null,
-      onTap: () {
-        context.setLocale(locale);
-        Navigator.pop(context);
-      },
+        if (hasMinor)
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, top: 6.0),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children:
+                  lang.minorLanguages.map((minorLang) {
+                    final isMinorSelected =
+                        service.minorLanguageCode == minorLang.code;
+                    return OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor:
+                            isMinorSelected
+                                ? Theme.of(context).primaryColor
+                                : Colors.white,
+                        foregroundColor:
+                            isMinorSelected ? Colors.white : Colors.black87,
+                        side: BorderSide(
+                          color:
+                              isMinorSelected
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey[400]!,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      onPressed: () async {
+                        await service.setLanguage(
+                          lang.code,
+                          minorCode: minorLang.code,
+                        );
+                        await context.setLocale(Locale(lang.code));
+                        Navigator.pop(context);
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            minorLang.name,
+                            style: TextStyle(
+                              fontWeight:
+                                  isMinorSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                              fontSize: 14,
+                            ),
+                          ),
+                          if (isMinorSelected)
+                            const Padding(
+                              padding: EdgeInsets.only(left: 4),
+                              child: Icon(
+                                Icons.check,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+            ),
+          ),
+      ],
     );
   }
 
@@ -199,16 +317,10 @@ class _IdentifyScreenState extends State<IdentifyScreen>
                             curve: Curves.easeOut,
                           ),
                         ),
-                        child: FadeTransition(
-                          opacity: _controllers[index],
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 20.0),
-                            child: _optionCards[index],
-                          ),
-                        ),
+                        child: _optionCards[index],
                       );
                     }),
-                    const Spacer(),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
