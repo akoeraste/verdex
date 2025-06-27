@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'main_screen.dart';
+import 'package:verdex/services/auth_service.dart';
 
 class FeedbackScreen extends StatefulWidget {
   const FeedbackScreen({super.key});
@@ -17,7 +18,6 @@ class FeedbackScreen extends StatefulWidget {
 class _FeedbackScreenState extends State<FeedbackScreen> {
   final _formKey = GlobalKey<FormState>();
   final _messageController = TextEditingController();
-  final _contactController = TextEditingController();
 
   int _rating = 0;
   bool _isLoading = false;
@@ -61,14 +61,17 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     });
 
     try {
+      final token = await AuthService().getToken();
       final response = await http.post(
         Uri.parse('${ApiConfig.baseUrl.replaceFirst('/api', '')}/api/feedback'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
         body: jsonEncode({
           'category': _selectedCategoryKey,
           'rating': _rating,
           'message': _messageController.text,
-          'contact': _contactController.text,
         }),
       );
       if (response.statusCode == 201) {
@@ -90,9 +93,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           });
         }
       } else {
-        print(
-          'Feedback error: \\nStatus: \\${response.statusCode}\\nBody: \\${response.body}',
-        );
+        print('Feedback error:');
+        print('Status: ${response.statusCode}');
+        print('Body: ${response.body}');
         setState(() => _isLoading = false);
         String errorMsg = 'failedToSubmitFeedback'.tr();
         try {
@@ -100,9 +103,19 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           if (err is Map && err['message'] != null) {
             errorMsg = err['message'].toString();
           } else if (err is Map && err['errors'] != null) {
-            errorMsg = err['errors'].toString();
+            // Collect all validation errors into a single string
+            final errors = err['errors'];
+            if (errors is Map) {
+              errorMsg = errors.values
+                  .map((e) => e is List ? e.join("\n") : e.toString())
+                  .join("\n");
+            } else {
+              errorMsg = errors.toString();
+            }
           }
-        } catch (_) {}
+        } catch (e) {
+          errorMsg += "\n${e.toString()}";
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
         );
@@ -126,7 +139,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     setState(() {
       _rating = 0;
       _messageController.clear();
-      _contactController.clear();
       _selectedCategoryKey = 'general_feedback';
       _isSubmitted = false;
     });
@@ -226,10 +238,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                           _buildMessageSection(),
                           const SizedBox(height: 24),
 
-                          // Contact field (optional)
-                          _buildContactSection(),
-                          const SizedBox(height: 32),
-
                           // Response time note
                           _buildResponseTimeNote(),
                           const SizedBox(height: 32),
@@ -259,7 +267,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                                         ),
                                       )
                                       : Text(
-                                        'Submit Feedback'.tr(),
+                                        'submit_feedback'.tr(),
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
@@ -471,58 +479,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     );
   }
 
-  Widget _buildContactSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'contactInfoOptional'.tr(),
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF2E7D32),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'contactInfoFollowUp'.tr(),
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha((0.05 * 255).toInt()),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: TextFormField(
-            controller: _contactController,
-            decoration: InputDecoration(
-              hintText: 'contactInfoHint'.tr(),
-              prefixIcon: Icon(Icons.contact_mail, color: Color(0xFF4CAF50)),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildResponseTimeNote() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -630,7 +586,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   @override
   void dispose() {
     _messageController.dispose();
-    _contactController.dispose();
     super.dispose();
   }
 }

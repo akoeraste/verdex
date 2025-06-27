@@ -5,152 +5,126 @@ import '../widgets/feedback_form.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/bottom_nav_bar.dart';
+import 'dart:io';
+import 'package:verdex/screens/plant_details_screen.dart';
 
 class PlantResultScreen extends StatefulWidget {
-  final Map<String, dynamic> plantData;
+  final File imageFile;
+  // Simulate identification result for now
+  final Map<String, dynamic>? identifiedPlant;
 
-  const PlantResultScreen({super.key, required this.plantData});
+  const PlantResultScreen({
+    super.key,
+    required this.imageFile,
+    this.identifiedPlant,
+  });
 
   @override
-  PlantResultScreenState createState() => PlantResultScreenState();
+  State<PlantResultScreen> createState() => _PlantResultScreenState();
 }
 
-class PlantResultScreenState extends State<PlantResultScreen> {
-  final FavoriteService _favoriteService = FavoriteService();
-  final FlutterTts _flutterTts = FlutterTts();
-  bool _isFavorite = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkFavoriteStatus();
-  }
-
-  Future<void> _checkFavoriteStatus() async {
-    final plantId = widget.plantData['id'];
-    if (plantId != null) {
-      final isFav = await _favoriteService.isFavorite(plantId);
-      if (mounted) setState(() => _isFavorite = isFav);
-    }
-  }
-
-  Future<void> _toggleFavorite() async {
-    final plantId = widget.plantData['id'];
-    if (plantId == null) return;
-    if (_isFavorite) {
-      await _favoriteService.removeFavorite(plantId);
-    } else {
-      await _favoriteService.addFavorite(plantId);
-    }
-    _checkFavoriteStatus();
-  }
-
-  Future<void> _speak(String text) async {
-    await _flutterTts.setLanguage(
-      context.locale.toString().replaceAll('_', '-'),
-    ); // This should be dynamic based on user settings
-    await _flutterTts.speak(text);
-  }
-
+class _PlantResultScreenState extends State<PlantResultScreen> {
   @override
   Widget build(BuildContext context) {
-    final tags = (widget.plantData['tags'] as List).join(', ');
-
+    final bool identified = widget.identifiedPlant != null;
     return Scaffold(
-      appBar: AppBar(title: Text(widget.plantData['name'])),
+      appBar: AppBar(title: Text('Plant Identification Result')),
       body: Padding(
         padding: const EdgeInsets.only(bottom: 100), // for navbar
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Center(
-                child: Image.network(
-                  widget.plantData['image_url'],
-                  height: 200,
+                child: Image.file(
+                  widget.imageFile,
+                  height: 220,
                   fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(height: 24),
-              Row(
-                children: [
-                  Text(
-                    widget.plantData['name'],
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.volume_up),
-                    onPressed: () => _speak(widget.plantData['name']),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: Icon(
-                      _isFavorite ? Icons.favorite : Icons.favorite_border,
-                    ),
-                    color: _isFavorite ? Colors.red : null,
-                    onPressed: _toggleFavorite,
-                  ),
-                ],
+              Text(
+                identified ? 'Plant Identified!' : 'Could not identify plant',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: identified ? Colors.green[800] : Colors.red[700],
+                ),
               ),
               const SizedBox(height: 16),
-              Text(widget.plantData['description']),
-              const SizedBox(height: 24),
-              _buildInfoRow('plantFamily'.tr(), widget.plantData['family']),
-              _buildInfoRow('plantCategory'.tr(), widget.plantData['category']),
-              _buildInfoRow('plantUses'.tr(), widget.plantData['uses']),
-              _buildInfoRow('tags'.tr(), tags),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton.icon(
-                    icon: const Icon(Icons.feedback),
-                    label: Text('feedback'.tr()),
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) => const FeedbackForm(),
-                        isScrollControlled: true,
-                      );
-                    },
+              if (identified)
+                Column(
+                  children: [
+                    Text(
+                      widget.identifiedPlant!['name'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.identifiedPlant!['description'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => PlantDetailsScreen(
+                                  plant: widget.identifiedPlant!,
+                                ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: const Text(
+                        'Show more details',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 14,
                   ),
-                  ElevatedButton(
-                    child: Text('identify_another'.tr()),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                ],
+                ),
+                child: const Text(
+                  'Identify another plant',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
               ),
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavBar(
-        selectedIndex: 1,
-        onTabSelected: (index) {
-          if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/home');
-          } else if (index == 1) {
-            // Already here
-          } else if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/settings');
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('$title: ', style: const TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(value)),
-        ],
       ),
     );
   }

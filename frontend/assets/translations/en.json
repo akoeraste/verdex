@@ -271,5 +271,22 @@
   "invalidEmail": "Enter a valid email address",
   "passwordRequired": "Password is required",
   "passwordMinLength": "Password must be at least 6 characters",
-  "registrationFailed": "Registration failed. Please try again."
+  "registrationFailed": "Registration failed. Please try again.",
+  "notifications": "Notifications",
+  "no_notifications": "No notifications",
+  "no_notifications_desc": "You're all caught up! Check back later for updates.",
+  "error_loading_notifications": "Error loading notifications",
+  "all_notifications_marked_read": "All notifications marked as read",
+  "error_marking_read": "Error marking notifications as read",
+  "error_deleting_notification": "Error deleting notification",
+  "clear_all_notifications": "Clear all notifications",
+  "clear_all_notifications_confirm": "Are you sure you want to clear all notifications? This action cannot be undone.",
+  "all_notifications_cleared": "All notifications cleared",
+  "error_clearing_notifications": "Error clearing notifications",
+  "mark_all_read": "Mark all as read",
+  "clear_all": "Clear all",
+  "mark_as_read": "Mark as read",
+  "delete": "Delete",
+  "your_feedback": "Your feedback",
+  "our_response": "Our response"
 } 

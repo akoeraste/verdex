@@ -6,6 +6,7 @@ import 'change_password_screen.dart';
 import 'identify_screen.dart';
 import 'favorites_screen.dart';
 import 'feedback_screen.dart';
+import 'notifications_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_screen.dart';
 import 'about_us_screen.dart';
@@ -598,6 +599,19 @@ class SettingsScreenState extends State<SettingsScreen>
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const FeedbackScreen()),
+                  );
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildQuickAccessItem(
+                icon: Icons.notifications,
+                title: 'notifications'.tr(),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationsScreen(),
+                    ),
                   );
                 },
               ),

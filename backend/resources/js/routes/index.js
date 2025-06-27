@@ -1,21 +1,31 @@
 import { createRouter, createWebHistory } from "vue-router";
 import routes from './routes.js'
+import { useAuthStore } from '@/store/auth';
 
 const router = createRouter({
     history: createWebHistory(),
     routes
 })
 
-/*router.beforeEach((to, from, next) => {
+// Add global navigation guard for public documentation routes
+const publicRoutes = [
+    '/login',
+    '/documentation',
+    '/documentation/connect',
+    '/documentation/backend',
+    '/documentation/api',
+    '/documentation/frontend'
+];
 
-    if (store.getters.user) {
-        if (to.matched.some(route => route.meta.guard === 'guest')) next({ name: 'home' })
-        else next();
-
+router.beforeEach((to, from, next) => {
+    const auth = useAuthStore();
+    if (publicRoutes.includes(to.path)) {
+        next();
+    } else if (!auth.authenticated) {
+        next('/login');
     } else {
-        if (to.matched.some(route => route.meta.guard === 'auth')) next({ name: 'login' })
-        else next();
+        next();
     }
-})*/
+});
 
 export default router;

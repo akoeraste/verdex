@@ -1,5 +1,8 @@
 <template>
   <div class="login-bg">
+    <button class="doc-btn" @click="$router.push('/documentation')">
+      <i class="bi bi-journal-code"></i> Visit Documentation
+    </button>
     <div class="login-container">
       <div class="login-card">
         <p class="login-welcome"><strong>Welcome back!</strong> <br> Please sign In.</p>
@@ -154,6 +157,30 @@ background-color: rgba(29, 29, 29, 0.762);
   opacity: 0.6;
   cursor: not-allowed;
 }
+.doc-btn {
+  position: fixed;
+  top: 2.2rem;
+  right: 2.2rem;
+  z-index: 100;
+  background: #fff;
+  color: #2e7d32;
+  border: 1.5px solid #2e7d32;
+  border-radius: 2rem;
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 8px rgba(34,34,59,0.07);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: background 0.15s, color 0.15s, border 0.15s;
+}
+.doc-btn:hover {
+  background: #2e7d32;
+  color: #fff;
+  border: 1.5px solid #43e97b;
+}
 @media (max-width: 600px) {
   .login-card {
     padding: 2rem 1rem 1.5rem 1rem;
@@ -162,6 +189,12 @@ background-color: rgba(29, 29, 29, 0.762);
   .login-logo {
     width: 60px;
     height: 60px;
+  }
+  .doc-btn {
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.98rem;
+    padding: 0.5rem 1.1rem;
   }
 }
 </style>

@@ -7,6 +7,13 @@ const PostsIndex  = ()  => import('../views/admin/posts/Index.vue');
 const PostsCreate  = ()  => import('../views/admin/posts/Create.vue');
 const PostsEdit  = ()  => import('../views/admin/posts/Edit.vue');
 
+// Documentation pages
+const DocumentationIndex = () => import('@/views/documentation/Index.vue');
+const DocumentationConnect = () => import('@/views/documentation/Connect.vue');
+const DocumentationBackend = () => import('@/views/documentation/Backend.vue');
+const DocumentationApi = () => import('@/views/documentation/Api.vue');
+const DocumentationFrontend = () => import('@/views/documentation/Frontend.vue');
+
 function requireLogin(to, from, next) {
     const auth = useAuthStore()
     let isLogin = false;
@@ -254,7 +261,112 @@ export default [
                 component: () => import('../views/admin/backup.vue'),
                 meta: { requiresAuth: true },
             },
-        ]
+            {
+                name: 'feedback.index',
+                path: 'feedback',
+                component: () => import('../views/admin/feedback/Index.vue'),
+                meta: { breadCrumb: 'Feedback' }
+            },
+        ],
+    },
+    {
+        name: 'documentation',
+        path: '/documentation',
+        component: DocumentationIndex,
+    },
+    
+    {
+        name: 'documentation-connect',
+        path: '/documentation/connect',
+        component: DocumentationConnect,
+        meta: {
+            sidebarSections: [
+                { id: 'connect', title: 'Connect Docs', items: [
+                    { id: 'overview', label: 'Overview' },
+                    { id: 'api-base-url', label: 'API Base URL' },
+                    { id: 'authentication-flow', label: 'Authentication Flow' },
+                    { id: 'how-frontend-calls', label: 'Frontend API Calls' },
+                    { id: 'error-handling', label: 'Error Handling' },
+                    { id: 'data-formats', label: 'Data Formats' },
+                    { id: 'cors-security', label: 'CORS & Security' },
+                    { id: 'example-integration', label: 'Example Integration' },
+                    { id: 'troubleshooting', label: 'Troubleshooting' },
+                    { id: 'best-practices', label: 'Best Practices' },
+                ]}
+            ]
+        },
+    },
+    {
+        name: 'documentation-backend',
+        path: '/documentation/backend',
+        component: DocumentationBackend,
+        meta: {
+            sidebarSections: [
+                { id: 'backend', title: 'Backend Docs', items: [
+                    { id: 'overview', label: 'Overview' },
+                    { id: 'features', label: 'Features' },
+                    { id: 'project-structure', label: 'Project Structure' },
+                    { id: 'main-modules', label: 'Main Modules' },
+                    { id: 'database-schema', label: 'Database Schema' },
+                    { id: 'auth', label: 'Auth' },
+                    { id: 'api-structure', label: 'API Structure' },
+                    { id: 'notifications', label: 'Notifications' },
+                    { id: 'caching', label: 'Caching' },
+                    { id: 'testing', label: 'Testing' },
+                    { id: 'deployment', label: 'Deployment' },
+                    { id: 'contribution', label: 'Contribution' },
+                    { id: 'troubleshooting', label: 'Troubleshooting' },
+                    { id: 'future', label: 'Future Improvements' },
+                ]}
+            ]
+        },
+    },
+    {
+        name: 'documentation-api',
+        path: '/documentation/api',
+        component: DocumentationApi,
+        meta: {
+            sidebarSections: [
+                { id: 'api', title: 'API Docs', items: [
+                    { id: 'overview', label: 'Overview' },
+                    { id: 'authentication', label: 'Authentication' },
+                    { id: 'error-handling', label: 'Error Handling' },
+                    { id: 'endpoints', label: 'Endpoints' },
+                    { id: 'example-request', label: 'Example Request' },
+                    { id: 'example-response', label: 'Example Response' },
+                    { id: 'feedback-notification', label: 'Feedback & Notification' },
+                    { id: 'pagination', label: 'Pagination' },
+                    { id: 'status-codes', label: 'Status Codes' },
+                    { id: 'versioning', label: 'Versioning' },
+                    { id: 'best-practices', label: 'Best Practices' },
+                ]}
+            ]
+        },
+    },
+    {
+        name: 'documentation-frontend',
+        path: '/documentation/frontend',
+        component: DocumentationFrontend,
+        meta: {
+            sidebarSections: [
+                { id: 'frontend', title: 'Frontend Docs', items: [
+                    { id: 'overview', label: 'Overview' },
+                    { id: 'features', label: 'Features' },
+                    { id: 'project-structure', label: 'Project Structure' },
+                    { id: 'main-screens', label: 'Main Screens' },
+                    { id: 'state-management', label: 'State Management' },
+                    { id: 'api-integration', label: 'API Integration' },
+                    { id: 'caching', label: 'Caching' },
+                    { id: 'localization', label: 'Localization' },
+                    { id: 'notifications', label: 'Notifications' },
+                    { id: 'build-run', label: 'Build & Run' },
+                    { id: 'testing', label: 'Testing' },
+                    { id: 'contribution', label: 'Contribution' },
+                    { id: 'troubleshooting', label: 'Troubleshooting' },
+                    { id: 'future', label: 'Future Improvements' },
+                ]}
+            ]
+        },
     },
     {
         path: "/:pathMatch(.*)*",

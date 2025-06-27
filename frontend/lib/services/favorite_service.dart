@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:verdex/constants/api_config.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:verdex/services/auth_service.dart';
 
 class FavoriteService {
   Future<List<int>> getFavorites() async {
-    final token = await _getToken();
+    final token = await AuthService().getToken();
     if (token == null) {
       // Not logged in, return empty favorites
       return [];
@@ -23,7 +23,7 @@ class FavoriteService {
   }
 
   Future<void> addFavorite(int plantId) async {
-    final token = await _getToken();
+    final token = await AuthService().getToken();
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/favorites'),
       headers: {
@@ -42,7 +42,7 @@ class FavoriteService {
   }
 
   Future<void> removeFavorite(int plantId) async {
-    final token = await _getToken();
+    final token = await AuthService().getToken();
     final response = await http.delete(
       Uri.parse('${ApiConfig.baseUrl}/favorites/$plantId'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
@@ -53,7 +53,7 @@ class FavoriteService {
   }
 
   Future<bool> isFavorite(int plantId) async {
-    final token = await _getToken();
+    final token = await AuthService().getToken();
     final response = await http.get(
       Uri.parse('${ApiConfig.baseUrl}/favorites/$plantId'),
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
@@ -64,10 +64,5 @@ class FavoriteService {
     } else {
       throw Exception('Failed to check favorite');
     }
-  }
-
-  Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('token');
   }
 }

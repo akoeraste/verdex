@@ -82,10 +82,23 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
     Route::post('favorites', [\App\Http\Controllers\Api\FavoriteController::class, 'store']);
     Route::delete('favorites/{plant_id}', [\App\Http\Controllers\Api\FavoriteController::class, 'destroy']);
     Route::get('favorites/{plant_id}', [\App\Http\Controllers\Api\FavoriteController::class, 'show']);
-});
 
-// Feedback route for unauthenticated users
-Route::post('feedback', [\App\Http\Controllers\Api\FeedbackController::class, 'store']);
+    // Feedback admin routes
+    Route::get('feedback', [\App\Http\Controllers\Api\FeedbackController::class, 'index']);
+    Route::get('feedback/{feedback}', [\App\Http\Controllers\Api\FeedbackController::class, 'show']);
+    Route::put('feedback/{feedback}/respond', [\App\Http\Controllers\Api\FeedbackController::class, 'respond']);
+    Route::get('feedback-stats', [\App\Http\Controllers\Api\FeedbackController::class, 'stats']);
+
+    // Notification routes
+    Route::get('notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::get('notifications/unread-count', [\App\Http\Controllers\Api\NotificationController::class, 'unreadCount']);
+    Route::put('notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+    Route::put('notifications/mark-all-read', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+    Route::delete('notifications/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'destroy']);
+    Route::delete('notifications', [\App\Http\Controllers\Api\NotificationController::class, 'clearAll']);
+
+    Route::post('feedback', [\App\Http\Controllers\Api\FeedbackController::class, 'store']);
+});
 
 Route::get('category-list', [CategoryController::class, 'getList']);
 Route::get('get-posts', [PostController::class, 'getPosts']);

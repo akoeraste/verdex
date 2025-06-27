@@ -2,13 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:verdex/screens/plant_library_screen.dart';
 import 'package:verdex/widgets/home_header.dart';
-import 'package:verdex/screens/identification_result_screen.dart';
 import '../services/language_service.dart';
 import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart';
+import 'plant_result_screen.dart';
 
 class IdentifyScreen extends StatefulWidget {
   const IdentifyScreen({super.key});
@@ -225,39 +225,66 @@ class _IdentifyScreenState extends State<IdentifyScreen>
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: source);
       if (pickedFile == null) return;
-
-      final croppedFile = await ImageCropper().cropImage(
-        sourcePath: pickedFile.path,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'crop_image'.tr(),
-            toolbarColor: Colors.green,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.original,
-            lockAspectRatio: false,
-            aspectRatioPresets: [
-              CropAspectRatioPreset.square,
-              CropAspectRatioPreset.ratio3x2,
-              CropAspectRatioPreset.original,
-              CropAspectRatioPreset.ratio4x3,
-              CropAspectRatioPreset.ratio16x9,
-            ],
-          ),
-          IOSUiSettings(title: 'crop_image'.tr()),
-        ],
+      final imageData = await pickedFile.readAsBytes();
+      if (!mounted) return;
+      // Save imageData to a temporary file
+      final tempDir = await getTemporaryDirectory();
+      final tempFile =
+          await File(
+            '${tempDir.path}/picked_image_${DateTime.now().millisecondsSinceEpoch}.jpg',
+          ).create();
+      await tempFile.writeAsBytes(imageData);
+      if (!mounted) return;
+      // Show confirm/cancel dialog
+      final confirmed = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.file(tempFile, height: 200),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      icon: const Icon(Icons.close),
+                      label: const Text('Cancel'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      icon: const Icon(Icons.check),
+                      label: const Text('Confirm'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
       );
-
-      if (croppedFile != null && mounted) {
+      if (confirmed == true) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder:
-                (context) => IdentificationResultScreen(
-                  imageFile: File(croppedFile.path),
-                ),
+            builder: (context) => PlantResultScreen(imageFile: tempFile),
           ),
         );
       }
+      // else do nothing (stay on IdentifyScreen)
     } else {
       // Handle the case where the user denies the permission
       ScaffoldMessenger.of(

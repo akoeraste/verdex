@@ -39,6 +39,8 @@ class SplashScreenState extends State<SplashScreen> {
       final prefs = await SharedPreferences.getInstance();
       final onboardingCompleted =
           prefs.getBool('onboarding_completed') ?? false;
+      final permissionsScreenShown =
+          prefs.getBool('permissions_screen_shown') ?? false;
       print('Splash: Onboarding completed? $onboardingCompleted');
       if (mounted) {
         if (!hasUsername) {
@@ -51,10 +53,15 @@ class SplashScreenState extends State<SplashScreen> {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const OnboardingScreen()),
           );
-        } else {
+        } else if (!permissionsScreenShown) {
           print('Splash: Navigating to PermissionScreen');
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const PermissionScreen()),
+          );
+        } else {
+          print('Splash: Navigating to MainScreen');
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const MainScreen()),
           );
         }
       }

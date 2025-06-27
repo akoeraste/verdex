@@ -299,11 +299,46 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 16, top: 8),
-          child: IconButton(
-            icon: const Icon(Icons.language, color: Colors.white, size: 28),
-            onPressed: _showLanguageSelector,
-            tooltip: 'Change Language',
+          padding: const EdgeInsets.only(left: 16, top: 8, right: 0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Favorite icon
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.4),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    _isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: Colors.white,
+                    size: 28,
+                    shadows: const [Shadow(blurRadius: 8, color: Colors.black)],
+                  ),
+                  onPressed: _toggleFavorite,
+                  tooltip: 'Favorite',
+                ),
+              ),
+              // Language icon
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.4),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.language,
+                    color: Colors.white,
+                    size: 28,
+                    shadows: [Shadow(blurRadius: 8, color: Colors.black)],
+                  ),
+                  onPressed: _showLanguageSelector,
+                  tooltip: 'Change Language',
+                ),
+              ),
+            ],
           ),
         ),
       ],

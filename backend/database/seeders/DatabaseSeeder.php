@@ -21,5 +21,6 @@ class DatabaseSeeder extends Seeder
         $this->call(LanguageSeeder::class);
         $this->call(PlantCategorySeeder::class);
         $this->call(PlantSeeder::class);
+        $this->call(NotificationSeeder::class);
     }
 }
