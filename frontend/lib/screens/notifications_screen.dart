@@ -210,36 +210,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
-  Future<void> _deleteNotification(String notificationId) async {
-    try {
-      final token = await AuthService().getToken();
-      if (token == null) return;
-
-      final response = await http.delete(
-        Uri.parse('${ApiConfig.baseUrl}/notifications/$notificationId'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _notifications.removeWhere((n) => n['id'] == notificationId);
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('error_deleting_notification'.tr()),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
   Future<void> _clearAllNotifications() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -331,8 +301,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           decoration: BoxDecoration(
             color:
                 isFeedbackResponse
-                    ? const Color(0xFF4CAF50).withOpacity(0.1)
-                    : Colors.blue.withOpacity(0.1),
+                    ? const Color(0xFF4CAF50).withAlpha((0.1 * 255).toInt())
+                    : Colors.blue.withAlpha((0.1 * 255).toInt()),
             borderRadius: BorderRadius.circular(24),
           ),
           child: Icon(
@@ -420,8 +390,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       decoration: BoxDecoration(
                         color:
                             isFeedbackResponse
-                                ? const Color(0xFF4CAF50).withOpacity(0.1)
-                                : Colors.blue.withOpacity(0.1),
+                                ? const Color(
+                                  0xFF4CAF50,
+                                ).withAlpha((0.1 * 255).toInt())
+                                : Colors.blue.withAlpha((0.1 * 255).toInt()),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Icon(
@@ -500,7 +472,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4CAF50).withOpacity(0.1),
+                      color: const Color(
+                        0xFF4CAF50,
+                      ).withAlpha((0.1 * 255).toInt()),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

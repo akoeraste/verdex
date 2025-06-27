@@ -72,7 +72,7 @@ class _QuickActionButton extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withAlpha((0.05 * 255).toInt()),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),

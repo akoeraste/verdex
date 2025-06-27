@@ -53,8 +53,7 @@ class _EducationalSnippetState extends State<EducationalSnippet> {
       _pageController.jumpToPage(_facts.length);
     });
     _pageController.addListener(() {
-      if (!_pageController.position.isScrollingNotifier.value &&
-          !_pageController.position.isScrollingNotifier.hasListeners) {
+      if (!_pageController.position.isScrollingNotifier.value) {
         _handleLooping();
       }
     });

@@ -3,7 +3,6 @@ import 'package:verdex/services/plant_service.dart';
 import 'package:verdex/widgets/library_plant_card.dart';
 import 'package:verdex/screens/plant_details_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'main_screen.dart';
 import 'package:provider/provider.dart';
@@ -87,33 +86,6 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
     setState(() {
       _isRefreshing = false;
     });
-  }
-
-  Future<void> _forceRefreshPlants() async {
-    setState(() {
-      _isRefreshing = true;
-    });
-    try {
-      final plants = await _plantService.forceRefreshPlants();
-      setState(() {
-        _allPlants = plants;
-        _filteredPlants = plants;
-        _isRefreshing = false;
-        _sortAndFilterPlants();
-      });
-    } catch (e) {
-      setState(() {
-        _isRefreshing = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error force refreshing plants: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 
   void _filterPlants() {
@@ -469,39 +441,6 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
         ],
       ),
     );
-  }
-
-  Future<void> _syncWithBackend() async {
-    setState(() {
-      _isRefreshing = true;
-    });
-
-    try {
-      await _plantService.refreshCache();
-      await _fetchPlants();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Data refreshed successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Refresh failed: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      setState(() {
-        _isRefreshing = false;
-      });
-    }
   }
 
   void _showLanguageSelector() {

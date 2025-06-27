@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:http/http.dart' as http;
 import 'package:verdex/constants/api_config.dart';
 import 'dart:convert';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'main_screen.dart';
 import 'package:verdex/services/auth_service.dart';
@@ -93,9 +92,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           });
         }
       } else {
-        print('Feedback error:');
-        print('Status: ${response.statusCode}');
-        print('Body: ${response.body}');
         setState(() => _isLoading = false);
         String errorMsg = 'failedToSubmitFeedback'.tr();
         try {
@@ -587,42 +583,5 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   void dispose() {
     _messageController.dispose();
     super.dispose();
-  }
-}
-
-class _NavIcon extends StatelessWidget {
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-  final double size;
-  const _NavIcon({
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-    this.size = 28,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color:
-              selected
-                  ? const Color(0xFF4CAF50).withOpacity(0.12)
-                  : Colors.transparent,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          size: size,
-          color: selected ? const Color(0xFF4CAF50) : Colors.grey.shade500,
-        ),
-      ),
-    );
   }
 }

@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/api_config.dart';
-import 'package:intl/intl.dart';
 import 'language_service.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 
 class PlantService {
   static final PlantService _instance = PlantService._internal();
@@ -29,7 +29,7 @@ class PlantService {
       }
 
       final url = '${ApiConfig.baseUrl}/plants/app/all';
-      print('Calling API URL: $url');
+      debugPrint('Calling API URL: $url');
 
       // Fetch from online database
       final response = await http.get(
@@ -40,17 +40,11 @@ class PlantService {
         },
       );
 
-      print('API Response Status: ${response.statusCode}');
-      print('API Response Headers: ${response.headers}');
-      print(
-        'API Response Body (first 500 chars): ${response.body.substring(0, response.body.length > 500 ? 500 : response.body.length)}',
-      );
-
       if (response.statusCode == 200) {
         // Check if response is HTML (error page) instead of JSON
         if (response.body.trim().startsWith('<!doctype html>') ||
             response.body.trim().startsWith('<html')) {
-          print(
+          debugPrint(
             'ERROR: Received HTML instead of JSON. This indicates a routing or server issue.',
           );
           throw Exception(
@@ -61,7 +55,7 @@ class PlantService {
         final Map<String, dynamic> responseJson = jsonDecode(response.body);
         final List<dynamic> responseData = responseJson['data'] ?? [];
 
-        print('Plants data length: ${responseData.length}');
+        debugPrint('Plants data length: ${responseData.length}');
 
         final plants =
             responseData.map((plant) => _formatPlantData(plant)).toList();
@@ -81,7 +75,7 @@ class PlantService {
         );
       }
     } catch (e) {
-      print('Error in getAllPlants: $e');
+      debugPrint('Error in getAllPlants: $e');
       // If any error occurs, try to return cached data
       final cachedPlants = await loadCachedPlants();
       if (cachedPlants.isNotEmpty) {
@@ -187,7 +181,7 @@ class PlantService {
     // Convert relative URL to absolute URL
     final baseUrl = ApiConfig.baseUrl.replaceFirst('/api', '');
     final fullUrl = '$baseUrl$relativeUrl';
-    print('Image URL conversion: $relativeUrl -> $fullUrl');
+    debugPrint('Image URL conversion: $relativeUrl -> $fullUrl');
     return fullUrl;
   }
 
@@ -207,10 +201,10 @@ class PlantService {
 
   Map<String, dynamic> _formatPlantData(Map<String, dynamic> plant) {
     try {
-      print('Formatting plant: ${plant['scientific_name']}');
+      debugPrint('Formatting plant: ${plant['scientific_name']}');
 
       final translations = (plant['translations'] as List<dynamic>?) ?? [];
-      print('Translations found: ${translations.length}');
+      debugPrint('Translations found: ${translations.length}');
 
       final languageService = LanguageService();
       final effectiveLang = languageService.effectiveLanguageCode;
@@ -231,7 +225,9 @@ class PlantService {
           ) ??
           {};
 
-      print('Selected translation for language "$effectiveLang": $translation');
+      debugPrint(
+        'Selected translation for language "$effectiveLang": $translation',
+      );
 
       // Get the first image URL and convert to full URL
       String imageUrl = '';
@@ -239,7 +235,7 @@ class PlantService {
           (plant['image_urls'] as List).isNotEmpty) {
         final relativeUrl = plant['image_urls'][0];
         imageUrl = _getFullImageUrl(relativeUrl);
-        print('Image URL conversion: $relativeUrl -> $imageUrl');
+        debugPrint('Image URL conversion: $relativeUrl -> $imageUrl');
       }
 
       final formattedPlant = {
@@ -261,12 +257,12 @@ class PlantService {
         'translations': translations,
       };
 
-      print('Formatted plant: $formattedPlant');
-      print('Final image URL: ${formattedPlant['image_url']}');
+      debugPrint('Formatted plant: $formattedPlant');
+      debugPrint('Final image URL: ${formattedPlant['image_url']}');
       return formattedPlant;
     } catch (e) {
-      print('Error formatting plant: $e');
-      print('Plant data: $plant');
+      debugPrint('Error formatting plant: $e');
+      debugPrint('Plant data: $plant');
       rethrow;
     }
   }
@@ -420,10 +416,10 @@ class PlantService {
   Future<bool> testImageUrl(String imageUrl) async {
     try {
       final response = await http.head(Uri.parse(imageUrl));
-      print('Image URL test: $imageUrl -> Status: ${response.statusCode}');
+      debugPrint('Image URL test: $imageUrl -> Status: ${response.statusCode}');
       return response.statusCode == 200;
     } catch (e) {
-      print('Image URL test failed: $imageUrl -> Error: $e');
+      debugPrint('Image URL test failed: $imageUrl -> Error: $e');
       return false;
     }
   }
@@ -442,7 +438,7 @@ class PlantService {
   Future<void> testApiConnection() async {
     try {
       final url = '${ApiConfig.baseUrl}/plants/app/all';
-      print('Testing API connection to: $url');
+      debugPrint('Testing API connection to: $url');
 
       final response = await http.get(
         Uri.parse(url),
@@ -452,25 +448,29 @@ class PlantService {
         },
       );
 
-      print('Test Response Status: ${response.statusCode}');
-      print('Test Response Content-Type: ${response.headers['content-type']}');
-      print(
+      debugPrint('Test Response Status: ${response.statusCode}');
+      debugPrint(
+        'Test Response Content-Type: ${response.headers['content-type']}',
+      );
+      debugPrint(
         'Test Response Body (first 200 chars): ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}',
       );
 
       if (response.statusCode == 200) {
-        print('✅ API connection successful');
+        debugPrint('✅ API connection successful');
       } else {
-        print('❌ API connection failed with status: ${response.statusCode}');
+        debugPrint(
+          '❌ API connection failed with status: ${response.statusCode}',
+        );
       }
     } catch (e) {
-      print('❌ API connection error: $e');
+      debugPrint('❌ API connection error: $e');
     }
   }
 
   // Force refresh - clear cache and fetch fresh data
   Future<List<Map<String, dynamic>>> forceRefreshPlants() async {
-    print('Force refreshing plants - clearing cache');
+    debugPrint('Force refreshing plants - clearing cache');
     await _clearCache();
     return getAllPlants(forceRefresh: true);
   }
@@ -480,6 +480,6 @@ class PlantService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('cached_plants');
     await prefs.remove('plants_cache_timestamp');
-    print('Cache cleared');
+    debugPrint('Cache cleared');
   }
 }

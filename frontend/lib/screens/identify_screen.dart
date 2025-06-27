@@ -404,7 +404,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   }) {
     return Card(
       elevation: 4,
-      shadowColor: Colors.green.withOpacity(0.2),
+      shadowColor: Colors.green.withAlpha((0.02 * 255).toInt()),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,

@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import '../services/language_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:verdex/services/plant_service.dart';
 
 class LibraryPlantCard extends StatelessWidget {
   final Map<String, dynamic> plant;
@@ -68,7 +67,7 @@ class LibraryPlantCard extends StatelessWidget {
                           imageUrl: imageUrl,
                           fit: BoxFit.cover,
                           placeholder: (context, url) {
-                            print('Loading image: $url');
+                            debugPrint('Loading image: $url');
                             return Container(
                               color: const Color(0xFFF1F8E9),
                               child: const Center(
@@ -80,7 +79,7 @@ class LibraryPlantCard extends StatelessWidget {
                             );
                           },
                           errorWidget: (context, url, error) {
-                            print('Image error: $url -> $error');
+                            debugPrint('Image error: $url -> $error');
                             // Try fallback image
                             return CachedNetworkImage(
                               imageUrl: _getFallbackImageUrl(url),

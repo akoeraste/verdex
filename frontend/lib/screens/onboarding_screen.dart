@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'login_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'permission_screen.dart';
 

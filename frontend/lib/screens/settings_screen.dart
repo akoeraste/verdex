@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import '../services/auth_service.dart';
 import 'edit_profile_screen.dart';
 import 'change_password_screen.dart';
-import 'identify_screen.dart';
 import 'favorites_screen.dart';
 import 'feedback_screen.dart';
 import 'notifications_screen.dart';
@@ -12,11 +11,9 @@ import 'terms_screen.dart';
 import 'about_us_screen.dart';
 import '../screens/login_screen.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'dart:convert';
 import '../widgets/section_header.dart';
 import '../constants/api_config.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'main_screen.dart';
 import 'package:provider/provider.dart';
 import '../services/language_service.dart';
@@ -89,7 +86,6 @@ class SettingsScreenState extends State<SettingsScreen>
 
   String _selectedLanguageKey = 'english';
   String _selectedThemeKey = 'light';
-  bool _isDarkMode = false;
   bool _enableSound = true;
   bool _wifiOnly = true;
 

@@ -75,7 +75,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Scaffold(
       body: Stack(
         children: [
@@ -277,8 +276,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                           ),
                                         ),
                                         elevation: 4,
-                                        shadowColor: Colors.green.withOpacity(
-                                          0.4,
+                                        shadowColor: Colors.green.withAlpha(
+                                          (0.4 * 255).toInt(),
                                         ),
                                         textStyle: GoogleFonts.poppins(
                                           fontWeight: FontWeight.w600,

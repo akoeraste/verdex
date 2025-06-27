@@ -4,10 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:animate_do/animate_do.dart';
 import '../services/auth_service.dart';
 import 'onboarding_screen.dart';
-import 'login_screen.dart';
 import 'main_screen.dart';
 import 'permission_screen.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'welcome_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -26,7 +24,7 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    print('Splash: Starting initialization');
+    debugPrint('Splash: Starting initialization');
     try {
       await Future.delayed(const Duration(seconds: 2));
 
@@ -41,44 +39,39 @@ class SplashScreenState extends State<SplashScreen> {
           prefs.getBool('onboarding_completed') ?? false;
       final permissionsScreenShown =
           prefs.getBool('permissions_screen_shown') ?? false;
-      print('Splash: Onboarding completed? $onboardingCompleted');
+      debugPrint('Splash: Onboarding completed? $onboardingCompleted');
       if (mounted) {
         if (!hasUsername) {
-          print('Splash: No valid user, redirecting to WelcomeScreen');
+          debugPrint('Splash: No valid user, redirecting to WelcomeScreen');
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const WelcomeScreen()),
           );
         } else if (!onboardingCompleted) {
-          print('Splash: Navigating to OnboardingScreen');
+          debugPrint('Splash: Navigating to OnboardingScreen');
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const OnboardingScreen()),
           );
         } else if (!permissionsScreenShown) {
-          print('Splash: Navigating to PermissionScreen');
+          debugPrint('Splash: Navigating to PermissionScreen');
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const PermissionScreen()),
           );
         } else {
-          print('Splash: Navigating to MainScreen');
+          debugPrint('Splash: Navigating to MainScreen');
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const MainScreen()),
           );
         }
       }
     } catch (e, stack) {
-      print('Splash: Error during initialization: $e');
-      print(stack);
+      debugPrint('Splash: Error during initialization: $e');
+      debugPrint(stack.toString());
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const OnboardingScreen()),
         );
       }
     }
-  }
-
-  Future<Widget> _performInitialization() async {
-    // This method is no longer needed, but kept for compatibility.
-    return const PermissionScreen();
   }
 
   @override

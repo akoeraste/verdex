@@ -1,10 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import '../services/favorite_service.dart';
-import '../widgets/feedback_form.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../widgets/bottom_nav_bar.dart';
 import 'dart:io';
 import 'package:verdex/screens/plant_details_screen.dart';
 

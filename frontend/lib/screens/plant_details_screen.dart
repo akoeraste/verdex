@@ -174,13 +174,15 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
       setState(() {
         _isFavorite = !_isFavorite; // Revert on error
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'failedToUpdateFavorite'.tr(namedArgs: {'error': e.toString()}),
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'failedToUpdateFavorite'.tr(namedArgs: {'error': e.toString()}),
+            ),
           ),
-        ),
-      );
+        );
+      }
     } finally {
       setState(() {
         _isFavoriteLoading = false;
@@ -210,9 +212,11 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
       await _audioPlayer.play(DeviceFileSource(localPath));
     } catch (e) {
       setState(() => _isPlayingAudio = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('failedToPlayAudio'.tr())));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('failedToPlayAudio'.tr())));
+      }
     }
   }
 
@@ -284,7 +288,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
       leading: Container(
         margin: const EdgeInsets.only(left: 8, top: 8),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.4),
+          color: Colors.black.withAlpha((0.4 * 255).toInt()),
           shape: BoxShape.circle,
         ),
         child: IconButton(
@@ -307,7 +311,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
               Container(
                 margin: const EdgeInsets.only(right: 8),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.4),
+                  color: Colors.black.withAlpha((0.4 * 255).toInt()),
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
@@ -324,7 +328,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
               // Language icon
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.4),
+                  color: Colors.black.withAlpha((0.4 * 255).toInt()),
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
@@ -433,7 +437,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
                         color:
                             _currentImageIndex == i
                                 ? Colors.white
-                                : Colors.white.withOpacity(0.4),
+                                : Colors.white.withAlpha((0.4 * 255).toInt()),
                       ),
                     );
                   }),
@@ -474,7 +478,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Colors.black.withAlpha((0.08 * 255).toInt()),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -751,7 +755,9 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
           onPressed: () async {
             await service.setLanguage(lang.code, minorCode: null);
             await context.setLocale(Locale(lang.code));
-            Navigator.pop(context);
+            if (mounted) {
+              Navigator.pop(context);
+            }
           },
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -809,7 +815,9 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
                           minorCode: minorLang.code,
                         );
                         await context.setLocale(Locale(lang.code));
-                        Navigator.pop(context);
+                        if (mounted) {
+                          Navigator.pop(context);
+                        }
                       },
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -840,43 +848,6 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
             ),
           ),
       ],
-    );
-  }
-}
-
-class _NavIcon extends StatelessWidget {
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-  final double size;
-  const _NavIcon({
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-    this.size = 28,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color:
-              selected
-                  ? const Color(0xFF4CAF50).withOpacity(0.12)
-                  : Colors.transparent,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          size: size,
-          color: selected ? const Color(0xFF4CAF50) : Colors.grey.shade500,
-        ),
-      ),
     );
   }
 }
