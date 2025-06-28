@@ -10,31 +10,31 @@ import 'screens/forgot_password_screen.dart';
 import 'screens/main_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/identify_screen.dart';
+import 'screens/debug_screen.dart';
 import 'services/language_service.dart';
 import 'services/connectivity_service.dart';
+import 'services/performance_monitor.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await EasyLocalization.ensureInitialized();
+
+  // Initialize performance monitoring
+  final performanceMonitor = PerformanceMonitor();
+  performanceMonitor.startTimer('app_startup');
+
+  // Run critical initializations in parallel
+  await Future.wait([
+    EasyLocalization.ensureInitialized(),
+    _initializeServices(),
+  ]);
 
   debugPrint('🚀 [App] Verdex app starting...');
-
-  final languageService = LanguageService();
-  final connectivityService = ConnectivityService();
-
-  // Initialize connectivity service
-  await connectivityService.initialize();
-
-  debugPrint('🚀 [App] Connectivity service initialized');
-  debugPrint(
-    '🚀 [App] Current connection status: ${connectivityService.isConnected ? "ONLINE" : "OFFLINE"}',
-  );
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => languageService),
-        ChangeNotifierProvider(create: (_) => connectivityService),
+        ChangeNotifierProvider(create: (_) => LanguageService()),
+        ChangeNotifierProvider(create: (_) => ConnectivityService()),
       ],
       child: EasyLocalization(
         supportedLocales: const [Locale('en'), Locale('fr')],
@@ -43,6 +43,24 @@ void main() async {
         child: const MyApp(),
       ),
     ),
+  );
+}
+
+// Initialize services in parallel for faster startup
+Future<void> _initializeServices() async {
+  final performanceMonitor = PerformanceMonitor();
+
+  return await performanceMonitor.timeOperation(
+    'services_initialization',
+    () async {
+      final connectivityService = ConnectivityService();
+      await connectivityService.initialize();
+
+      debugPrint('🚀 [App] Services initialized');
+      debugPrint(
+        '🚀 [App] Current connection status: ${connectivityService.isConnected ? "ONLINE" : "OFFLINE"}',
+      );
+    },
   );
 }
 
@@ -60,7 +78,7 @@ class MyApp extends StatelessWidget {
       locale: context.locale,
       theme: ThemeData(
         primaryColor: const Color(0xFF4CAF50),
-        scaffoldBackgroundColor: const Color(0xFFF9FBE7),
+        scaffoldBackgroundColor: Colors.transparent,
         textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF4CAF50),
@@ -75,6 +93,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const MainScreen(),
         '/settings': (context) => const SettingsScreen(),
         '/identify': (context) => const IdentifyScreen(),
+        '/debug': (context) => const DebugScreen(),
       },
       debugShowCheckedModeBanner: false,
     );
@@ -99,23 +118,18 @@ class _AppInitializerState extends State<AppInitializer> {
   Future<void> _initializeApp() async {
     debugPrint('🚀 [App] Starting app initialization...');
 
-    // Load language and set locale
-    final languageService = Provider.of<LanguageService>(
-      context,
-      listen: false,
-    );
-    await languageService.loadSavedLanguage();
-    await context.setLocale(Locale(languageService.majorLanguageCode));
+    final performanceMonitor = PerformanceMonitor();
 
-    debugPrint(
-      '🚀 [App] Language loaded: ${languageService.majorLanguageCode}',
-    );
+    // Run non-critical initializations in parallel
+    final results = await Future.wait([
+      _loadLanguageSettings(),
+      _checkPermissions(),
+    ]);
 
-    // Check permissions
-    final cameraStatus = await Permission.camera.status;
-    final photosStatus = await Permission.photos.status;
-    final permissionsGranted = cameraStatus.isGranted && photosStatus.isGranted;
+    final languageCode = results[0] as String;
+    final permissionsGranted = results[1] as bool;
 
+    debugPrint('🚀 [App] Language loaded: $languageCode');
     debugPrint(
       '🚀 [App] Permissions status: ${permissionsGranted ? "GRANTED" : "NOT GRANTED"}',
     );
@@ -133,6 +147,10 @@ class _AppInitializerState extends State<AppInitializer> {
       '🚀 [App] App initialization complete, navigating to splash screen',
     );
 
+    // Complete startup timer
+    performanceMonitor.stopTimer('app_startup');
+    performanceMonitor.printPerformanceSummary();
+
     // Navigate to the splash screen
     if (mounted) {
       Navigator.of(context).pushReplacement(
@@ -141,6 +159,31 @@ class _AppInitializerState extends State<AppInitializer> {
         ),
       );
     }
+  }
+
+  Future<String> _loadLanguageSettings() async {
+    final performanceMonitor = PerformanceMonitor();
+    return await performanceMonitor.timeOperation('language_loading', () async {
+      final languageService = Provider.of<LanguageService>(
+        context,
+        listen: false,
+      );
+      await languageService.loadSavedLanguage();
+      await context.setLocale(Locale(languageService.majorLanguageCode));
+      return languageService.majorLanguageCode;
+    });
+  }
+
+  Future<bool> _checkPermissions() async {
+    final performanceMonitor = PerformanceMonitor();
+    return await performanceMonitor.timeOperation(
+      'permissions_check',
+      () async {
+        final cameraStatus = await Permission.camera.status;
+        final photosStatus = await Permission.photos.status;
+        return cameraStatus.isGranted && photosStatus.isGranted;
+      },
+    );
   }
 
   @override

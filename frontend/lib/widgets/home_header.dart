@@ -23,13 +23,24 @@ class HomeHeader extends StatelessWidget {
       children: [
         // Main header container
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
-            color: Color(0xFFF9FBE7),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
             ),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(32),
+              bottomRight: Radius.circular(32),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x1A000000),
+                blurRadius: 20,
+                offset: Offset(0, 8),
+              ),
+            ],
           ),
           child: Column(
             children: [
@@ -37,31 +48,47 @@ class HomeHeader extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // App name instead of leaf icon
+                  // App name
                   Text(
                     'app_name'.tr(),
                     style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF2E7D32),
-                      fontFamily: 'Poppins',
-                      letterSpacing: 1.2,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: -0.5,
+                      shadows: [
+                        Shadow(
+                          color: Color(0x40000000),
+                          offset: Offset(0, 2),
+                          blurRadius: 4,
+                        ),
+                      ],
                     ),
                   ),
                   // Language selector
-                  IconButton(
-                    onPressed: () => onLanguageButtonPressed(),
-                    icon: const Icon(
-                      Icons.language,
-                      color: Color(0xFF4CAF50),
-                      size: 28,
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: IconButton(
+                      onPressed: () => onLanguageButtonPressed(),
+                      icon: const Icon(
+                        Icons.language_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
                     ),
                   ),
                 ],
               ),
               if (showSearchBar) ...[
-                const SizedBox(height: 20),
-                // Rounded search bar
+                const SizedBox(height: 24),
+                // Modern search bar
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -73,39 +100,63 @@ class HomeHeader extends StatelessWidget {
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                      horizontal: 20,
+                      vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFFFFF),
-                      borderRadius: BorderRadius.circular(25),
-                      border: Border.all(
-                        color: const Color(
-                          0xFF4CAF50,
-                        ).withAlpha((0.3 * 255).toInt()),
-                        width: 1,
-                      ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha((0.05 * 255).toInt()),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                          color: const Color(0x1A000000),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.search,
-                          color: Color(0xFF4CAF50),
-                          size: 20,
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF667EEA).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.search_rounded,
+                            color: Color(0xFF667EEA),
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            'search_placeholder'.tr(),
+                            style: const TextStyle(
+                              color: Color(0xFF6B7280),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          'search_placeholder'.tr(),
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 16,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF667EEA).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Text(
+                            '⌘K',
+                            style: TextStyle(
+                              color: Color(0xFF667EEA),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
@@ -116,43 +167,82 @@ class HomeHeader extends StatelessWidget {
             ],
           ),
         ),
-        // Quick actions section with white background spanning edge to edge
+        // Quick actions section with modern design
         if (quickActions != null)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
             decoration: const BoxDecoration(
-              color: Color.fromARGB(18, 255, 255, 255),
+              color: Colors.white,
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(1),
-                bottomRight: Radius.circular(1),
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x0A000000),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '${'hi'.tr()} ${AuthService.currentUser?['username'] ?? AuthService.currentUser?['name'] ?? 'User'}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF2E7D32),
-                    fontFamily: 'Poppins',
-                  ),
-                  textAlign: TextAlign.left,
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF667EEA).withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.person_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${'hi'.tr()} ${AuthService.currentUser?['username'] ?? AuthService.currentUser?['name'] ?? 'User'}',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1A1A1A),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'greeting_message'.tr(),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'greeting_message'.tr(),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF2E7D32),
-                    fontFamily: 'Poppins',
-                  ),
-                  textAlign: TextAlign.left,
-                ),
-                const SizedBox(height: 36),
+                const SizedBox(height: 32),
                 quickActions!,
               ],
             ),

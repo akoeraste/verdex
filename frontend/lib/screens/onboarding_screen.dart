@@ -61,54 +61,102 @@ class OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          PageView.builder(
-            controller: _pageController,
-            itemCount: _pages.length,
-            onPageChanged: _onPageChanged,
-            itemBuilder: (context, index) {
-              final page = _pages[index];
-              return OnboardingPage(
-                image: page['image']!,
-                titleKey: page['titleKey']!,
-                subtitleKey: page['subtitleKey']!,
-              );
-            },
+      backgroundColor: const Color(0xFFFAFBFC),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          Positioned(
-            bottom: 80,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_pages.length, (index) {
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                  height: 8.0,
-                  width: _currentPage == index ? 24.0 : 8.0,
-                  decoration: BoxDecoration(
-                    color:
-                        _currentPage == index
-                            ? Theme.of(context).primaryColor
-                            : Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                );
-              }),
-            ),
-          ),
-          if (_currentPage < _pages.length - 1)
-            Positioned(bottom: 40, right: 24, child: _buildNextButton()),
-          if (_currentPage == _pages.length - 1)
+        ),
+        child: Stack(
+          children: [
+            // Decorative elements
             Positioned(
-              bottom: 40,
-              left: 24,
-              right: 24,
-              child: _buildContinueButton(),
+              top: -100,
+              left: -100,
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.1),
+                ),
+              ),
             ),
-        ],
+            Positioned(
+              bottom: -150,
+              right: -150,
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.05),
+                ),
+              ),
+            ),
+            // Page content
+            PageView.builder(
+              controller: _pageController,
+              itemCount: _pages.length,
+              onPageChanged: _onPageChanged,
+              itemBuilder: (context, index) {
+                final page = _pages[index];
+                return OnboardingPage(
+                  image: page['image']!,
+                  titleKey: page['titleKey']!,
+                  subtitleKey: page['subtitleKey']!,
+                );
+              },
+            ),
+            // Page indicators
+            Positioned(
+              bottom: 120,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(_pages.length, (index) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.symmetric(horizontal: 6.0),
+                    height: 8.0,
+                    width: _currentPage == index ? 32.0 : 8.0,
+                    decoration: BoxDecoration(
+                      color:
+                          _currentPage == index
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow:
+                          _currentPage == index
+                              ? [
+                                BoxShadow(
+                                  color: Colors.white.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                              : null,
+                    ),
+                  );
+                }),
+              ),
+            ),
+            // Navigation buttons
+            if (_currentPage < _pages.length - 1)
+              Positioned(bottom: 40, right: 24, child: _buildNextButton()),
+            if (_currentPage == _pages.length - 1)
+              Positioned(
+                bottom: 40,
+                left: 24,
+                right: 24,
+                child: _buildContinueButton(),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -116,15 +164,11 @@ class OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildNextButton() {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(50),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4CAF50).withOpacity(0.3),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -133,7 +177,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(50),
+          borderRadius: BorderRadius.circular(16),
           onTap: _nextPage,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -143,21 +187,21 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                 Text(
                   'next'.tr(),
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF667EEA),
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    color: const Color(0xFF667EEA).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
                     Icons.arrow_forward_ios,
-                    color: Colors.white,
+                    color: Color(0xFF667EEA),
                     size: 16,
                   ),
                 ),
@@ -173,14 +217,14 @@ class OnboardingScreenState extends State<OnboardingScreen> {
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF2E7D32), Color(0xFF4CAF50)],
+          colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2E7D32).withOpacity(0.3),
+            color: const Color(0xFF667EEA).withOpacity(0.3),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -211,7 +255,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
                     Icons.rocket_launch,
@@ -242,25 +286,85 @@ class OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0).copyWith(top: 100),
-      child: Column(
-        children: [
-          Image.asset(image, height: 300),
-          const SizedBox(height: 48),
-          Text(
-            titleKey.tr(),
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            subtitleKey.tr(),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ],
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 60),
+            // Image container with modern styling
+            Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Image.asset(
+                image,
+                height: 280,
+                width: 280,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(height: 48),
+            // Title container
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                titleKey.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                  letterSpacing: -0.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Subtitle container
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.1),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                subtitleKey.tr(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

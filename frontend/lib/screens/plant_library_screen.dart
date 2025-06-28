@@ -82,10 +82,40 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
     setState(() {
       _isRefreshing = true;
     });
-    await _fetchPlants();
-    setState(() {
-      _isRefreshing = false;
-    });
+
+    try {
+      // Force refresh from API
+      final plants = await _plantService.forceRefreshPlants();
+
+      setState(() {
+        _allPlants = plants;
+        _filteredPlants = plants;
+        _isRefreshing = false;
+        _sortAndFilterPlants();
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Plants refreshed successfully'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isRefreshing = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to refresh: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _filterPlants() {
@@ -172,75 +202,197 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
     return Consumer<LanguageService>(
       builder: (context, languageService, child) {
         return Scaffold(
-          backgroundColor: const Color(0xFFF9FBE7),
-          appBar: AppBar(
-            title: Text('plant_library'.tr()),
-            elevation: 0,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            foregroundColor: const Color(0xFF2E7D32),
-            actions: [
-              IconButton(
-                icon: const Icon(
-                  Icons.language,
-                  color: Color(0xFF4CAF50),
-                  size: 28,
-                ),
-                onPressed: _showLanguageSelector,
-                tooltip: 'Change Language',
-              ),
-            ],
-          ),
-          body: Column(
-            children: [
-              _buildSearchAndFilter(),
-              Expanded(
-                child:
-                    _isLoading
-                        ? const Center(
-                          child: CircularProgressIndicator(
-                            color: Color(0xFF4CAF50),
-                          ),
-                        )
-                        : _filteredPlants.isEmpty
-                        ? _buildEmptyState()
-                        : Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: 10,
-                          ), // reduced for navbar
-                          child: RefreshIndicator(
-                            onRefresh: _refreshPlants,
-                            child: GridView.builder(
-                              padding: const EdgeInsets.all(16),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    crossAxisSpacing: 16,
-                                    mainAxisSpacing: 16,
-                                    childAspectRatio: 0.75,
-                                  ),
-                              itemCount: _filteredPlants.length,
-                              itemBuilder: (context, index) {
-                                final plant = _filteredPlants[index];
-                                return LibraryPlantCard(
-                                  plant: plant,
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder:
-                                            (context) => PlantDetailsScreen(
-                                              plant: plant,
-                                            ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
+          backgroundColor: const Color(0xFFFAFBFC),
+          body: SafeArea(
+            child: Column(
+              children: [
+                // Header - Fixed at top
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 20,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 20,
+                  ),
+                  child: Row(
+                    children: [
+                      // Back button
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => Navigator.of(context).pop(),
+                            child: const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Icon(
+                                Icons.arrow_back_ios_new,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                             ),
                           ),
                         ),
-              ),
-            ],
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'plant_library'.tr(),
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Refresh button
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: _isRefreshing ? null : _refreshPlants,
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child:
+                                  _isRefreshing
+                                      ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                        ),
+                                      )
+                                      : const Icon(
+                                        Icons.refresh,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: _showLanguageSelector,
+                            child: const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Icon(
+                                Icons.language,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Scrollable content area
+                Expanded(
+                  child:
+                      _isLoading
+                          ? const Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFF667EEA),
+                              ),
+                            ),
+                          )
+                          : _filteredPlants.isEmpty
+                          ? _buildEmptyState()
+                          : RefreshIndicator(
+                            onRefresh: _refreshPlants,
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.only(
+                                bottom: 100,
+                              ), // for navbar
+                              child: Column(
+                                children: [
+                                  // Search and Filter Section - Now scrolls with content
+                                  _buildSearchAndFilter(),
+
+                                  // Plants Grid
+                                  Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: GridView.builder(
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 2,
+                                            crossAxisSpacing: 16,
+                                            mainAxisSpacing: 16,
+                                            childAspectRatio: 0.75,
+                                          ),
+                                      itemCount: _filteredPlants.length,
+                                      itemBuilder: (context, index) {
+                                        final plant = _filteredPlants[index];
+                                        return LibraryPlantCard(
+                                          plant: plant,
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder:
+                                                    (context) =>
+                                                        PlantDetailsScreen(
+                                                          plant: plant,
+                                                        ),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                ),
+              ],
+            ),
           ),
           bottomNavigationBar: BottomNavBar(
             selectedIndex: 1,
@@ -263,52 +415,84 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.eco_outlined, size: 80, color: Colors.grey[400]),
-          const SizedBox(height: 16),
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(60),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF667EEA).withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.eco_outlined,
+              size: 48,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 24),
           Text(
             _searchController.text.isEmpty
                 ? 'no_plants_available'.tr()
                 : 'no_plants_found'.tr(),
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1A1A1A),
             ),
           ),
           if (_searchController.text.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
               'try_different_search'.tr(),
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              style: const TextStyle(fontSize: 16, color: Color(0xFF666666)),
             ),
           ] else ...[
             const SizedBox(height: 16),
             Text(
               'tap_refresh_to_load_plants'.tr(),
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              style: const TextStyle(fontSize: 16, color: Color(0xFF666666)),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _isRefreshing ? null : _refreshPlants,
-              icon:
-                  _isRefreshing
-                      ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                      : const Icon(Icons.refresh),
-              label: Text(_isRefreshing ? 'loading'.tr() : 'refresh'.tr()),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
+            const SizedBox(height: 24),
+            SizedBox(
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: _isRefreshing ? null : _refreshPlants,
+                icon:
+                    _isRefreshing
+                        ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                        : const Icon(Icons.refresh),
+                label: Text(_isRefreshing ? 'loading'.tr() : 'refresh'.tr()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ).copyWith(
+                  backgroundColor: MaterialStateProperty.all(
+                    Colors.transparent,
+                  ),
                 ),
               ),
             ),
@@ -320,18 +504,16 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
 
   Widget _buildSearchAndFilter() {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
-        ),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((0.05 * 255).toInt()),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: const Color(0xFF000000).withOpacity(0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -341,25 +523,34 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
             controller: _searchController,
             decoration: InputDecoration(
               hintText: 'search_plants'.tr(),
-              prefixIcon: const Icon(Icons.search, color: Color(0xFF4CAF50)),
+              hintStyle: const TextStyle(
+                color: Color(0xFF999999),
+                fontWeight: FontWeight.w400,
+              ),
+              prefixIcon: const Icon(Icons.search, color: Color(0xFF667EEA)),
               suffixIcon:
                   _searchController.text.isNotEmpty
                       ? IconButton(
-                        icon: const Icon(Icons.clear, color: Color(0xFF4CAF50)),
+                        icon: const Icon(Icons.clear, color: Color(0xFF667EEA)),
                         onPressed: () {
                           _searchController.clear();
                         },
                       )
                       : null,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: const Color(0xFFF1F8E9),
+              fillColor: const Color(0xFFF8F9FA),
+            ),
+            style: const TextStyle(
+              color: Color(0xFF1A1A1A),
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [_buildFilterDropdown(), _buildSortDropdown()],
@@ -371,13 +562,11 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
 
   Widget _buildFilterDropdown() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F8E9),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFF4CAF50).withAlpha((0.3 * 255).toInt()),
-        ),
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF667EEA).withOpacity(0.2)),
       ),
       child: DropdownButton<String>(
         value: _categoryFilter,
@@ -403,7 +592,11 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
                   value == 'all'
                       ? 'all_categories'.tr()
                       : value[0].toUpperCase() + value.substring(1),
-                  style: const TextStyle(fontSize: 14),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF1A1A1A),
+                  ),
                 ),
               );
             }).toList(),
@@ -413,13 +606,11 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
 
   Widget _buildSortDropdown() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F8E9),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFF4CAF50).withAlpha((0.3 * 255).toInt()),
-        ),
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF667EEA).withOpacity(0.2)),
       ),
       child: DropdownButton<String>(
         value: _sortOrder,
@@ -450,41 +641,62 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
     );
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
             return Container(
-              padding: const EdgeInsets.all(20),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'select_language'.tr(),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF2E7D32),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x1A000000),
+                    blurRadius: 20,
+                    offset: Offset(0, -4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Handle bar
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE0E0E0),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'select_language'.tr(),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1A1A1A),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Full width language buttons
+                  ...languageService.availableLanguages.map((lang) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildFullWidthLanguageButton(
+                        lang,
+                        languageService,
+                        setModalState,
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children:
-                          languageService.availableLanguages.map((lang) {
-                            return _buildLanguageButton(
-                              lang,
-                              languageService,
-                              setModalState,
-                            );
-                          }).toList(),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
+                    );
+                  }).toList(),
+                  const SizedBox(height: 24),
+                ],
               ),
             );
           },
@@ -493,7 +705,7 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
     );
   }
 
-  Widget _buildLanguageButton(
+  Widget _buildFullWidthLanguageButton(
     Language lang,
     LanguageService service,
     StateSetter setModalState,
@@ -502,107 +714,161 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
         service.majorLanguageCode == lang.code &&
         service.minorLanguageCode == null;
     final hasMinor = lang.minorLanguages.isNotEmpty;
+
     return Column(
-      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                isSelected ? Theme.of(context).primaryColor : Colors.grey[200],
-            foregroundColor: isSelected ? Colors.white : Colors.black87,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            ),
-            elevation: isSelected ? 4 : 0,
+        // Main language button
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient:
+                isSelected
+                    ? const LinearGradient(
+                      colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                    : null,
+            color: isSelected ? null : const Color(0xFFF8F9FA),
+            boxShadow:
+                isSelected
+                    ? [
+                      BoxShadow(
+                        color: const Color(0xFF667EEA).withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                    : [
+                      BoxShadow(
+                        color: const Color(0xFF000000).withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
           ),
-          onPressed: () async {
-            await service.setLanguage(lang.code, minorCode: null);
-            await context.setLocale(Locale(lang.code));
-            Navigator.pop(context);
-          },
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                lang.name,
-                style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 16,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () async {
+                await service.setLanguage(lang.code, minorCode: null);
+                await context.setLocale(Locale(lang.code));
+                Navigator.pop(context);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        lang.name,
+                        style: TextStyle(
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          fontSize: 16,
+                          color:
+                              isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF1A1A1A),
+                        ),
+                      ),
+                    ),
+                    if (isSelected)
+                      const Icon(
+                        Icons.check_circle,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                  ],
                 ),
               ),
-              if (isSelected)
-                const Padding(
-                  padding: EdgeInsets.only(left: 6),
-                  child: Icon(Icons.check, size: 18, color: Colors.white),
-                ),
-            ],
+            ),
           ),
         ),
+        // Minor languages if any
         if (hasMinor)
           Padding(
-            padding: const EdgeInsets.only(left: 8.0, top: 6.0),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            padding: const EdgeInsets.only(left: 16, top: 8),
+            child: Column(
               children:
                   lang.minorLanguages.map((minorLang) {
                     final isMinorSelected =
                         service.minorLanguageCode == minorLang.code;
-                    return OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor:
-                            isMinorSelected
-                                ? Theme.of(context).primaryColor
-                                : Colors.white,
-                        foregroundColor:
-                            isMinorSelected ? Colors.white : Colors.black87,
-                        side: BorderSide(
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
                           color:
                               isMinorSelected
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.grey[400]!,
+                                  ? const Color(0xFF667EEA)
+                                  : const Color(0xFFF1F3F4),
+                          boxShadow:
+                              isMinorSelected
+                                  ? [
+                                    BoxShadow(
+                                      color: const Color(
+                                        0xFF667EEA,
+                                      ).withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                  : null,
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      onPressed: () async {
-                        await service.setLanguage(
-                          lang.code,
-                          minorCode: minorLang.code,
-                        );
-                        await context.setLocale(Locale(lang.code));
-                        Navigator.pop(context);
-                      },
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            minorLang.name,
-                            style: TextStyle(
-                              fontWeight:
-                                  isMinorSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                              fontSize: 14,
-                            ),
-                          ),
-                          if (isMinorSelected)
-                            const Padding(
-                              padding: EdgeInsets.only(left: 4),
-                              child: Icon(
-                                Icons.check,
-                                size: 16,
-                                color: Colors.white,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () async {
+                              await service.setLanguage(
+                                lang.code,
+                                minorCode: minorLang.code,
+                              );
+                              await context.setLocale(Locale(lang.code));
+                              Navigator.pop(context);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      minorLang.name,
+                                      style: TextStyle(
+                                        fontWeight:
+                                            isMinorSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.w500,
+                                        fontSize: 14,
+                                        color:
+                                            isMinorSelected
+                                                ? Colors.white
+                                                : const Color(0xFF1A1A1A),
+                                      ),
+                                    ),
+                                  ),
+                                  if (isMinorSelected)
+                                    const Icon(
+                                      Icons.check_circle,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                ],
                               ),
                             ),
-                        ],
+                          ),
+                        ),
                       ),
                     );
                   }).toList(),

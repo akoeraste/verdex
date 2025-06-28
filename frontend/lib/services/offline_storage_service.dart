@@ -10,6 +10,12 @@ class OfflineStorageService {
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
+  // Cache for frequently accessed data
+  Map<String, dynamic>? _cachedUserData;
+  Map<String, dynamic>? _cachedCredentials;
+  bool _userDataLoaded = false;
+  bool _credentialsLoaded = false;
+
   // Keys for secure storage
   static const String _cachedCredentialsKey = 'cached_credentials';
   static const String _cachedUserDataKey = 'cached_user_data';
@@ -28,6 +34,9 @@ class OfflineStorageService {
       'timestamp': DateTime.now().toIso8601String(),
     };
 
+    _cachedCredentials = credentials; // Update cache
+    _credentialsLoaded = true;
+
     await _secureStorage.write(
       key: _cachedCredentialsKey,
       value: jsonEncode(credentials),
@@ -36,12 +45,19 @@ class OfflineStorageService {
 
   // Get cached user credentials
   Future<Map<String, dynamic>?> getCachedCredentials() async {
+    if (_credentialsLoaded && _cachedCredentials != null) {
+      return _cachedCredentials;
+    }
+
     final credentialsJson = await _secureStorage.read(
       key: _cachedCredentialsKey,
     );
     if (credentialsJson != null) {
       try {
-        return jsonDecode(credentialsJson) as Map<String, dynamic>;
+        _cachedCredentials =
+            jsonDecode(credentialsJson) as Map<String, dynamic>;
+        _credentialsLoaded = true;
+        return _cachedCredentials;
       } catch (e) {
         return null;
       }
@@ -51,6 +67,9 @@ class OfflineStorageService {
 
   // Cache user data
   Future<void> cacheUserData(Map<String, dynamic> userData) async {
+    _cachedUserData = userData; // Update cache
+    _userDataLoaded = true;
+
     await _secureStorage.write(
       key: _cachedUserDataKey,
       value: jsonEncode(userData),
@@ -60,10 +79,16 @@ class OfflineStorageService {
 
   // Get cached user data
   Future<Map<String, dynamic>?> getCachedUserData() async {
+    if (_userDataLoaded && _cachedUserData != null) {
+      return _cachedUserData;
+    }
+
     final userDataJson = await _secureStorage.read(key: _cachedUserDataKey);
     if (userDataJson != null) {
       try {
-        return jsonDecode(userDataJson) as Map<String, dynamic>;
+        _cachedUserData = jsonDecode(userDataJson) as Map<String, dynamic>;
+        _userDataLoaded = true;
+        return _cachedUserData;
       } catch (e) {
         return null;
       }
@@ -161,14 +186,34 @@ class OfflineStorageService {
 
   // Clear all cached data
   Future<void> clearAllCachedData() async {
+    print('🗄️ [OfflineStorage] Clearing all cached data...');
+
     await _secureStorage.delete(key: _cachedCredentialsKey);
     await _secureStorage.delete(key: _cachedUserDataKey);
+    print('🗄️ [OfflineStorage] Secure storage cleared');
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_lastSyncTimestampKey);
     await prefs.remove(_pendingActionsKey);
     await prefs.remove(_isOfflineModeKey);
     await prefs.remove(_offlineModeEnabledKey);
+    print('🗄️ [OfflineStorage] Shared preferences cleared');
+
+    // Clear in-memory cache
+    _cachedUserData = null;
+    _cachedCredentials = null;
+    _userDataLoaded = false;
+    _credentialsLoaded = false;
+    print('🗄️ [OfflineStorage] In-memory cache cleared');
+
+    print('🗄️ [OfflineStorage] All cached data cleared successfully');
+  }
+
+  // Clear only cached user data (keep credentials for offline login)
+  Future<void> clearCachedUserData() async {
+    await _secureStorage.delete(key: _cachedUserDataKey);
+    _cachedUserData = null;
+    _userDataLoaded = false;
   }
 
   // Check if cached credentials are still valid (within 30 days)

@@ -48,35 +48,61 @@ class _IdentifyScreenState extends State<IdentifyScreen>
     );
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
             return Container(
-              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x1A000000),
+                    blurRadius: 20,
+                    offset: Offset(0, -4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Handle bar
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE0E0E0),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   Text(
                     'select_language'.tr(),
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1A1A1A),
+                      fontSize: 20,
+                    ),
                   ),
-                  const SizedBox(height: 20),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children:
-                        languageService.availableLanguages.map((lang) {
-                          return _buildLanguageButton(
-                            lang,
-                            languageService,
-                            setModalState,
-                          );
-                        }).toList(),
-                  ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
+                  // Full width language buttons
+                  ...languageService.availableLanguages.map((lang) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildFullWidthLanguageButton(
+                        lang,
+                        languageService,
+                        setModalState,
+                      ),
+                    );
+                  }).toList(),
+                  const SizedBox(height: 24),
                 ],
               ),
             );
@@ -86,7 +112,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
     );
   }
 
-  Widget _buildLanguageButton(
+  Widget _buildFullWidthLanguageButton(
     Language lang,
     LanguageService service,
     StateSetter setModalState,
@@ -95,107 +121,161 @@ class _IdentifyScreenState extends State<IdentifyScreen>
         service.majorLanguageCode == lang.code &&
         service.minorLanguageCode == null;
     final hasMinor = lang.minorLanguages.isNotEmpty;
+
     return Column(
-      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                isSelected ? Theme.of(context).primaryColor : Colors.grey[200],
-            foregroundColor: isSelected ? Colors.white : Colors.black87,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            ),
-            elevation: isSelected ? 4 : 0,
+        // Main language button
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient:
+                isSelected
+                    ? const LinearGradient(
+                      colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                    : null,
+            color: isSelected ? null : const Color(0xFFF8F9FA),
+            boxShadow:
+                isSelected
+                    ? [
+                      BoxShadow(
+                        color: const Color(0xFF667EEA).withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                    : [
+                      BoxShadow(
+                        color: const Color(0xFF000000).withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
           ),
-          onPressed: () async {
-            await service.setLanguage(lang.code, minorCode: null);
-            await context.setLocale(Locale(lang.code));
-            Navigator.pop(context);
-          },
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                lang.name,
-                style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 16,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () async {
+                await service.setLanguage(lang.code, minorCode: null);
+                await context.setLocale(Locale(lang.code));
+                Navigator.pop(context);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        lang.name,
+                        style: TextStyle(
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          fontSize: 16,
+                          color:
+                              isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF1A1A1A),
+                        ),
+                      ),
+                    ),
+                    if (isSelected)
+                      const Icon(
+                        Icons.check_circle,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                  ],
                 ),
               ),
-              if (isSelected)
-                const Padding(
-                  padding: EdgeInsets.only(left: 6),
-                  child: Icon(Icons.check, size: 18, color: Colors.white),
-                ),
-            ],
+            ),
           ),
         ),
+        // Minor languages if any
         if (hasMinor)
           Padding(
-            padding: const EdgeInsets.only(left: 8.0, top: 6.0),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            padding: const EdgeInsets.only(left: 16, top: 8),
+            child: Column(
               children:
                   lang.minorLanguages.map((minorLang) {
                     final isMinorSelected =
                         service.minorLanguageCode == minorLang.code;
-                    return OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor:
-                            isMinorSelected
-                                ? Theme.of(context).primaryColor
-                                : Colors.white,
-                        foregroundColor:
-                            isMinorSelected ? Colors.white : Colors.black87,
-                        side: BorderSide(
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
                           color:
                               isMinorSelected
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.grey[400]!,
+                                  ? const Color(0xFF667EEA)
+                                  : const Color(0xFFF1F3F4),
+                          boxShadow:
+                              isMinorSelected
+                                  ? [
+                                    BoxShadow(
+                                      color: const Color(
+                                        0xFF667EEA,
+                                      ).withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                  : null,
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      onPressed: () async {
-                        await service.setLanguage(
-                          lang.code,
-                          minorCode: minorLang.code,
-                        );
-                        await context.setLocale(Locale(lang.code));
-                        Navigator.pop(context);
-                      },
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            minorLang.name,
-                            style: TextStyle(
-                              fontWeight:
-                                  isMinorSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                              fontSize: 14,
-                            ),
-                          ),
-                          if (isMinorSelected)
-                            const Padding(
-                              padding: EdgeInsets.only(left: 4),
-                              child: Icon(
-                                Icons.check,
-                                size: 16,
-                                color: Colors.white,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () async {
+                              await service.setLanguage(
+                                lang.code,
+                                minorCode: minorLang.code,
+                              );
+                              await context.setLocale(Locale(lang.code));
+                              Navigator.pop(context);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      minorLang.name,
+                                      style: TextStyle(
+                                        fontWeight:
+                                            isMinorSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.w500,
+                                        fontSize: 14,
+                                        color:
+                                            isMinorSelected
+                                                ? Colors.white
+                                                : const Color(0xFF1A1A1A),
+                                      ),
+                                    ),
+                                  ),
+                                  if (isMinorSelected)
+                                    const Icon(
+                                      Icons.check_circle,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                ],
                               ),
                             ),
-                        ],
+                          ),
+                        ),
                       ),
                     );
                   }).toList(),
@@ -239,39 +319,194 @@ class _IdentifyScreenState extends State<IdentifyScreen>
       final confirmed = await showDialog<bool>(
         context: context,
         barrierDismissible: false,
+        barrierColor: Colors.black.withOpacity(0.6),
         builder: (context) {
-          return AlertDialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.file(tempFile, height: 200),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      icon: const Icon(Icons.close),
-                      label: const Text('Cancel'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF000000).withOpacity(0.1),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header with gradient
+                  Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
                       ),
                     ),
-                    ElevatedButton.icon(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      icon: const Icon(Icons.check),
-                      label: const Text('Confirm'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                    padding: const EdgeInsets.all(24),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            'confirm_photo'.tr(),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Image preview
+                  Container(
+                    margin: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF000000).withOpacity(0.1),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.file(
+                        tempFile,
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
                       ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  // Action buttons
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    child: Row(
+                      children: [
+                        // Cancel button
+                        Expanded(
+                          child: Container(
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8F9FA),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFFE0E0E0),
+                              ),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () => Navigator.of(context).pop(false),
+                                child: const Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.close,
+                                        color: Color(0xFF666666),
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Cancel',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF666666),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        // Confirm button
+                        Expanded(
+                          child: Container(
+                            height: 48,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFF667EEA,
+                                  ).withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () => Navigator.of(context).pop(true),
+                                child: const Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Confirm',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -297,7 +532,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
   Widget build(BuildContext context) {
     _buildOptionCardsList(context); // Build cards before rendering
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FBE7),
+      backgroundColor: const Color(0xFFFAFBFC),
       body: SafeArea(
         child: Column(
           children: [
@@ -311,25 +546,27 @@ class _IdentifyScreenState extends State<IdentifyScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     Text(
                       'identify_page_title'.tr(),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green[800],
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF1A1A1A),
+                        letterSpacing: -0.5,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     Text(
                       'identify_page_subtitle'.tr(),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,
-                        color: Colors.grey[700],
+                        color: Color(0xFF6B7280),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     const Spacer(),
@@ -402,36 +639,87 @@ class _IdentifyScreenState extends State<IdentifyScreen>
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    return Card(
-      elevation: 4,
-      shadowColor: Colors.green.withAlpha((0.02 * 255).toInt()),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Row(
-            children: [
-              Icon(icon, size: 40, color: Colors.green[800]),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(subtitle, style: TextStyle(color: Colors.grey[600])),
-                  ],
+    Gradient gradient;
+    Color iconColor;
+    if (icon == Icons.camera_alt) {
+      gradient = const LinearGradient(
+        colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+      iconColor = const Color(0xFF667EEA);
+    } else if (icon == Icons.photo_library) {
+      gradient = const LinearGradient(
+        colors: [Color(0xFFFFD93D), Color(0xFFFF6B6B)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+      iconColor = const Color(0xFFFF6B6B);
+    } else {
+      gradient = const LinearGradient(
+        colors: [Color(0xFF4ECDC4), Color(0xFF44A08D)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+      iconColor = const Color(0xFF44A08D);
+    }
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: gradient.colors.first.withOpacity(0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, size: 32, color: Colors.white),
                 ),
-              ),
-            ],
+                const SizedBox(width: 24),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          color: Color(0xFFF1F3F4),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

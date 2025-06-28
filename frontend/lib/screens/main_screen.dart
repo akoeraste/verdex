@@ -31,13 +31,14 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _checkAuth() async {
-    final authService = AuthService();
-    final user = AuthService.currentUser;
-    final hasUsername =
-        user != null && (user['username']?.toString().isNotEmpty ?? false);
+    // Add a small delay to ensure user data is properly loaded
+    await Future.delayed(const Duration(milliseconds: 100));
 
-    if (!hasUsername && mounted) {
-      await authService.logout();
+    final authService = AuthService();
+    final isAuthenticated = await authService.isAuthenticated();
+
+    if (!isAuthenticated && mounted) {
+      await authService.forceLogout();
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const WelcomeScreen()),
       );

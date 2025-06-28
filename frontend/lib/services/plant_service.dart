@@ -16,72 +16,117 @@ class PlantService {
   static const String _lastFetchKey = 'last_fetch_time';
   static const Duration _cacheExpiry = Duration(hours: 1); // Cache for 1 hour
 
+  // In-memory cache for faster access
+  List<Map<String, dynamic>>? _memoryCache;
+  DateTime? _lastMemoryCacheTime;
+
   Future<List<Map<String, dynamic>>> getAllPlants({
     bool forceRefresh = false,
   }) async {
     try {
+      // Always try memory cache first for fastest access
+      if (!forceRefresh &&
+          _memoryCache != null &&
+          _lastMemoryCacheTime != null) {
+        final timeSinceLastCache = DateTime.now().difference(
+          _lastMemoryCacheTime!,
+        );
+        if (timeSinceLastCache < _cacheExpiry) {
+          debugPrint(
+            'Using memory cache: ${_memoryCache!.length} plants (${timeSinceLastCache.inMinutes} minutes old)',
+          );
+          return _memoryCache!;
+        }
+      }
+
       // Check if we have cached data and it's not expired
       if (!forceRefresh) {
         final cachedPlants = await loadCachedPlants();
         if (cachedPlants.isNotEmpty && await _isCacheValid()) {
+          // Update memory cache
+          _memoryCache = cachedPlants;
+          _lastMemoryCacheTime = DateTime.now();
+          debugPrint('Using disk cache: ${cachedPlants.length} plants');
           return cachedPlants;
         }
       }
 
-      final url = '${ApiConfig.baseUrl}/plants/app/all';
-      debugPrint('Calling API URL: $url');
+      // Only fetch from API if forced refresh or cache is expired/empty
+      debugPrint('Fetching plants from API (forceRefresh: $forceRefresh)');
+      final plants = await _fetchFromApi();
 
-      // Fetch from online database
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      );
+      // Update both memory and disk cache
+      _memoryCache = plants;
+      _lastMemoryCacheTime = DateTime.now();
+      await cachePlants(plants);
 
-      if (response.statusCode == 200) {
-        // Check if response is HTML (error page) instead of JSON
-        if (response.body.trim().startsWith('<!doctype html>') ||
-            response.body.trim().startsWith('<html')) {
-          debugPrint(
-            'ERROR: Received HTML instead of JSON. This indicates a routing or server issue.',
-          );
-          throw Exception(
-            'Server returned HTML instead of JSON. Check API endpoint configuration.',
-          );
-        }
-
-        final Map<String, dynamic> responseJson = jsonDecode(response.body);
-        final List<dynamic> responseData = responseJson['data'] ?? [];
-
-        debugPrint('Plants data length: ${responseData.length}');
-
-        final plants =
-            responseData.map((plant) => _formatPlantData(plant)).toList();
-
-        // Cache the data
-        await cachePlants(plants);
-
-        return plants;
-      } else {
-        // If online fetch fails, try to return cached data
-        final cachedPlants = await loadCachedPlants();
-        if (cachedPlants.isNotEmpty) {
-          return cachedPlants;
-        }
-        throw Exception(
-          'Failed to load plants: ${response.statusCode} - ${response.body}',
-        );
-      }
+      debugPrint('Successfully fetched and cached ${plants.length} plants');
+      return plants;
     } catch (e) {
       debugPrint('Error in getAllPlants: $e');
       // If any error occurs, try to return cached data
       final cachedPlants = await loadCachedPlants();
       if (cachedPlants.isNotEmpty) {
+        debugPrint('Using cached plants due to exception');
         return cachedPlants;
       }
       throw Exception('Failed to load plants: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchFromApi() async {
+    final url = '${ApiConfig.baseUrl}/plants/app/all';
+    debugPrint('Calling API URL: $url');
+
+    // Fetch from online database
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    );
+
+    debugPrint('API Response Status: ${response.statusCode}');
+    debugPrint('API Response Body Length: ${response.body.length}');
+
+    if (response.statusCode == 200) {
+      // Check if response is HTML (error page) instead of JSON
+      if (response.body.trim().startsWith('<!doctype html>') ||
+          response.body.trim().startsWith('<html')) {
+        debugPrint(
+          'ERROR: Received HTML instead of JSON. This indicates a routing or server issue.',
+        );
+        throw Exception(
+          'Server returned HTML instead of JSON. Check API endpoint configuration.',
+        );
+      }
+
+      // Try to parse the response
+      final dynamic responseData = jsonDecode(response.body);
+      List<dynamic> plantsList;
+
+      // Handle different response formats
+      if (responseData is Map<String, dynamic>) {
+        // If response is wrapped in a data field
+        plantsList = responseData['data'] ?? [];
+      } else if (responseData is List) {
+        // If response is directly a list
+        plantsList = responseData;
+      } else {
+        throw Exception('Unexpected response format from API');
+      }
+
+      debugPrint('Plants data length: ${plantsList.length}');
+
+      final plants =
+          plantsList.map((plant) => _formatPlantData(plant)).toList();
+      return plants;
+    } else {
+      debugPrint('API Error: ${response.statusCode} - ${response.body}');
+      throw Exception(
+        'Failed to load plants: ${response.statusCode} - ${response.body}',
+      );
     }
   }
 
@@ -112,55 +157,99 @@ class PlantService {
     final cachedPlants = await loadCachedPlants();
     final plantFromCache = cachedPlants.firstWhereOrNull((p) => p['id'] == id);
     if (plantFromCache != null) {
+      debugPrint('Found plant $id in cache');
       return _formatPlantData(plantFromCache);
     }
+
     final languageService = LanguageService();
     final langCode = languageService.effectiveLanguageCode;
     final urlWithLang = '${ApiConfig.baseUrl}/plants/$id?lang=$langCode';
     final urlWithoutLang = '${ApiConfig.baseUrl}/plants/$id';
+
     try {
+      debugPrint('Fetching plant $id from API with lang: $langCode');
+
       // Try with lang param first
       final response = await http.get(
         Uri.parse(urlWithLang),
         headers: {'Content-Type': 'application/json'},
       );
+
+      debugPrint('API Response Status: ${response.statusCode}');
+
       if (response.statusCode == 200 &&
           !response.body.trim().startsWith('<!doctype html>') &&
           !response.body.trim().startsWith('<html')) {
-        final data = jsonDecode(response.body)['data'];
-        return data != null ? _formatPlantData(data) : null;
+        final dynamic responseData = jsonDecode(response.body);
+        Map<String, dynamic>? plantData;
+
+        // Handle different response formats
+        if (responseData is Map<String, dynamic>) {
+          plantData = responseData['data'];
+        } else if (responseData is Map) {
+          plantData = Map<String, dynamic>.from(responseData);
+        }
+
+        if (plantData != null) {
+          debugPrint('Successfully fetched plant $id from API');
+          return _formatPlantData(plantData);
+        }
       } else {
-        // Fallback: try without lang param
-        final fallbackResponse = await http.get(
-          Uri.parse(urlWithoutLang),
-          headers: {'Content-Type': 'application/json'},
-        );
-        if (fallbackResponse.statusCode == 200 &&
-            !fallbackResponse.body.trim().startsWith('<!doctype html>') &&
-            !fallbackResponse.body.trim().startsWith('<html')) {
-          final data = jsonDecode(fallbackResponse.body)['data'];
-          return data != null ? _formatPlantData(data) : null;
-        } else {
-          // If backend fails or returns HTML, try cache again
-          final cachedPlantsRetry = await loadCachedPlants();
-          final plantRetry = cachedPlantsRetry.firstWhereOrNull(
-            (p) => p['id'] == id,
-          );
-          if (plantRetry != null) {
-            return _formatPlantData(plantRetry);
-          }
-          throw Exception(
-            'Failed to load plant: Backend returned HTML or error, and plant not found in cache.',
-          );
+        debugPrint('API returned HTML or error, trying without lang param');
+      }
+
+      // Fallback: try without lang param
+      final fallbackResponse = await http.get(
+        Uri.parse(urlWithoutLang),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      debugPrint(
+        'Fallback API Response Status: ${fallbackResponse.statusCode}',
+      );
+
+      if (fallbackResponse.statusCode == 200 &&
+          !fallbackResponse.body.trim().startsWith('<!doctype html>') &&
+          !fallbackResponse.body.trim().startsWith('<html')) {
+        final dynamic responseData = jsonDecode(fallbackResponse.body);
+        Map<String, dynamic>? plantData;
+
+        // Handle different response formats
+        if (responseData is Map<String, dynamic>) {
+          plantData = responseData['data'];
+        } else if (responseData is Map) {
+          plantData = Map<String, dynamic>.from(responseData);
+        }
+
+        if (plantData != null) {
+          debugPrint('Successfully fetched plant $id from fallback API');
+          return _formatPlantData(plantData);
         }
       }
+
+      // If backend fails or returns HTML, try cache again
+      debugPrint('API failed, checking cache again for plant $id');
+      final cachedPlantsRetry = await loadCachedPlants();
+      final plantRetry = cachedPlantsRetry.firstWhereOrNull(
+        (p) => p['id'] == id,
+      );
+      if (plantRetry != null) {
+        debugPrint('Found plant $id in cache retry');
+        return _formatPlantData(plantRetry);
+      }
+
+      throw Exception(
+        'Failed to load plant: Backend returned HTML or error, and plant not found in cache.',
+      );
     } catch (e) {
+      debugPrint('Error fetching plant $id: $e');
       // On any error, try cache again
       final cachedPlantsRetry = await loadCachedPlants();
       final plantRetry = cachedPlantsRetry.firstWhereOrNull(
         (p) => p['id'] == id,
       );
       if (plantRetry != null) {
+        debugPrint('Found plant $id in cache after error');
         return _formatPlantData(plantRetry);
       }
       throw Exception('Failed to load plant: $e');
@@ -294,9 +383,12 @@ class PlantService {
   }
 
   Future<void> clearCache() async {
+    _memoryCache = null;
+    _lastMemoryCacheTime = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_cacheKey);
     await prefs.remove(_lastFetchKey);
+    debugPrint('All plant caches cleared');
   }
 
   Future<void> refreshCache() async {
@@ -435,7 +527,7 @@ class PlantService {
   }
 
   // Test method to verify API connection
-  Future<void> testApiConnection() async {
+  Future<bool> testApiConnection() async {
     try {
       final url = '${ApiConfig.baseUrl}/plants/app/all';
       debugPrint('Testing API connection to: $url');
@@ -448,23 +540,19 @@ class PlantService {
         },
       );
 
-      debugPrint('Test Response Status: ${response.statusCode}');
-      debugPrint(
-        'Test Response Content-Type: ${response.headers['content-type']}',
-      );
-      debugPrint(
-        'Test Response Body (first 200 chars): ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}',
-      );
+      debugPrint('Test API Response Status: ${response.statusCode}');
+      debugPrint('Test API Response Body Length: ${response.body.length}');
 
       if (response.statusCode == 200) {
         debugPrint('✅ API connection successful');
+        return true;
       } else {
-        debugPrint(
-          '❌ API connection failed with status: ${response.statusCode}',
-        );
+        debugPrint('❌ API connection failed: ${response.statusCode}');
+        return false;
       }
     } catch (e) {
       debugPrint('❌ API connection error: $e');
+      return false;
     }
   }
 
@@ -481,5 +569,30 @@ class PlantService {
     await prefs.remove('cached_plants');
     await prefs.remove('plants_cache_timestamp');
     debugPrint('Cache cleared');
+  }
+
+  // Get cache status
+  Future<Map<String, dynamic>> getCacheStatus() async {
+    final lastFetch = await _getLastFetchTime();
+    final cachedPlants = await loadCachedPlants();
+    final timeSinceLastFetch =
+        lastFetch != null ? DateTime.now().difference(lastFetch) : null;
+
+    return {
+      'hasCache': cachedPlants.isNotEmpty,
+      'cacheSize': cachedPlants.length,
+      'lastFetch': lastFetch?.toIso8601String(),
+      'timeSinceLastFetch': timeSinceLastFetch?.inMinutes,
+      'isExpired':
+          timeSinceLastFetch != null && timeSinceLastFetch > _cacheExpiry,
+      'memoryCacheSize': _memoryCache?.length ?? 0,
+    };
+  }
+
+  Future<DateTime?> _getLastFetchTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastFetch = prefs.getInt(_lastFetchKey);
+    if (lastFetch == null) return null;
+    return DateTime.fromMillisecondsSinceEpoch(lastFetch);
   }
 }

@@ -160,7 +160,7 @@ class AuthService {
       return {
         'success': false,
         'message':
-            'No cached credentials found. Please connect to the internet to login.',
+            'No cached credentials found. Please connect to the internet and login first to enable offline access.',
         'offline': true,
       };
     }
@@ -217,16 +217,6 @@ class AuthService {
     };
   }
 
-  // Check if user is logged in (token exists or cached data available)
-  Future<bool> isLoggedIn() async {
-    final token = await _secureStorage.read(key: _tokenKey);
-    if (token != null) return true;
-
-    // Check if we have cached user data for offline mode
-    final cachedUser = await _offlineStorage.getCachedUserData();
-    return cachedUser != null;
-  }
-
   // Get stored token
   Future<String?> getToken() async {
     return await _secureStorage.read(key: _tokenKey);
@@ -238,20 +228,48 @@ class AuthService {
     if (_currentUser == null) {
       final token = await getToken();
       if (token != null) {
-        // Always try to refresh from server first
-        print('🔐 [AuthService] Token found, refreshing from server...');
-        await refreshUser();
-      } else {
-        // Only use cached data if no token exists
-        print('🔐 [AuthService] No token found, checking cached data...');
+        // Use cached data first for faster startup, then refresh in background
+        print('🔐 [AuthService] Token found, checking cached data first...');
         final cachedUser = await _offlineStorage.getCachedUserData();
         if (cachedUser != null) {
           _currentUser = cachedUser;
-          print('🔐 [AuthService] Using cached user data for initialization');
+          print(
+            '🔐 [AuthService] Using cached user data for immediate startup',
+          );
+        }
+
+        // Refresh from server in background (non-blocking)
+        _refreshUserInBackground();
+      } else {
+        // Only check cached credentials for offline login availability, don't auto-login
+        print(
+          '🔐 [AuthService] No token found, checking cached credentials...',
+        );
+        final cachedCredentials = await _offlineStorage.getCachedCredentials();
+        if (cachedCredentials != null) {
+          final areValid = await _offlineStorage.areCachedCredentialsValid();
+          if (areValid) {
+            print(
+              '🔐 [AuthService] Valid cached credentials available for offline login',
+            );
+          } else {
+            print('🔐 [AuthService] Cached credentials have expired');
+          }
         } else {
-          print('🔐 [AuthService] No cached user data available');
+          print('🔐 [AuthService] No cached credentials available');
         }
       }
+    }
+  }
+
+  // Refresh user data in background without blocking the UI
+  Future<void> _refreshUserInBackground() async {
+    try {
+      print('🔐 [AuthService] Refreshing user data in background...');
+      await refreshUser();
+      print('🔐 [AuthService] Background refresh completed');
+    } catch (e) {
+      print('🔐 [AuthService] Background refresh failed: $e');
     }
   }
 
@@ -259,6 +277,10 @@ class AuthService {
   Future<void> logout() async {
     print('🔐 [AuthService] Logging out...');
     final token = await getToken();
+    print(
+      '🔐 [AuthService] Logout - Current token: ${token != null ? "EXISTS" : "NULL"}',
+    );
+
     try {
       if (token != null && _connectivityService.isConnected) {
         print('🔐 [AuthService] Attempting online logout...');
@@ -277,12 +299,57 @@ class AuthService {
       // Ignore errors, always clear token
       print('🔐 [AuthService] Logout error: $e');
     }
+
+    // Clear token and current user
     await _secureStorage.delete(key: _tokenKey);
     _currentUser = null;
+    print('🔐 [AuthService] Logout - Token and current user cleared');
+
+    // Clear all cached data including credentials for complete logout
+    await _offlineStorage.clearAllCachedData();
+    print('🔐 [AuthService] Logout - All cached data cleared');
 
     // Clear offline mode
     await _offlineStorage.setOfflineMode(false);
     print('🔐 [AuthService] Logout complete');
+  }
+
+  // Check if user is authenticated (has token or valid cached credentials with user data)
+  Future<bool> isAuthenticated() async {
+    final token = await getToken();
+    print(
+      '🔐 [AuthService] isAuthenticated - Token: ${token != null ? "EXISTS" : "NULL"}',
+    );
+
+    if (token != null) {
+      print('🔐 [AuthService] isAuthenticated - Returning true (token exists)');
+      return true;
+    }
+
+    // For offline mode, we need both valid cached credentials AND cached user data
+    final cachedCredentials = await _offlineStorage.getCachedCredentials();
+    print(
+      '🔐 [AuthService] isAuthenticated - Cached credentials: ${cachedCredentials != null ? "EXISTS" : "NULL"}',
+    );
+
+    if (cachedCredentials != null) {
+      final areValid = await _offlineStorage.areCachedCredentialsValid();
+      print('🔐 [AuthService] isAuthenticated - Credentials valid: $areValid');
+
+      if (areValid) {
+        // Also check if we have cached user data
+        final cachedUser = await _offlineStorage.getCachedUserData();
+        print(
+          '🔐 [AuthService] isAuthenticated - Cached user data: ${cachedUser != null ? "EXISTS" : "NULL"}',
+        );
+        return cachedUser != null;
+      }
+    }
+
+    print(
+      '🔐 [AuthService] isAuthenticated - Returning false (no valid authentication)',
+    );
+    return false;
   }
 
   // Sync when coming back online
@@ -511,5 +578,35 @@ class AuthService {
   // Check if currently in offline mode
   Future<bool> isOfflineMode() async {
     return await _offlineStorage.isOfflineMode();
+  }
+
+  // Check if offline login is available (has valid cached credentials and user data)
+  Future<bool> isOfflineLoginAvailable() async {
+    final cachedCredentials = await _offlineStorage.getCachedCredentials();
+    if (cachedCredentials == null) return false;
+
+    final areValid = await _offlineStorage.areCachedCredentialsValid();
+    if (!areValid) return false;
+
+    final cachedUser = await _offlineStorage.getCachedUserData();
+    return cachedUser != null;
+  }
+
+  // Force logout with complete data clearing
+  Future<void> forceLogout() async {
+    print('🔐 [AuthService] Force logging out...');
+
+    // Clear token and current user
+    await _secureStorage.delete(key: _tokenKey);
+    _currentUser = null;
+    print('🔐 [AuthService] Force logout - Token and current user cleared');
+
+    // Clear all cached data including credentials for complete logout
+    await _offlineStorage.clearAllCachedData();
+    print('🔐 [AuthService] Force logout - All cached data cleared');
+
+    // Clear offline mode
+    await _offlineStorage.setOfflineMode(false);
+    print('🔐 [AuthService] Force logout complete');
   }
 }

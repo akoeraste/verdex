@@ -77,9 +77,16 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
                 }
                 return img.toString();
               })
-              .where((url) => url.isNotEmpty)
+              .where(
+                (url) =>
+                    url != null &&
+                    url.isNotEmpty &&
+                    Uri.tryParse(url)?.hasAbsolutePath == true,
+              )
               .toList();
-    } else if (widget.plant['image_url'] != null) {
+    } else if (widget.plant['image_url'] != null &&
+        (widget.plant['image_url'] as String).isNotEmpty &&
+        Uri.tryParse(widget.plant['image_url'])?.hasAbsolutePath == true) {
       _imageUrls = [widget.plant['image_url']];
     } else {
       _imageUrls = [];
@@ -114,18 +121,23 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
     final plantId = _plant['id'];
     if (plantId != null) {
       try {
+        debugPrint('Fetching plant details for ID: $plantId');
+        // Use cached data by default, only fetch from API if not in cache
         final plant = await PlantService().getPlantById(plantId);
         if (mounted && plant != null) {
+          debugPrint('Successfully loaded plant: ${plant['scientific_name']}');
           setState(() {
             _plant = plant;
             _isLoading = false;
           });
         } else {
+          debugPrint('Plant not found or null for ID: $plantId');
           setState(() {
             _isLoading = false;
           });
         }
       } catch (e) {
+        debugPrint('Error fetching plant $plantId: $e');
         setState(() {
           _isLoading = false;
         });
@@ -136,6 +148,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
         }
       }
     } else {
+      debugPrint('Plant ID is null');
       setState(() {
         _isLoading = false;
       });
@@ -226,10 +239,17 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
     return Consumer<LanguageService>(
       builder: (context, languageService, child) {
         return Scaffold(
-          backgroundColor: const Color(0xFFF9FBE7),
+          backgroundColor: const Color(0xFFFAFBFC),
           body: Stack(
             children: [
-              if (_isLoading) const Center(child: CircularProgressIndicator()),
+              if (_isLoading)
+                const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF667EEA),
+                    ),
+                  ),
+                ),
               if (!_isLoading)
                 CustomScrollView(
                   slivers: [
@@ -238,16 +258,16 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
                       child: FadeTransition(
                         opacity: _fadeAnimation,
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(20.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildTitleAudioRow(),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 24),
                               _buildDescription(),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 24),
                               _buildPlantInfo(),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 24),
                               _buildUsesCard(),
                               const SizedBox(height: 100), // for navbar spacing
                             ],
@@ -285,19 +305,31 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
     return SliverAppBar(
       expandedHeight: 300.0,
       pinned: true,
-      backgroundColor: const Color(0xFF4CAF50),
+      backgroundColor: const Color(0xFF667EEA),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(16.0),
+        child: Container(
+          height: 16.0,
+          decoration: const BoxDecoration(
+            color: Color(0xFF667EEA),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+        ),
+      ),
       leading: Container(
         margin: const EdgeInsets.only(left: 8, top: 8),
         decoration: BoxDecoration(
-          color: Colors.black.withAlpha((0.4 * 255).toInt()),
-          shape: BoxShape.circle,
+          color: Colors.black.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: IconButton(
           icon: const Icon(
-            Icons.arrow_back,
+            Icons.arrow_back_ios_new,
             color: Colors.white,
-            size: 28,
-            shadows: [Shadow(blurRadius: 8, color: Colors.black)],
+            size: 20,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -312,15 +344,14 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
               Container(
                 margin: const EdgeInsets.only(right: 8),
                 decoration: BoxDecoration(
-                  color: Colors.black.withAlpha((0.4 * 255).toInt()),
-                  shape: BoxShape.circle,
+                  color: Colors.black.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: IconButton(
                   icon: Icon(
                     _isFavorite ? Icons.favorite : Icons.favorite_border,
                     color: Colors.white,
-                    size: 28,
-                    shadows: const [Shadow(blurRadius: 8, color: Colors.black)],
+                    size: 20,
                   ),
                   onPressed: _toggleFavorite,
                   tooltip: 'Favorite',
@@ -329,15 +360,14 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
               // Language icon
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withAlpha((0.4 * 255).toInt()),
-                  shape: BoxShape.circle,
+                  color: Colors.black.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: IconButton(
                   icon: const Icon(
                     Icons.language,
                     color: Colors.white,
-                    size: 28,
-                    shadows: [Shadow(blurRadius: 8, color: Colors.black)],
+                    size: 20,
                   ),
                   onPressed: _showLanguageSelector,
                   tooltip: 'Change Language',
@@ -366,7 +396,13 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
                     fit: BoxFit.cover,
                     placeholder:
                         (context, url) => Container(
-                          color: const Color(0xFF4CAF50),
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
                           child: const Center(
                             child: Icon(
                               Icons.eco,
@@ -377,12 +413,22 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
                         ),
                     errorWidget:
                         (context, url, error) => Container(
-                          color: const Color(0xFF4CAF50),
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
                           child: const Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.eco, size: 100, color: Colors.white),
+                                Icon(
+                                  Icons.broken_image,
+                                  size: 100,
+                                  color: Colors.white,
+                                ),
                                 SizedBox(height: 16),
                                 Text(
                                   'imageNotAvailable',
@@ -401,7 +447,13 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
               )
             else
               Container(
-                color: const Color(0xFF4CAF50),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
                 child: const Center(
                   child: Icon(Icons.eco, size: 100, color: Colors.white),
                 ),
@@ -438,7 +490,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
                         color:
                             _currentImageIndex == i
                                 ? Colors.white
-                                : Colors.white.withAlpha((0.4 * 255).toInt()),
+                                : Colors.white.withOpacity(0.4),
                       ),
                     );
                   }),
@@ -459,9 +511,8 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
             _plant['name'] ?? 'unknownPlant'.tr(),
             style: const TextStyle(
               fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2E7D32),
-              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1A1A1A),
               letterSpacing: 1.1,
             ),
             maxLines: 2,
@@ -473,15 +524,19 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
           GestureDetector(
             onTap: _isPlayingAudio ? null : _playAudio,
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withAlpha((0.08 * 255).toInt()),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    color: const Color(0xFF667EEA).withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
@@ -490,12 +545,17 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
                       ? const SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
                       )
-                      : FaIcon(
+                      : const FaIcon(
                         FontAwesomeIcons.volumeHigh,
-                        color: Colors.green[800],
-                        size: 30,
+                        color: Colors.white,
+                        size: 24,
                       ),
             ),
           ),
@@ -505,35 +565,60 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
 
   Widget _buildDescription() {
     final description = _plant['description'] ?? 'noDescriptionAvailable'.tr();
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF000000).withOpacity(0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.description, color: Color(0xFF4CAF50)),
-                const SizedBox(width: 8),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.description,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Text(
                   'description'.tr(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF2E7D32),
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1A1A1A),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
               description,
               style: const TextStyle(
                 fontSize: 16,
                 height: 1.6,
-                color: Color(0xFF424242),
+                color: Color(0xFF444444),
               ),
             ),
           ],
@@ -543,23 +628,50 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
   }
 
   Widget _buildPlantInfo() {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF000000).withOpacity(0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'plantInformation'.tr(),
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF2E7D32),
-              ),
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.info, color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'plantInformation'.tr(),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1A1A1A),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _buildInfoRow(
               'scientificName'.tr(),
               _plant['scientific_name'] ?? 'notAvailable'.tr(),
@@ -594,9 +706,9 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
             width: 120,
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
+                color: Color(0xFF666666),
                 fontSize: 14,
               ),
             ),
@@ -604,7 +716,11 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 14, color: Color(0xFF2E7D32)),
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF1A1A1A),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -628,47 +744,87 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
             .map((e) => e.trim())
             .where((e) => e.isNotEmpty)
             .toList();
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF000000).withOpacity(0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.local_florist, color: Color(0xFF4CAF50)),
-                const SizedBox(width: 8),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.local_florist,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Text(
                   'plantUses'.tr(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF2E7D32),
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1A1A1A),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             if (items.isEmpty)
               Text(
                 'noUsesInfoAvailable'.tr(),
-                style: const TextStyle(color: Colors.grey),
+                style: const TextStyle(color: Color(0xFF666666), fontSize: 16),
               ),
             for (final use in items)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.check_circle_outline,
-                      color: Color(0xFF4CAF50),
-                      size: 18,
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF667EEA),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 16,
+                      ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: Text(use, style: const TextStyle(fontSize: 15)),
+                      child: Text(
+                        use,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF444444),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -686,41 +842,62 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
     );
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
             return Container(
-              padding: const EdgeInsets.all(20),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'select_language'.tr(),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF2E7D32),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x1A000000),
+                    blurRadius: 20,
+                    offset: Offset(0, -4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Handle bar
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE0E0E0),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'select_language'.tr(),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1A1A1A),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Full width language buttons
+                  ...languageService.availableLanguages.map((lang) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildFullWidthLanguageButton(
+                        lang,
+                        languageService,
+                        setModalState,
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children:
-                          languageService.availableLanguages.map((lang) {
-                            return _buildLanguageButton(
-                              lang,
-                              languageService,
-                              setModalState,
-                            );
-                          }).toList(),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
+                    );
+                  }).toList(),
+                  const SizedBox(height: 24),
+                ],
               ),
             );
           },
@@ -729,7 +906,7 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
     );
   }
 
-  Widget _buildLanguageButton(
+  Widget _buildFullWidthLanguageButton(
     Language lang,
     LanguageService service,
     StateSetter setModalState,
@@ -738,111 +915,165 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
         service.majorLanguageCode == lang.code &&
         service.minorLanguageCode == null;
     final hasMinor = lang.minorLanguages.isNotEmpty;
+
     return Column(
-      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                isSelected ? Theme.of(context).primaryColor : Colors.grey[200],
-            foregroundColor: isSelected ? Colors.white : Colors.black87,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            ),
-            elevation: isSelected ? 4 : 0,
+        // Main language button
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient:
+                isSelected
+                    ? const LinearGradient(
+                      colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                    : null,
+            color: isSelected ? null : const Color(0xFFF8F9FA),
+            boxShadow:
+                isSelected
+                    ? [
+                      BoxShadow(
+                        color: const Color(0xFF667EEA).withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                    : [
+                      BoxShadow(
+                        color: const Color(0xFF000000).withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
           ),
-          onPressed: () async {
-            await service.setLanguage(lang.code, minorCode: null);
-            await context.setLocale(Locale(lang.code));
-            if (mounted) {
-              Navigator.pop(context);
-            }
-          },
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                lang.name,
-                style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 16,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () async {
+                await service.setLanguage(lang.code, minorCode: null);
+                await context.setLocale(Locale(lang.code));
+                if (mounted) {
+                  Navigator.pop(context);
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        lang.name,
+                        style: TextStyle(
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          fontSize: 16,
+                          color:
+                              isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF1A1A1A),
+                        ),
+                      ),
+                    ),
+                    if (isSelected)
+                      const Icon(
+                        Icons.check_circle,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                  ],
                 ),
               ),
-              if (isSelected)
-                const Padding(
-                  padding: EdgeInsets.only(left: 6),
-                  child: Icon(Icons.check, size: 18, color: Colors.white),
-                ),
-            ],
+            ),
           ),
         ),
+        // Minor languages if any
         if (hasMinor)
           Padding(
-            padding: const EdgeInsets.only(left: 8.0, top: 6.0),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            padding: const EdgeInsets.only(left: 16, top: 8),
+            child: Column(
               children:
                   lang.minorLanguages.map((minorLang) {
                     final isMinorSelected =
                         service.minorLanguageCode == minorLang.code;
-                    return OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor:
-                            isMinorSelected
-                                ? Theme.of(context).primaryColor
-                                : Colors.white,
-                        foregroundColor:
-                            isMinorSelected ? Colors.white : Colors.black87,
-                        side: BorderSide(
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
                           color:
                               isMinorSelected
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.grey[400]!,
+                                  ? const Color(0xFF667EEA)
+                                  : const Color(0xFFF1F3F4),
+                          boxShadow:
+                              isMinorSelected
+                                  ? [
+                                    BoxShadow(
+                                      color: const Color(
+                                        0xFF667EEA,
+                                      ).withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                  : null,
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      onPressed: () async {
-                        await service.setLanguage(
-                          lang.code,
-                          minorCode: minorLang.code,
-                        );
-                        await context.setLocale(Locale(lang.code));
-                        if (mounted) {
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            minorLang.name,
-                            style: TextStyle(
-                              fontWeight:
-                                  isMinorSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                              fontSize: 14,
-                            ),
-                          ),
-                          if (isMinorSelected)
-                            const Padding(
-                              padding: EdgeInsets.only(left: 4),
-                              child: Icon(
-                                Icons.check,
-                                size: 16,
-                                color: Colors.white,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () async {
+                              await service.setLanguage(
+                                lang.code,
+                                minorCode: minorLang.code,
+                              );
+                              await context.setLocale(Locale(lang.code));
+                              if (mounted) {
+                                Navigator.pop(context);
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      minorLang.name,
+                                      style: TextStyle(
+                                        fontWeight:
+                                            isMinorSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.w500,
+                                        fontSize: 14,
+                                        color:
+                                            isMinorSelected
+                                                ? Colors.white
+                                                : const Color(0xFF1A1A1A),
+                                      ),
+                                    ),
+                                  ),
+                                  if (isMinorSelected)
+                                    const Icon(
+                                      Icons.check_circle,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                ],
                               ),
                             ),
-                        ],
+                          ),
+                        ),
                       ),
                     );
                   }).toList(),

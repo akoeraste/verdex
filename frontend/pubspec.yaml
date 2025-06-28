@@ -33,30 +33,51 @@ dependencies:
     sdk: flutter
   collection: ^1.18.0
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  # Core Flutter dependencies
   cupertino_icons: ^1.0.8
+  
+  # State management and UI
+  provider: ^6.1.5
+  animate_do: ^3.3.4
+  font_awesome_flutter: ^10.8.0
+  
+  # Storage and preferences
   shared_preferences: ^2.2.3
   flutter_secure_storage: ^9.0.0
-  http: ^1.2.1
-  image_picker: ^1.1.2
-  flutter_tts: ^4.0.2
-  google_fonts: ^6.2.1
-  animate_do: ^3.3.4
-  easy_localization: ^3.0.7
-  font_awesome_flutter: ^10.8.0
-  permission_handler: ^12.0.0+1
-  package_info_plus: ^4.2.0
-  cached_network_image: ^3.3.1
   sqflite: ^2.3.0
   path_provider: ^2.1.2
-  connectivity_plus: ^5.0.2
-  audioplayers: ^6.5.0
-  provider: ^6.1.5
+  
+  # Networking and connectivity
+  http: ^1.2.1
   dio: ^5.8.0+1
+  connectivity_plus: ^5.0.2
+  
+  # Localization
+  easy_localization: ^3.0.7
+  
+  # Media and image processing
+  image_picker: ^1.1.2
   image_cropper: ^9.1.0
-
+  cached_network_image: ^3.3.1
+  image: ^4.1.7
+  
+  # Audio and text-to-speech
+  flutter_tts: ^4.0.2
+  audioplayers: ^6.5.0
+  
+  # Permissions and device info
+  permission_handler: ^12.0.0+1
+  package_info_plus: ^4.2.0
+  
+  # Machine learning
+  tflite_flutter: ^0.11.0
+  
+  # Typography
+  google_fonts: ^6.2.1
+  
+  # Utilities
   path: any
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -83,6 +104,7 @@ flutter:
   assets:
     - assets/images/
     - assets/translations/
+    - assets/model/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

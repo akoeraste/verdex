@@ -25,6 +25,7 @@ class LanguageService with ChangeNotifier {
 
   String _majorLanguageCode = 'en';
   String? _minorLanguageCode;
+  bool _isLoaded = false;
 
   String get majorLanguageCode => _majorLanguageCode;
   String? get minorLanguageCode => _minorLanguageCode;
@@ -54,9 +55,12 @@ class LanguageService with ChangeNotifier {
   List<Language> get availableLanguages => _availableLanguages;
 
   Future<void> loadSavedLanguage() async {
+    if (_isLoaded) return; // Prevent multiple loads
+
     final prefs = await SharedPreferences.getInstance();
     _majorLanguageCode = prefs.getString(_majorLanguageKey) ?? 'en';
     _minorLanguageCode = prefs.getString(_minorLanguageKey);
+    _isLoaded = true;
     notifyListeners();
   }
 

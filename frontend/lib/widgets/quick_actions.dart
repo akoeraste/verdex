@@ -13,8 +13,13 @@ class QuickActions extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _QuickActionButton(
-          icon: Icons.local_florist,
+          icon: Icons.local_florist_rounded,
           label: 'plant_library'.tr(),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           onTap: () {
             Navigator.push(
               context,
@@ -25,8 +30,13 @@ class QuickActions extends StatelessWidget {
           },
         ),
         _QuickActionButton(
-          icon: Icons.favorite,
+          icon: Icons.favorite_rounded,
           label: 'favorites'.tr(),
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFF6B6B), Color(0xFFFF8E8E)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           onTap: () {
             Navigator.push(
               context,
@@ -35,8 +45,13 @@ class QuickActions extends StatelessWidget {
           },
         ),
         _QuickActionButton(
-          icon: Icons.feedback,
+          icon: Icons.feedback_rounded,
           label: 'feedback'.tr(),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4ECDC4), Color(0xFF44A08D)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           onTap: () {
             Navigator.push(
               context,
@@ -53,10 +68,13 @@ class _QuickActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final Gradient gradient;
+
   const _QuickActionButton({
     required this.icon,
     required this.label,
     required this.onTap,
+    required this.gradient,
   });
 
   @override
@@ -66,28 +84,30 @@ class _QuickActionButton extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
-              color: const Color(0xFFFFFFFF),
-              shape: BoxShape.circle,
+              gradient: gradient,
+              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withAlpha((0.05 * 255).toInt()),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  color: gradient.colors.first.withOpacity(0.3),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
-            child: Icon(icon, size: 32, color: const Color(0xFF4CAF50)),
+            child: Icon(icon, size: 28, color: Colors.white),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             label,
             style: const TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF2E7D32),
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1A1A1A),
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

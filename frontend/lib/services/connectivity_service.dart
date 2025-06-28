@@ -9,7 +9,6 @@ class ConnectivityService extends ChangeNotifier {
 
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<ConnectivityResult>? _connectivitySubscription;
-  Timer? _periodicCheckTimer;
   bool _isConnected = true;
   bool _isInitialized = false;
 
@@ -28,7 +27,7 @@ class ConnectivityService extends ChangeNotifier {
       '🌐 [ConnectivityService] App launched - Connection status: ${_isConnected ? "ONLINE" : "OFFLINE"} (${result.name})',
     );
 
-    // Listen to connectivity changes
+    // Listen to connectivity changes (reactive monitoring only)
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
       ConnectivityResult result,
     ) {
@@ -44,45 +43,11 @@ class ConnectivityService extends ChangeNotifier {
       }
     });
 
-    // Start periodic connection checking every 15 seconds
-    _startPeriodicCheck();
-
     notifyListeners();
-  }
-
-  void _startPeriodicCheck() {
-    _periodicCheckTimer?.cancel();
-    _periodicCheckTimer = Timer.periodic(const Duration(seconds: 15), (
-      timer,
-    ) async {
-      await _performPeriodicCheck();
-    });
-  }
-
-  Future<void> _performPeriodicCheck() async {
-    try {
-      final result = await _connectivity.checkConnectivity();
-      final newConnectionStatus = result != ConnectivityResult.none;
-
-      if (newConnectionStatus != _isConnected) {
-        print(
-          '🌐 [ConnectivityService] Periodic check - Connection status changed: ${newConnectionStatus ? "ONLINE" : "OFFLINE"} (${result.name})',
-        );
-        _isConnected = newConnectionStatus;
-        notifyListeners();
-      } else {
-        print(
-          '🌐 [ConnectivityService] Periodic check - Connection status stable: ${_isConnected ? "ONLINE" : "OFFLINE"} (${result.name})',
-        );
-      }
-    } catch (e) {
-      print('🌐 [ConnectivityService] Periodic check failed: $e');
-    }
   }
 
   void dispose() {
     _connectivitySubscription?.cancel();
-    _periodicCheckTimer?.cancel();
     super.dispose();
   }
 
@@ -107,17 +72,5 @@ class ConnectivityService extends ChangeNotifier {
     print('🌐 [ConnectivityService] Refreshing connectivity status...');
     await checkConnectivity();
     notifyListeners();
-  }
-
-  // Stop periodic checking (useful for testing or when app goes to background)
-  void stopPeriodicCheck() {
-    _periodicCheckTimer?.cancel();
-    print('🌐 [ConnectivityService] Periodic check stopped');
-  }
-
-  // Restart periodic checking
-  void restartPeriodicCheck() {
-    print('🌐 [ConnectivityService] Restarting periodic check');
-    _startPeriodicCheck();
   }
 }
