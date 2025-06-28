@@ -1,0 +1,176 @@
+3.5 SYSTEM MODELING AND DESIGN
+
+3.5.1 Unified Modeling Language (UML) Diagrams
+
+3.5.1.1 Use Case Diagrams and Actor Analysis
+
+The following use case diagram illustrates the main actors (User, Admin, System) and their interactions with the Verdex system:
+
+```mermaid
+usecase
+  actor "User" as User
+  actor "Admin" as Admin
+  actor "System" as System
+  User --> (Identify Plant)
+  User --> (View Plant Library)
+  User --> (Submit Feedback)
+  User --> (Receive Notifications)
+  User --> (Manage Profile)
+  Admin --> (Manage Plants)
+  Admin --> (Manage Categories)
+  Admin --> (Respond to Feedback)
+  Admin --> (View Analytics)
+  System --> (Send Notifications)
+  System --> (Log Activity)
+```
+
+Table 3.5.1: Actor Analysis
+| Actor  | Description                                 |
+|--------|---------------------------------------------|
+| User   | End-user of the mobile app                  |
+| Admin  | Manages content and user feedback           |
+| System | Automated backend processes and notifications|
+
+3.5.1.2 Activity Diagrams for Core Processes
+
+**Plant Identification Activity:**
+```mermaid
+flowchart TD
+    A[Start] --> B[Capture/Select Image]
+    B --> C[Preprocess Image]
+    C --> D[Run ML Model]
+    D --> E[Display Results]
+    E --> F[User Feedback]
+    F --> G[End]
+```
+
+**Feedback Submission Activity:**
+```mermaid
+flowchart TD
+    A[Start] --> B[Open Feedback Form]
+    B --> C[Enter Feedback]
+    C --> D[Submit Feedback]
+    D --> E[Store in Database]
+    E --> F[Notify Admin]
+    F --> G[End]
+```
+
+3.5.1.3 Sequence Diagrams for System Interactions
+
+**Plant Identification Sequence:**
+```mermaid
+sequenceDiagram
+    participant User
+    participant App
+    participant API
+    participant ML
+    User->>App: Capture/Select Image
+    App->>ML: Preprocess & Run Model
+    ML-->>App: Identification Result
+    App->>API: Log Activity
+    API-->>App: Acknowledge
+    App->>User: Show Result
+```
+
+3.5.1.4 Class Diagrams and Object-Oriented Design
+
+**Core Classes:**
+```mermaid
+classDiagram
+    class User {
+      +int id
+      +string name
+      +string email
+      +login()
+      +logout()
+    }
+    class Plant {
+      +int id
+      +string name
+      +string scientificName
+      +string imageUrl
+      +getDetails()
+    }
+    class Feedback {
+      +int id
+      +string message
+      +int userId
+      +submit()
+    }
+    User "1" -- "*" Feedback : submits
+    User "*" -- "*" Plant : favorites
+    Plant "1" -- "*" Feedback : referenced_in
+```
+
+3.5.1.5 State Diagrams for Complex Workflows
+
+**User Authentication State:**
+```mermaid
+stateDiagram-v2
+    [*] --> LoggedOut
+    LoggedOut --> LoggingIn
+    LoggingIn --> LoggedIn: Success
+    LoggingIn --> LoggedOut: Failure
+    LoggedIn --> LoggingOut
+    LoggingOut --> LoggedOut
+```
+
+3.5.2 Data Flow Diagrams (DFD) and Process Modeling
+
+**Level 0 DFD:**
+```mermaid
+flowchart TD
+    User-->|Image|App
+    App-->|Image Data|MLModel
+    MLModel-->|Result|App
+    App-->|Request|API
+    API-->|Data|DB
+    API-->|Response|App
+    App-->|Display|User
+```
+
+3.5.3 Entity-Relationship Diagrams (ERD) and Database Design
+
+```mermaid
+erDiagram
+    users ||--o{ feedback : submits
+    users ||--o{ favorites : has
+    users ||--o{ notifications : receives
+    users ||--o{ activity_logs : generates
+    plants ||--o{ plant_translations : has
+    plants ||--o{ favorites : favorited_by
+    plants ||--o{ feedback : referenced_in
+    categories ||--o{ plants : contains
+    plant_categories ||--o{ plants : categorizes
+    roles ||--o{ users : assigned_to
+    permissions ||--o{ roles : granted_to
+    feedback ||--o{ notifications : triggers
+```
+
+3.5.4 User Interface Design and Wireframing
+
+**Sample Wireframe: Plant Identification Screen**
+```mermaid
+flowchart TD
+    A[Camera View]
+    B[Capture Button]
+    C[Result Panel]
+    D[Feedback Button]
+    A --> B
+    B --> C
+    C --> D
+```
+
+3.5.5 API Design and Interface Specifications
+
+Table 3.5.2: Key API Endpoints
+| Endpoint                | Method | Description                       |
+|-------------------------|--------|-----------------------------------|
+| /api/login              | POST   | User authentication               |
+| /api/plants             | GET    | List all plants                   |
+| /api/plants/{id}        | GET    | Get plant details                 |
+| /api/identify           | POST   | Identify plant from image         |
+| /api/feedback           | POST   | Submit user feedback              |
+| /api/notifications      | GET    | Get user notifications            |
+
+All endpoints use JSON for request/response and require authentication except login and plant identification. 

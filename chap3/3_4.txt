@@ -1,0 +1,421 @@
+3.4 SYSTEM ARCHITECTURE AND DESIGN
+
+3.4.1 High-Level System Architecture Overview
+
+The Verdex system implements a modern three-tier architecture with clear separation of concerns across client, application, and data layers. The system architecture follows microservices principles while maintaining monolithic deployment for simplicity and cost-effectiveness.
+
+System Architecture Diagram:
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              CLIENT LAYER                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
+│  │   Flutter App   │  │  Vue.js Admin   │  │      Web Browser           │  │
+│  │   (Mobile)      │  │   Dashboard     │  │                            │  │
+│  │ • iOS/Android   │  │ • User Mgmt     │  │ • Plant Library            │  │
+│  │ • Offline Mode  │  │ • Content Mgmt  │  │ • Search & Browse          │  │
+│  │ • ML Inference  │  │ • Analytics     │  │ • Feedback System          │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           API GATEWAY LAYER                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────────────────────┐  │
+│  │                    Laravel API Gateway                                 │  │
+│  │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────┐  │  │
+│  │  │ Authentication  │  │ Rate Limiting   │  │    Request/Response     │  │  │
+│  │  │   Middleware    │  │                 │  │       Handling          │  │  │
+│  │  │ • Sanctum Auth  │  │ • API Throttling│  │ • JSON Serialization   │  │  │
+│  │  │ • JWT Tokens    │  │ • Request Limits│  │ • Error Handling       │  │  │
+│  │  │ • Role-Based    │  │ • CORS Policy   │  │ • Validation           │  │  │
+│  │  └─────────────────┘  └─────────────────┘  └─────────────────────────┘  │  │
+│  └─────────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           SERVICE LAYER                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
+│  │    User     │ │    Plant    │ │  Feedback   │ │Notification │          │
+│  │ Management  │ │ Management  │ │   System    │ │   System    │          │
+│  │ • Auth      │ │ • CRUD      │ │ • Submit    │ │ • Email     │          │
+│  │ • Profiles  │ │ • Search    │ │ • Review    │ │ • Push      │          │
+│  │ • Roles     │ │ • Categories│ │ • Analytics │ │ • In-App    │          │
+│  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘          │
+│                                                                             │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
+│  │    File     │ │  Activity   │ │   Cache     │ │   Search    │          │
+│  │  Storage    │ │  Logging    │ │  Service    │ │   Engine    │          │
+│  │ • Images    │ │ • User Logs │ │ • Redis     │ │ • Full-text │          │
+│  │ • Audio     │ │ • System    │ │ • Sessions  │ │ • Filters   │          │
+│  │ • Documents │ │ • Audit     │ │ • API Cache │ │ • Ranking   │          │
+│  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            DATA LAYER                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
+│  │   MySQL/PostgreSQL │     Redis      │  │      File Storage           │  │
+│  │   Database       │     Cache       │  │     (Images, Files)         │  │
+│  │ • Users          │  │ • Sessions     │  │ • Plant Images             │  │
+│  │ • Plants         │  │ • API Cache    │  │ • Audio Files              │  │
+│  │ • Translations   │  │ • Query Cache  │  │ • Documents                 │  │
+│  │ • Feedback       │  │ • Rate Limits  │  │ • Backups                   │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        EXTERNAL SERVICES                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
+│  │   AI Plant      │  │   Email         │  │   Push Notifications       │  │
+│  │ Identification  │  │   Service       │  │   (Firebase FCM)           │  │
+│  │ • TensorFlow    │  │ • Laravel Mail  │  │ • Real-time Alerts         │  │
+│  │ • MobileNetV3   │  │ • SMTP/API      │  │ • Feedback Responses       │  │
+│  │ • On-device     │  │ • Templates     │  │ • System Updates           │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+3.4.2 Architectural Patterns and Design Principles
+
+The Verdex system implements several architectural patterns to ensure maintainability, scalability, and separation of concerns.
+
+Layered Architecture Implementation:
+The system follows a four-layer architecture pattern:
+
+1. **Presentation Layer**: Flutter mobile app and Vue.js admin dashboard
+2. **Application Layer**: Laravel API controllers and business logic
+3. **Domain Layer**: Models, services, and domain logic
+4. **Infrastructure Layer**: Database, file storage, and external services
+
+Client-Server Architecture Design:
+The client-server architecture provides several benefits:
+
+Table 3.4.1: Client-Server Architecture Benefits
+┌─────────────────┬─────────────────────────────────────────────────────────┐
+│     Benefit     │                    Description                          │
+├─────────────────┼─────────────────────────────────────────────────────────┤
+│ Scalability     │ Multiple clients can connect to centralized server     │
+│ Maintainability │ Server-side logic can be updated without client changes│
+│ Security        │ Centralized authentication and authorization           │
+│ Performance     │ Server-side caching and optimization                   │
+│ Offline Support │ Client-side caching for offline functionality          │
+└─────────────────┴─────────────────────────────────────────────────────────┘
+
+Microservices Considerations:
+While the current implementation is monolithic, the architecture supports future microservices decomposition:
+
+Table 3.4.2: Potential Microservices Decomposition
+┌─────────────────┬─────────────────┬─────────────────────────────────────┐
+│   Service       │   Components    │           Responsibilities          │
+├─────────────────┼─────────────────┼─────────────────────────────────────┤
+│ User Service    │ Auth, Profiles  │ User management and authentication  │
+│ Plant Service   │ CRUD, Search    │ Plant data and identification       │
+│ Feedback Service│ Submit, Review  │ User feedback and admin responses   │
+│ Notification    │ Email, Push     │ Communication and alerts           │
+│ File Service    │ Images, Audio   │ Media file management              │
+│ Analytics       │ Logs, Metrics   │ System monitoring and reporting    │
+└─────────────────┴─────────────────┴─────────────────────────────────────┘
+
+3.4.3 Component Architecture and Module Design
+
+Frontend Mobile Application Architecture:
+The Flutter application follows a modular architecture with clear separation of concerns:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        FLUTTER APPLICATION ARCHITECTURE                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
+│  │   PRESENTATION  │  │    BUSINESS     │  │         DATA                │  │
+│  │     LAYER       │  │     LOGIC       │  │         LAYER               │  │
+│  │                 │  │     LAYER       │  │                             │  │
+│  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
+│  │ │   Screens   │ │  │ │  Services   │ │  │ │      Models             │ │  │
+│  │ │ • Home      │ │  │ │ • API       │ │  │ │ • Plant                 │ │  │
+│  │ │ • Identify  │ │  │ │ • ML        │ │  │ │ • User                  │ │  │
+│  │ │ • Library   │ │  │ │ • Storage   │ │  │ │ • Feedback              │ │  │
+│  │ │ • Profile   │ │  │ │ • Auth      │ │  │ │ • Translation           │ │  │
+│  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
+│  │                 │  │                 │  │                             │  │
+│  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
+│  │ │   Widgets   │ │  │ │  Providers  │ │  │ │    Local Storage        │ │  │
+│  │ │ • Custom    │ │  │ │ • State     │ │  │ │ • SQLite Database       │ │  │
+│  │ │ • Reusable  │ │  │ │ • Language  │ │  │ │ • SharedPreferences     │ │  │
+│  │ │ • UI        │ │  │ │ • Auth      │ │  │ │ • Secure Storage        │ │  │
+│  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+Backend API Architecture:
+The Laravel backend implements a clean architecture pattern:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        LARAVEL BACKEND ARCHITECTURE                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌───────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
+│  │   CONTROLLERS     │  │     MODELS      │  │         MIDDLEWARE          │  │
+│  │                   │  │                 │  │                             │  │
+│  │ ┌────────────────┐|  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
+│  │ │ API Controllers││  │ | Eloquent    │ │  │ │ Authentication          │ │  │
+│  │ │ • Plant        ││  │ │ Models      │ │  │ │ • Sanctum               │ │  │
+│  │ │ • User         ││  │ │ • User      │ │  │ │ • Role-based            │ │  │
+│  │ │ • Feedback     ││  │ │ • Plant     │ │  │ │ • Permission            │ │  │
+│  │ │ • Auth         ││  │ │ • Translation││  │ │ • Permission            │ │  │
+│  │ └────────────────┘│  │ └─────────────┘ │  │                             │  │
+│  │                   │  │                 │  │ ┌─────────────────────────┐ │  │
+│  │ ┌─────────────┐   │  │ ┌─────────────┐ │  │ │ Request Validation      │ │  │
+│  │ │ Resources   │   │  │ │ Services    │ │  │ │ • Form Requests         │ │  │
+│  │ │ • API       │   │  │ │ • Business  │ │  │ │ • Custom Rules          │ │  │
+│  │ │ • JSON      │   │  │ │ • Logic     │ │  │ │ • Sanitization          │ │  │
+│  │ │ • Transform │   │  │ │ • External  │ │  │ │ • External API          │ │  │
+│  │ └─────────────┘   │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
+│  └───────────────────┘  └─────────────────┘  └─────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+Database Architecture and Design:
+The database follows a normalized relational design with proper indexing and relationships:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           DATABASE SCHEMA DESIGN                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                    │
+│  │    users    │    │   plants    │    │plant_categories│                 │
+│  │             │    │             │    │             │                    │
+│  │ • id (PK)   │    │ • id (PK)   │    │ • id (PK)   │                    │
+│  │ • username  │    │ • scientific│    │ • name      │                    │
+│  │ • email     │    │   name      │    │ • description│                   │
+│  │ • password  │    │ • category_id│   │ • created_at│                    │
+│  │ • avatar    │    │ • family    │    │ • updated_at│                    │
+│  │ • created_at│    │ • genus     │    └─────────────┘                    │
+│  │ • updated_at│    │ • species   │                                      │
+│  └─────────────┘    │ • image_urls│                                      │
+│         │           │ • toxicity  │                                      │
+│         │           └─────────────┘                                      │
+│         │                   │                                              │
+│         │                   │                                              │
+│         ▼                   ▼                                              │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                    │
+│  │  feedback   │    │plant_trans- │    │  favorites  │                    │
+│  │             │    │  lations    │    │             │                    │
+│  │ • id (PK)   │    │ • id (PK)   │    │ • id (PK)   │                    │
+│  │ • user_id   │    │ • plant_id  │    │ • user_id   │                    │
+│  │ • plant_id  │    │ • language  │    │ • plant_id  │                    │
+│  │ • is_correct│    │ • common_name│   │ • created_at│                    │
+│  │ • comment   │    │ • description│   │ • updated_at│                    │
+│  │ • created_at│    │ • uses       │    └─────────────┘                    │
+│  │ • updated_at│    │ • audio_url  │                                      │
+│  └─────────────┘    └─────────────┘                                      │
+│         │                                                                   │
+│         ▼                                                                   │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                    │
+│  │notifications│    │activity_logs│    │   roles     │                    │
+│  │             │    │             │    │             │                    │
+│  │ • id (PK)   │    │ • id (PK)   │    │ • id (PK)   │                    │
+│  │ • type      │    │ • user_id   │    │ • name      │                    │
+│  │ • data      │    │ • event     │    │ • guard_name│                    │
+│  │ • read_at   │    │ • properties│    │ • created_at│                    │
+│  │ • created_at│    │ • created_at│    │ • updated_at│                    │
+│  └─────────────┘    └─────────────┘    └─────────────┘                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+Machine Learning Pipeline Architecture:
+The ML pipeline is designed for on-device inference with offline capabilities:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      MACHINE LEARNING PIPELINE                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
+│  │   DATA INPUT    │  │   PREPROCESSING │  │      INFERENCE              │  │
+│  │                 │  │                 │  │                             │  │
+│  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
+│  │ │ Camera      │ │  │ │ Image       │ │  │ │ TensorFlow Lite         │ │  │
+│  │ │ Gallery     │ │  │ │ Resize      │ │  │ │ Model                   │ │  │
+│  │ │ File Upload │ │  │ │ Normalize   │ │  │ │ • MobileNetV3           │ │  │
+│  │ └─────────────┘ │  │ │ Convert     │ │  │ │ • Binary Classification │ │  │
+│  │                 │  │ └─────────────┘ │  │ │ • On-device             │ │  │
+│  │ ┌─────────────┐ │  │                 │  │ └─────────────────────────┘ │  │
+│  │ │ Image       │ │  │ ┌─────────────┐ │  │                             │  │
+│  │ │ Validation  │ │  │ │ Tensor      │ │  │ ┌─────────────────────────┐ │  │
+│  │ │ Format      │ │  │ │ Preparation │ │  │ │ Result Processing       │ │  │
+│  │ │ Size Check  │ │  │ │ • RGB       │ │  │ │ • Confidence Score      │ │  │
+│  │ └─────────────┘ │  │ │ • 224x224   │ │  │ │ • Classification        │ │  │
+│  └─────────────────┘  │ │ • Float32   │ │  │ │ • Post-processing       │ │  │
+│                       │ └─────────────┘ │  │ └─────────────────────────┘ │  │
+│                       └─────────────────┘  └─────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+3.4.4 System Integration Architecture
+
+The system integration architecture ensures seamless communication between components:
+
+Data Flow Architecture:
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           DATA FLOW ARCHITECTURE                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
+│  │   Client    │    │   API       │    │   Cache     │    │  Database   │  │
+│  │  Request    │───▶│  Gateway    │───▶│   Layer     │───▶│   Layer     │  │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘  │
+│         ▲                   │                   │                   │      │
+│         │                   ▼                   ▼                   ▼      │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
+│  │   Client    │    │   Business  │    │   Session   │    │   Query     │  │
+│  │  Response   │◀───│   Logic     │◀───│   Storage   │◀───│  Results    │  │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+API Integration Patterns:
+The system implements several integration patterns:
+
+Table 3.4.3: API Integration Patterns
+┌─────────────────┬─────────────────┬─────────────────────────────────────┐
+│     Pattern     │   Implementation│           Description               │
+├─────────────────┼─────────────────┼─────────────────────────────────────┤
+│ RESTful API     │ Laravel Routes  │ Standard HTTP methods for CRUD     │
+│ Authentication  │ Sanctum Tokens  │ Token-based authentication         │
+│ Rate Limiting   │ API Throttling  │ Request rate control               │
+│ Caching         │ Redis Cache     │ Response and query caching         │
+│ Validation      │ Form Requests   │ Input validation and sanitization  │
+│ Error Handling  │ Exception Handler│ Standardized error responses      │
+└─────────────────┴─────────────────┴─────────────────────────────────────┘
+
+3.4.5 Deployment Architecture and Infrastructure
+
+The deployment architecture supports multiple environments with proper scaling and security:
+
+Environment Architecture:
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        DEPLOYMENT ARCHITECTURE                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
+│  │   PRODUCTION    │  │    STAGING      │  │        DEVELOPMENT         │  │
+│  │   ENVIRONMENT   │  │   ENVIRONMENT   │  │       ENVIRONMENT          │  │
+│  │                 │  │                 │  │                             │  │
+│  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
+│  │ │ Load        │ │  │ │ Web Server  │ │  │ │ Local Development       │ │  │
+│  │ │ Balancer    │ │  │ │ (Single)    │ │  │ │ Environment             │ │  │
+│  │ │ (Nginx)     │ │  │ │             │ │  │ │                         │ │  │
+│  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
+│  │                 │  │                 │  │                             │  │
+│  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
+│  │ │ Web Servers │ │  │ │ Application │ │  │ │ Laravel Sail            │ │  │
+│  │ │ (Multiple)  │ │  │ │ Server      │ │  │ │ Docker Environment      │ │  │
+│  │ │             │ │  │ │             │ │  │ │                         │ │  │
+│  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
+│  │                 │  │                 │  │                             │  │
+│  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
+│  │ │ Database    │ │  │ │ Database    │ │  │ │ Local Database          │ │  │
+│  │ │ Cluster     │ │  │ │ (Single)    │ │  │ │ (MySQL/SQLite)          │ │  │
+│  │ │ (Master-Slave)│ │  │             │ │  │ │                         │ │  │
+│  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
+│  │                 │  │                 │  │                             │  │
+│  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
+│  │ │ Redis       │ │  │ │ Redis       │ │  │ │ Local Cache             │ │  │
+│  │ │ Cluster     │ │  │ │ (Single)    │ │  │ │ (File-based)            │ │  │
+│  │ │             │ │  │ │             │ │  │ │                         │ │  │
+│  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
+│  │                 │  │                 │  │                             │  │
+│  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
+│  │ │ CDN         │ │  │ │ File Storage│ │  │ │ Local Storage           │ │  │
+│  │ │ (CloudFlare)│ │  │ │ (Local)     │ │  │ │ (Development)           │ │  │
+│  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+Infrastructure Components:
+Table 3.4.4: Infrastructure Components
+┌─────────────────┬─────────────────┬─────────────────────────────────────┐
+│   Component     │   Technology    │           Purpose                   │
+├─────────────────┼─────────────────┼─────────────────────────────────────┤
+│ Web Server      │ Nginx/Apache    │ HTTP request handling               │
+│ Application     │ PHP-FPM         │ PHP application processing          │
+│ Database        │ MySQL 8.0       │ Data persistence                    │
+│ Cache           │ Redis           │ Session and API caching             │
+│ File Storage    │ Local/Cloud     │ Media file storage                  │
+│ Load Balancer   │ Nginx/Cloud     │ Traffic distribution                │
+│ SSL/TLS         │ Let's Encrypt   │ Secure communication                │
+│ Monitoring      │ Laravel Telescope│ Application debugging              │
+└─────────────────┴─────────────────┴─────────────────────────────────────┘
+
+Security Architecture:
+The security architecture implements multiple layers of protection:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           SECURITY ARCHITECTURE                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────────┐  │
+│  │                    API SECURITY LAYER                                  │  │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐      │  │
+│  │  │   Rate      │ │   CORS      │ │   CSRF      │ │   Input     │      │  │
+│  │  │ Limiting    │ │ Protection  │ │ Protection  │ │ Validation  │      │  │
+│  │  │ • API       │ │ • Origins   │ │ • Tokens    │ │ • Rules     │      │  │
+│  │  │ • Requests  │ │ • Headers   │ │ • Validation│ │ • Sanitize  │      │  │
+│  │  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘      │  │
+│  └─────────────────────────────────────────────────────────────────────────┘  │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────────┐  │
+│  │                AUTHENTICATION & AUTHORIZATION                           │  │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐      │  │
+│  │  │   Laravel   │ │   Role-     │ │ Permission- │ │   Token     │      │  │
+│  │  │  Sanctum    │ │   Based     │ │   Based     │ │ Expiration  │      │  │
+│  │  │ • JWT       │ │ • Access    │ │ • Control   │ │ • Refresh   │      │  │
+│  │  │ • Tokens    │ │ • Roles     │ │ • Permissions│ │ • Rotation  │      │  │
+│  │  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘      │  │
+│  └─────────────────────────────────────────────────────────────────────────┘  │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────────┐  │
+│  │                        DATA PROTECTION                                 │  │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐      │  │
+│  │  │ Encryption  │ │ SQL Injection│ │ XSS         │ │ Output      │      │  │
+│  │  │ • At Rest   │ │ • Eloquent   │ │ • Escaping  │ │ Sanitization│      │  │
+│  │  │ • In Transit│ │ • ORM        │ │ • Validation│ │ • Encoding  │      │  │
+│  │  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘      │  │
+│  └─────────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+Performance Architecture:
+The performance architecture ensures optimal system performance:
+
+Table 3.4.5: Performance Optimization Strategies
+┌─────────────────┬─────────────────┬─────────────────────────────────────┐
+│   Strategy      │   Implementation│           Benefits                  │
+├─────────────────┼─────────────────┼─────────────────────────────────────┤
+│ Database        │ Query           │ Faster data retrieval               │
+│ Indexing        │ Optimization    │ Reduced query execution time       │
+│ Caching         │ Redis/Memory    │ Reduced database load               │
+│ CDN             │ CloudFlare      │ Faster static asset delivery        │
+│ Compression     │ Gzip/Brotli     │ Reduced bandwidth usage             │
+│ Minification    │ CSS/JS          │ Smaller file sizes                  │
+│ Lazy Loading    │ Images/Content  │ Faster initial page load            │
+│ Connection      │ Pooling         │ Efficient database connections      │
+└─────────────────┴─────────────────┴─────────────────────────────────────┘
+
+This comprehensive architecture design provides a robust, scalable, and secure foundation for the Verdex plant identification system, supporting current requirements while enabling future growth and enhancements. 

@@ -1,0 +1,69 @@
+3.2 SOFTWARE DEVELOPMENT LIFE CYCLE (SDLC) METHODOLOGY
+
+3.2.1 SDLC Model Selection and Justification
+
+The Verdex project adopted a hybrid approach combining elements of the Agile methodology with traditional software engineering principles. This selection was based on the complex nature of the project, which involved multiple technologies, iterative development requirements, and the need for continuous stakeholder feedback.
+
+The primary SDLC model chosen was the Agile-Scrum methodology, which was selected for several key reasons. The iterative nature of Agile development allowed for rapid prototyping and early testing of critical components such as the machine learning model integration and mobile application features. The Scrum framework provided structured sprint cycles that enabled systematic development while maintaining flexibility for requirement changes and improvements.
+
+The justification for this approach was based on the project's unique characteristics. The integration of machine learning models required extensive testing and optimization cycles that benefited from iterative development. The multilingual requirements necessitated continuous feedback from diverse user groups, which was facilitated by the Agile approach. Additionally, the cross-platform mobile development with Flutter required frequent testing across different devices and platforms, making the iterative nature of Agile development highly beneficial.
+
+The hybrid approach incorporated elements of the Waterfall model for certain phases, particularly in the initial requirements analysis and final deployment stages. This combination ensured that critical planning phases received adequate attention while maintaining the flexibility needed for the dynamic development process.
+
+3.2.2 Agile Development Methodology Implementation
+
+The Agile methodology was implemented through a structured Scrum framework with two-week sprint cycles. Each sprint was designed to deliver potentially shippable increments of the system, allowing for continuous integration and testing throughout the development process.
+
+The Scrum implementation involved the formation of cross-functional development teams that included backend developers, frontend developers, machine learning specialists, and quality assurance engineers. Daily stand-up meetings were conducted to track progress, identify blockers, and ensure effective communication among team members.
+
+Sprint planning sessions were held at the beginning of each sprint cycle, where user stories were broken down into manageable tasks and assigned to team members. The user stories were prioritized based on business value, technical dependencies, and risk assessment. This prioritization ensured that the most critical features were developed first, particularly the core plant identification functionality and user authentication system.
+
+Sprint review sessions were conducted at the end of each sprint to demonstrate completed features to stakeholders and gather feedback. This feedback was then incorporated into the product backlog for future sprints, ensuring that the system evolved according to user needs and expectations.
+
+The implementation of Agile methodology was supported by various tools and practices. Project management tools were used to track user stories, tasks, and sprint progress. Continuous integration practices were established to ensure that code changes were automatically tested and integrated into the main codebase. Regular retrospectives were conducted to identify areas for improvement in the development process.
+
+3.2.3 Iterative Development Process
+
+The iterative development process was structured around the concept of continuous improvement and incremental delivery. Each iteration focused on specific system components while maintaining the overall system architecture and design principles.
+
+The first iteration focused on establishing the foundational architecture and core backend services. This included the development of the Laravel API framework, database schema design, and basic authentication system. The iterative approach allowed for early identification and resolution of architectural issues before they could impact subsequent development phases.
+
+The second iteration concentrated on the machine learning model development and integration. This phase involved extensive experimentation with different model architectures, training approaches, and optimization techniques. The iterative nature of this phase was crucial for achieving the required accuracy and performance benchmarks for the plant identification system.
+
+The third iteration focused on the mobile application development using Flutter. This phase involved the implementation of core user interface components, camera integration, and offline functionality. The iterative approach enabled continuous testing and refinement of the user experience across different devices and platforms.
+
+The fourth iteration integrated all system components and focused on end-to-end testing and optimization. This phase involved comprehensive testing of the complete system, performance optimization, and security validation. The iterative approach allowed for the identification and resolution of integration issues before the final deployment.
+
+Each iteration included specific deliverables and acceptance criteria that were reviewed and validated before proceeding to the next iteration. This structured approach ensured that quality standards were maintained throughout the development process while allowing for flexibility in addressing emerging requirements and technical challenges.
+
+3.2.4 Version Control and Collaboration Strategy
+
+The version control strategy was implemented using Git as the primary version control system, with GitHub serving as the central repository for collaborative development. This approach was selected for its robust branching and merging capabilities, which were essential for managing the complex development workflow involving multiple developers and technologies.
+
+The Git workflow was structured around a feature branch model, where each new feature or enhancement was developed in a separate branch. This approach allowed for isolated development of features while maintaining the stability of the main codebase. Feature branches were created from the main development branch and merged back after thorough testing and code review.
+
+The collaboration strategy involved the implementation of pull request workflows, where all code changes were required to go through a review process before being merged into the main codebase. This process ensured code quality, knowledge sharing among team members, and early identification of potential issues.
+
+The version control strategy also included the implementation of semantic versioning for both the backend API and mobile application. This approach provided clear version numbering that indicated the nature and impact of changes, facilitating effective release management and deployment planning.
+
+Continuous integration practices were established to automatically build and test code changes as they were committed to the repository. This approach ensured that integration issues were identified early and that the codebase remained in a consistently deployable state.
+
+The collaboration strategy also included the use of issue tracking systems to manage bugs, feature requests, and development tasks. This system provided a centralized location for tracking progress, assigning responsibilities, and maintaining communication among team members.
+
+3.2.5 Project Management and Documentation Standards
+
+The project management approach was structured around the principles of transparency, accountability, and continuous improvement. Project management tools were utilized to track progress, manage resources, and maintain communication among stakeholders.
+
+The documentation standards were established to ensure consistency, clarity, and maintainability of the system. Technical documentation included detailed specifications for system architecture, API documentation, database schema documentation, and deployment procedures. User documentation included user manuals, installation guides, and troubleshooting procedures.
+
+The documentation process was integrated into the development workflow, with documentation requirements included in the definition of done for each user story. This approach ensured that documentation was created and maintained alongside the development of system features.
+
+Code documentation standards were established to ensure that all code was properly commented and documented. This included the use of standardized comment formats, inline documentation for complex algorithms, and comprehensive README files for each component of the system.
+
+The project management approach also included regular stakeholder communication and reporting. Weekly status reports were generated to track progress against project milestones and identify any issues or risks that required attention. Monthly review sessions were conducted to assess overall project progress and make necessary adjustments to the project plan.
+
+Quality assurance processes were integrated into the project management approach, with regular code reviews, testing procedures, and quality gates established throughout the development process. This ensured that quality standards were maintained consistently across all aspects of the system.
+
+The project management and documentation standards were designed to support the long-term maintainability and scalability of the system. This included the establishment of procedures for future enhancements, bug fixes, and system updates. The documentation was structured to facilitate knowledge transfer and onboarding of new team members.
+
+The overall project management approach emphasized the importance of continuous learning and improvement. Regular retrospectives were conducted to identify lessons learned and opportunities for process improvement. This approach ensured that the development process evolved and improved over time, leading to more efficient and effective development practices. 
