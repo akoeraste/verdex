@@ -9,11 +9,11 @@ class ImageCropperWidget extends StatefulWidget {
   final VoidCallback onCancel;
 
   const ImageCropperWidget({
-    Key? key,
+    super.key,
     required this.imagePath,
     required this.onCropped,
     required this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   State<ImageCropperWidget> createState() => _ImageCropperWidgetState();

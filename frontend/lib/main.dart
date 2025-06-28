@@ -11,16 +11,31 @@ import 'screens/main_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/identify_screen.dart';
 import 'services/language_service.dart';
+import 'services/connectivity_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
+  debugPrint('🚀 [App] Verdex app starting...');
+
   final languageService = LanguageService();
+  final connectivityService = ConnectivityService();
+
+  // Initialize connectivity service
+  await connectivityService.initialize();
+
+  debugPrint('🚀 [App] Connectivity service initialized');
+  debugPrint(
+    '🚀 [App] Current connection status: ${connectivityService.isConnected ? "ONLINE" : "OFFLINE"}',
+  );
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => languageService,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => languageService),
+        ChangeNotifierProvider(create: (_) => connectivityService),
+      ],
       child: EasyLocalization(
         supportedLocales: const [Locale('en'), Locale('fr')],
         path: 'assets/translations',
@@ -36,6 +51,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('🚀 [App] Building main app widget');
+
     return MaterialApp(
       title: 'Verdex',
       localizationsDelegates: context.localizationDelegates,
@@ -75,10 +92,13 @@ class _AppInitializerState extends State<AppInitializer> {
   @override
   void initState() {
     super.initState();
+    debugPrint('🚀 [App] AppInitializer initState called');
     _initializeApp();
   }
 
   Future<void> _initializeApp() async {
+    debugPrint('🚀 [App] Starting app initialization...');
+
     // Load language and set locale
     final languageService = Provider.of<LanguageService>(
       context,
@@ -87,10 +107,31 @@ class _AppInitializerState extends State<AppInitializer> {
     await languageService.loadSavedLanguage();
     await context.setLocale(Locale(languageService.majorLanguageCode));
 
+    debugPrint(
+      '🚀 [App] Language loaded: ${languageService.majorLanguageCode}',
+    );
+
     // Check permissions
     final cameraStatus = await Permission.camera.status;
     final photosStatus = await Permission.photos.status;
     final permissionsGranted = cameraStatus.isGranted && photosStatus.isGranted;
+
+    debugPrint(
+      '🚀 [App] Permissions status: ${permissionsGranted ? "GRANTED" : "NOT GRANTED"}',
+    );
+
+    // Get connectivity status
+    final connectivityService = Provider.of<ConnectivityService>(
+      context,
+      listen: false,
+    );
+
+    debugPrint(
+      '🚀 [App] Final connectivity status: ${connectivityService.isConnected ? "ONLINE" : "OFFLINE"}',
+    );
+    debugPrint(
+      '🚀 [App] App initialization complete, navigating to splash screen',
+    );
 
     // Navigate to the splash screen
     if (mounted) {

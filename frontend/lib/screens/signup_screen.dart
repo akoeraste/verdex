@@ -5,7 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+  const SignUpScreen({super.key});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();

@@ -1,11 +1,13 @@
 import 'dart:ui';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
+import '../services/connectivity_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -22,6 +24,17 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   final FocusNode _loginFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
+  final ConnectivityService _connectivityService = ConnectivityService();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeConnectivity();
+  }
+
+  Future<void> _initializeConnectivity() async {
+    await _connectivityService.initialize();
+  }
 
   @override
   void dispose() {
@@ -38,9 +51,11 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordError = null;
       _generalError = null;
     });
+
     final login = _loginController.text.trim();
     final password = _passwordController.text;
     bool valid = true;
+
     if (login.isEmpty) {
       setState(() => _loginError = 'login_error_empty'.tr());
       valid = false;
@@ -52,24 +67,70 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!valid) {
       return;
     }
+
     setState(() => _isLoading = true);
-    // Use AuthService for real login
-    final authService = AuthService();
-    final result = await authService.login(login, password);
-    if (result['success'] == true) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        if (result['usedTempPass'] == true) {
-          Navigator.of(context).pushReplacementNamed('/change-password');
-        } else {
-          Navigator.of(context).pushReplacementNamed('/home');
+
+    try {
+      // Refresh connectivity status before login
+      await _connectivityService.refreshConnectivity();
+
+      // Use AuthService for login (handles both online and offline)
+      final authService = AuthService();
+
+      // Add timeout to prevent infinite loading
+      final result = await authService
+          .login(login, password)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              throw TimeoutException(
+                'Login timeout',
+                const Duration(seconds: 30),
+              );
+            },
+          );
+
+      if (result['success'] == true) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+
+          // Show offline message if applicable
+          if (result['offline'] == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message'] ?? 'Logged in offline'),
+                backgroundColor: Colors.orange,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+
+          if (result['usedTempPass'] == true) {
+            Navigator.of(context).pushReplacementNamed('/change-password');
+          } else {
+            Navigator.of(context).pushReplacementNamed('/home');
+          }
         }
+      } else {
+        setState(() {
+          _isLoading = false;
+          _generalError = result['message'] ?? 'invalid_credentials'.tr();
+        });
       }
-    } else {
+    } catch (e) {
       setState(() {
         _isLoading = false;
-        _generalError = 'invalid_credentials'.tr();
+        if (e is TimeoutException) {
+          _generalError =
+              'Login timeout. Please check your internet connection and try again.';
+        } else {
+          _generalError =
+              'Network error. Please check your connection and try again.';
+        }
       });
+
+      // Log the error for debugging
+      print('Login error: $e');
     }
   }
 
@@ -198,10 +259,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                     textInputAction: TextInputAction.done,
                                     onFieldSubmitted: (_) {
                                       _passwordFocus.unfocus();
-                                      if (!_isLoading) _login();
+                                      if (!_isLoading) {
+                                        _login();
+                                      }
                                     },
                                     decoration: InputDecoration(
-                                      labelText: 'password'.tr(),
+                                      labelText: 'password_field_label'.tr(),
                                       labelStyle: GoogleFonts.poppins(
                                         color: Colors.grey.shade800,
                                       ),
@@ -247,19 +310,47 @@ class _LoginScreenState extends State<LoginScreen> {
                                       color: const Color(0xFF212121),
                                     ),
                                   ),
-                                  if (_generalError != null) ...[
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      _generalError!,
-                                      style: GoogleFonts.poppins(
-                                        color: Colors.red,
-                                        fontSize: 14,
+                                  const SizedBox(height: 24),
+                                  // Error message
+                                  if (_generalError != null)
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.shade50,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: Colors.red.shade200,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.error_outline,
+                                            color: Colors.red.shade600,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              _generalError!,
+                                              style: GoogleFonts.poppins(
+                                                color: Colors.red.shade700,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                  const SizedBox(height: 28),
+                                  const SizedBox(height: 24),
+                                  // Login button
                                   SizedBox(
                                     width: double.infinity,
+                                    height: 56,
                                     child: ElevatedButton(
                                       onPressed: _isLoading ? null : _login,
                                       style: ElevatedButton.styleFrom(
@@ -267,35 +358,51 @@ class _LoginScreenState extends State<LoginScreen> {
                                           0xFF4CAF50,
                                         ),
                                         foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 16,
-                                        ),
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
-                                            32,
+                                            16,
                                           ),
                                         ),
-                                        elevation: 4,
-                                        shadowColor: Colors.green.withAlpha(
-                                          (0.4 * 255).toInt(),
-                                        ),
-                                        textStyle: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 18,
-                                        ),
+                                        elevation: 0,
                                       ),
                                       child:
                                           _isLoading
                                               ? const SizedBox(
                                                 width: 24,
                                                 height: 24,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                      strokeWidth: 2,
-                                                      color: Colors.white,
-                                                    ),
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                        Color
+                                                      >(Colors.white),
+                                                ),
                                               )
-                                              : Text('login'.tr()),
+                                              : Text(
+                                                'login_button'.tr(),
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  // Forgot password link
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        '/forgot-password',
+                                      );
+                                    },
+                                    child: Text(
+                                      'forgot_password'.tr(),
+                                      style: GoogleFonts.poppins(
+                                        color: const Color(0xFF4CAF50),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -303,21 +410,32 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          // Forgot Password
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/forgot-password');
-                            },
-                            style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF2E7D32),
-                              textStyle: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14,
+                          // Sign up link
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'dont_have_account'.tr(),
+                                style: GoogleFonts.poppins(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 14,
+                                ),
                               ),
-                            ),
-                            child: Text('forgot_password'.tr()),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/signup');
+                                },
+                                child: Text(
+                                  'sign_up'.tr(),
+                                  style: GoogleFonts.poppins(
+                                    color: const Color(0xFF4CAF50),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 40),
                         ],
                       ),
                     ),
@@ -332,19 +450,24 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildGlassmorphicCard({required Widget child}) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
-          decoration: BoxDecoration(
-            color: Colors.white.withAlpha((0.3 * 255).toInt()),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: Colors.white.withAlpha((0.4 * 255).toInt()),
-            ),
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: child,
         ),
       ),
@@ -353,20 +476,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildBlurCircle(Color color) {
     return Container(
-      width: 300,
-      height: 300,
+      width: 200,
+      height: 200,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: color.withAlpha((0.4 * 255).toInt()),
-      ),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
-        child: Container(
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.transparent,
-          ),
-        ),
+        color: color.withOpacity(0.3),
       ),
     );
   }

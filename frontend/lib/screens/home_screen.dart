@@ -193,7 +193,10 @@ class _HomeScreenState extends State<HomeScreen> {
           body: SafeArea(
             child: Column(
               children: [
-                HomeHeader(onLanguageButtonPressed: _showLanguageSelector),
+                HomeHeader(
+                  onLanguageButtonPressed: _showLanguageSelector,
+                  quickActions: const QuickActions(),
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
@@ -201,10 +204,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const EducationalSnippet(),
-                        const SizedBox(height: 24),
-                        SectionHeader(titleKey: 'quick_actions'),
-                        const SizedBox(height: 16),
-                        const QuickActions(),
                         const SizedBox(height: 24),
                       ],
                     ),

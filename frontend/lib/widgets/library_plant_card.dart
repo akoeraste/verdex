@@ -59,7 +59,7 @@ class LibraryPlantCard extends StatelessWidget {
             // Image section
             Expanded(
               flex: 3,
-              child: Container(
+              child: SizedBox(
                 width: double.infinity,
                 child:
                     imageUrl.isNotEmpty

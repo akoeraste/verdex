@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 class EducationalSnippet extends StatefulWidget {
   const EducationalSnippet({super.key});
@@ -11,6 +12,8 @@ class EducationalSnippet extends StatefulWidget {
 class _EducationalSnippetState extends State<EducationalSnippet> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  Timer? _autoSwipeTimer;
+
   final List<_Fact> _facts = [
     _Fact(
       title: 'did_you_know'.tr(),
@@ -33,6 +36,8 @@ class _EducationalSnippetState extends State<EducationalSnippet> {
     setState(() {
       _currentPage = index % _facts.length;
     });
+    // Reset timer when page changes
+    _startAutoSwipeTimer();
   }
 
   void _handleLooping() {
@@ -46,11 +51,24 @@ class _EducationalSnippetState extends State<EducationalSnippet> {
     }
   }
 
+  void _startAutoSwipeTimer() {
+    _autoSwipeTimer?.cancel();
+    _autoSwipeTimer = Timer(const Duration(seconds: 10), () {
+      if (mounted && _pageController.hasClients) {
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _pageController.jumpToPage(_facts.length);
+      _startAutoSwipeTimer();
     });
     _pageController.addListener(() {
       if (!_pageController.position.isScrollingNotifier.value) {
@@ -61,6 +79,7 @@ class _EducationalSnippetState extends State<EducationalSnippet> {
 
   @override
   void dispose() {
+    _autoSwipeTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -68,7 +87,7 @@ class _EducationalSnippetState extends State<EducationalSnippet> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color(0xFFF1F8E9),
+      color: const Color.fromARGB(255, 255, 255, 255),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 2,
       child: Padding(

@@ -68,7 +68,7 @@ class _QuickActionButton extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F8E9),
+              color: const Color(0xFFFFFFFF),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(

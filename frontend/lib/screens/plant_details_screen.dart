@@ -72,8 +72,9 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
           images
               .map((img) {
                 if (img is String) return img;
-                if (img is Map && img.containsKey('url'))
+                if (img is Map && img.containsKey('url')) {
                   return img['url'] as String;
+                }
                 return img.toString();
               })
               .where((url) => url.isNotEmpty)

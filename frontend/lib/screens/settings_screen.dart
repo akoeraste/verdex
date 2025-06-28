@@ -84,7 +84,7 @@ class SettingsScreenState extends State<SettingsScreen>
     super.dispose();
   }
 
-  String _selectedLanguageKey = 'english';
+  final String _selectedLanguageKey = 'english';
   String _selectedThemeKey = 'light';
   bool _enableSound = true;
   bool _wifiOnly = true;
@@ -781,7 +781,7 @@ class SettingsScreenState extends State<SettingsScreen>
     if (avatar != null && avatar is String && avatar.isNotEmpty) {
       if (avatar.startsWith('http')) return avatar;
       final baseUrl = ApiConfig.baseUrl.replaceFirst('/api', '');
-      return avatar.startsWith('/') ? baseUrl + avatar : baseUrl + '/' + avatar;
+      return avatar.startsWith('/') ? baseUrl + avatar : '$baseUrl/$avatar';
     }
     // fallback
     const avatarPath = '/storage/avatars/default.png';
