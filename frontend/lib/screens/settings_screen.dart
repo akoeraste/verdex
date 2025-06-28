@@ -543,7 +543,7 @@ class SettingsScreenState extends State<SettingsScreen>
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        'Version: $_appVersion',
+                        'appVersion'.tr(namedArgs: {'version': _appVersion}),
                         style: const TextStyle(
                           color: Color(0xFF6B7280),
                           fontSize: 14,

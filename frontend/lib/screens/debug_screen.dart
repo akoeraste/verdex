@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../services/connectivity_service.dart';
 import '../services/plant_service.dart';
 import '../services/auth_service.dart';
@@ -103,7 +104,7 @@ class DebugScreenState extends State<DebugScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Debug Information'),
+        title: Text('debug_information'.tr()),
         backgroundColor: const Color(0xFF4CAF50),
         foregroundColor: Colors.white,
       ),
@@ -113,24 +114,24 @@ class DebugScreenState extends State<DebugScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'API Configuration',
+              'api_configuration'.tr(),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-            Text('Base URL: ${ApiConfig.baseUrl}'),
+            Text('base_url'.tr(namedArgs: {'url': ApiConfig.baseUrl})),
             const SizedBox(height: 16),
 
             Text(
-              'System Status',
+              'system_status'.tr(),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
 
-            _buildStatusCard('Connectivity', _connectivityStatus),
-            _buildStatusCard('API Connection', _apiStatus),
-            _buildStatusCard('Authentication', _authStatus),
-            _buildStatusCard('Plants Data', _plantsCount),
-            _buildStatusCard('Cache Status', _cacheStatus),
+            _buildStatusCard('connectivity'.tr(), _connectivityStatus),
+            _buildStatusCard('api_connection'.tr(), _apiStatus),
+            _buildStatusCard('authentication'.tr(), _authStatus),
+            _buildStatusCard('plants_data'.tr(), _plantsCount),
+            _buildStatusCard('cache_status'.tr(), _cacheStatus),
 
             const SizedBox(height: 24),
 
@@ -144,7 +145,7 @@ class DebugScreenState extends State<DebugScreen> {
                 child:
                     _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Run Diagnostics'),
+                        : Text('run_diagnostics'.tr()),
               ),
             ),
 
@@ -157,7 +158,7 @@ class DebugScreenState extends State<DebugScreen> {
                   backgroundColor: const Color(0xFFFF6B6B),
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Clear Plant Cache'),
+                child: Text('clear_plant_cache'.tr()),
               ),
             ),
           ],

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ImageCropperWidget extends StatefulWidget {
   final String imagePath;
@@ -30,14 +31,17 @@ class _ImageCropperWidgetState extends State<ImageCropperWidget> {
       uiSettings: [
         if (!kIsWeb)
           AndroidUiSettings(
-            toolbarTitle: 'Crop Image',
+            toolbarTitle: 'crop_image_title'.tr(),
             toolbarColor: Colors.deepOrange,
             toolbarWidgetColor: Colors.white,
             initAspectRatio: CropAspectRatioPreset.original,
             lockAspectRatio: false,
           ),
         if (!kIsWeb)
-          IOSUiSettings(title: 'Crop Image', aspectRatioLockEnabled: false),
+          IOSUiSettings(
+            title: 'crop_image_title'.tr(),
+            aspectRatioLockEnabled: false,
+          ),
         if (kIsWeb)
           WebUiSettings(context: context, presentStyle: WebPresentStyle.dialog),
       ],
@@ -84,9 +88,9 @@ class _ImageCropperWidgetState extends State<ImageCropperWidget> {
                             ElevatedButton.icon(
                               onPressed: _cropping ? null : _confirmOriginal,
                               icon: const Icon(Icons.check, size: 28),
-                              label: const Text(
-                                'Confirm',
-                                style: TextStyle(fontSize: 18),
+                              label: Text(
+                                'confirm'.tr(),
+                                style: const TextStyle(fontSize: 18),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green,
@@ -103,7 +107,7 @@ class _ImageCropperWidgetState extends State<ImageCropperWidget> {
                               onPressed: _cropping ? null : _cropImage,
                               icon: const Icon(Icons.crop, size: 28),
                               label: Text(
-                                _cropping ? 'Cropping...' : 'Crop',
+                                _cropping ? 'cropping'.tr() : 'crop'.tr(),
                                 style: const TextStyle(fontSize: 18),
                               ),
                               style: ElevatedButton.styleFrom(
@@ -120,9 +124,9 @@ class _ImageCropperWidgetState extends State<ImageCropperWidget> {
                             ElevatedButton.icon(
                               onPressed: _cropping ? null : widget.onCancel,
                               icon: const Icon(Icons.close, size: 28),
-                              label: const Text(
-                                'Cancel',
-                                style: TextStyle(fontSize: 18),
+                              label: Text(
+                                'cancel'.tr(),
+                                style: const TextStyle(fontSize: 18),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red,

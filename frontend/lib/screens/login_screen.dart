@@ -83,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const Duration(seconds: 30),
             onTimeout: () {
               throw TimeoutException(
-                'Login timeout',
+                'login_timeout'.tr(),
                 const Duration(seconds: 30),
               );
             },
@@ -97,7 +97,9 @@ class _LoginScreenState extends State<LoginScreen> {
           if (result['offline'] == true) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(result['message'] ?? 'Logged in offline'),
+                content: Text(
+                  result['message'] ?? 'logged_in_offline_message'.tr(),
+                ),
                 backgroundColor: Colors.orange,
                 duration: const Duration(seconds: 4),
               ),
@@ -120,11 +122,9 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = false;
         if (e is TimeoutException) {
-          _generalError =
-              'Login timeout. Please check your internet connection and try again.';
+          _generalError = 'login_timeout_error'.tr();
         } else {
-          _generalError =
-              'Network error. Please check your connection and try again.';
+          _generalError = 'network_error'.tr();
         }
       });
 

@@ -97,9 +97,8 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Plants refreshed successfully'),
+            content: Text('plants_refreshed_success'.tr()),
             backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -110,7 +109,9 @@ class _PlantLibraryScreenState extends State<PlantLibraryScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to refresh: ${e.toString()}'),
+            content: Text(
+              'failed_to_refresh_plants'.tr(namedArgs: {'error': e.toString()}),
+            ),
             backgroundColor: Colors.red,
           ),
         );

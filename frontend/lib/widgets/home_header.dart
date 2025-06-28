@@ -221,7 +221,7 @@ class HomeHeader extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${'hi'.tr()} ${AuthService.currentUser?['username'] ?? AuthService.currentUser?['name'] ?? 'User'}',
+                            '${'hi'.tr()} ${AuthService.currentUser?['username'] ?? AuthService.currentUser?['name'] ?? 'user'.tr()}',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w700,

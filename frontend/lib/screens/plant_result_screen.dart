@@ -241,7 +241,7 @@ class _PlantResultScreenState extends State<PlantResultScreen>
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'Analyzing image...',
+                                  'analyzing_image'.tr(),
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
@@ -250,7 +250,7 @@ class _PlantResultScreenState extends State<PlantResultScreen>
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Running apple classification model',
+                                  'running_apple_classification'.tr(),
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: const Color(0xFF666666),
@@ -289,7 +289,7 @@ class _PlantResultScreenState extends State<PlantResultScreen>
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'Analysis Failed',
+                                  'analysis_failed'.tr(),
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.w700,
@@ -309,7 +309,7 @@ class _PlantResultScreenState extends State<PlantResultScreen>
                                 ElevatedButton.icon(
                                   onPressed: _runPrediction,
                                   icon: const Icon(Icons.refresh),
-                                  label: const Text('Retry'),
+                                  label: Text('retry'.tr()),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFFFF6B6B),
                                     foregroundColor: Colors.white,
@@ -365,8 +365,8 @@ class _PlantResultScreenState extends State<PlantResultScreen>
                                 const SizedBox(height: 16),
                                 Text(
                                   _predictionResult!['isApple']
-                                      ? 'Apple Detected 🍎'
-                                      : 'Not an Apple ❌',
+                                      ? 'apple_detected'.tr()
+                                      : 'not_an_apple'.tr(),
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.w700,
@@ -394,7 +394,7 @@ class _PlantResultScreenState extends State<PlantResultScreen>
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            'Confidence',
+                                            'confidence'.tr(),
                                             style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w600,
@@ -467,8 +467,8 @@ class _PlantResultScreenState extends State<PlantResultScreen>
                                       Expanded(
                                         child: Text(
                                           _predictionResult!['isApple']
-                                              ? 'This image contains an apple with high confidence!'
-                                              : 'This image does not appear to contain an apple.',
+                                              ? 'apple_detected_message'.tr()
+                                              : 'not_apple_message'.tr(),
                                           style: TextStyle(
                                             fontSize: 14,
                                             color:

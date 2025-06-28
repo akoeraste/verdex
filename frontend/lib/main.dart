@@ -72,7 +72,7 @@ class MyApp extends StatelessWidget {
     debugPrint('🚀 [App] Building main app widget');
 
     return MaterialApp(
-      title: 'Verdex',
+      title: 'app_name'.tr(),
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,

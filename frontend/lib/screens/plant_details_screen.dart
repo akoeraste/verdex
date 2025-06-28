@@ -142,9 +142,13 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
           _isLoading = false;
         });
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Failed to load plant: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'failed_to_load_plant'.tr(namedArgs: {'error': e.toString()}),
+              ),
+            ),
+          );
         }
       }
     } else {
@@ -164,7 +168,13 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to check favorite: $e')),
+            SnackBar(
+              content: Text(
+                'failed_to_check_favorite'.tr(
+                  namedArgs: {'error': e.toString()},
+                ),
+              ),
+            ),
           );
         }
       }
