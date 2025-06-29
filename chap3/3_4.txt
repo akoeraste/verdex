@@ -60,7 +60,7 @@ System Architecture Diagram:
 │                            DATA LAYER                                      │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
-│  │   MySQL/PostgreSQL │     Redis      │  │      File Storage           │  │
+│  │   PostgreSQL     │     Redis      │  │      File Storage           │  │
 │  │   Database       │     Cache       │  │     (Images, Files)         │  │
 │  │ • Users          │  │ • Sessions     │  │ • Plant Images             │  │
 │  │ • Plants         │  │ • API Cache    │  │ • Audio Files              │  │
@@ -74,8 +74,8 @@ System Architecture Diagram:
 │                        EXTERNAL SERVICES                                   │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
-│  │   AI Plant      │  │   Email         │  │   Push Notifications       │  │
-│  │ Identification  │  │   Service       │  │   (Firebase FCM)           │  │
+│  │   AI Plant      │  │   Email         │  │   Notifications             │  │
+│  │ Identification  │  │   Service       │  │                             │  │
 │  │ • TensorFlow    │  │ • Laravel Mail  │  │ • Real-time Alerts         │  │
 │  │ • MobileNetV3   │  │ • SMTP/API      │  │ • Feedback Responses       │  │
 │  │ • On-device     │  │ • Templates     │  │ • System Updates           │  │
@@ -131,7 +131,7 @@ The Flutter application follows a modular architecture with clear separation of 
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                        FLUTTER APPLICATION ARCHITECTURE                    │
+│                        FLUTTER APPLICATION ARCHITECTURE                     │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
@@ -160,20 +160,20 @@ Backend API Architecture:
 The Laravel backend implements a clean architecture pattern:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        LARAVEL BACKEND ARCHITECTURE                       │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                        LARAVEL BACKEND ARCHITECTURE                           │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
 │  ┌───────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
 │  │   CONTROLLERS     │  │     MODELS      │  │         MIDDLEWARE          │  │
 │  │                   │  │                 │  │                             │  │
-│  │ ┌────────────────┐|  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
-│  │ │ API Controllers││  │ | Eloquent    │ │  │ │ Authentication          │ │  │
-│  │ │ • Plant        ││  │ │ Models      │ │  │ │ • Sanctum               │ │  │
-│  │ │ • User         ││  │ │ • User      │ │  │ │ • Role-based            │ │  │
-│  │ │ • Feedback     ││  │ │ • Plant     │ │  │ │ • Permission            │ │  │
+│  │ ┌────────────────┐|  │ ┌──────────────┐│  │ ┌─────────────────────────┐ │  │
+│  │ │ API Controllers││  │ | Eloquent     ││  │ │ Authentication          │ │  │
+│  │ │ • Plant        ││  │ │ Models       ││  │ │ • Sanctum               │ │  │
+│  │ │ • User         ││  │ │ • User       ││  │ │ • Role-based            │ │  │
+│  │ │ • Feedback     ││  │ │ • Plant      ││  │ │ • Permission            │ │  │
 │  │ │ • Auth         ││  │ │ • Translation││  │ │ • Permission            │ │  │
-│  │ └────────────────┘│  │ └─────────────┘ │  │                             │  │
+│  │ └────────────────┘│  │ └──────────────┘│  │ └─────────────────────────┘ │  │
 │  │                   │  │                 │  │ ┌─────────────────────────┐ │  │
 │  │ ┌─────────────┐   │  │ ┌─────────────┐ │  │ │ Request Validation      │ │  │
 │  │ │ Resources   │   │  │ │ Services    │ │  │ │ • Form Requests         │ │  │
@@ -182,46 +182,47 @@ The Laravel backend implements a clean architecture pattern:
 │  │ │ • Transform │   │  │ │ • External  │ │  │ │ • External API          │ │  │
 │  │ └─────────────┘   │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
 │  └───────────────────┘  └─────────────────┘  └─────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
+└───────────────────────────────────────────────────────────────────────────────┘
+
 ```
 
 Database Architecture and Design:
 The database follows a normalized relational design with proper indexing and relationships:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           DATABASE SCHEMA DESIGN                           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                    │
-│  │    users    │    │   plants    │    │plant_categories│                 │
-│  │             │    │             │    │             │                    │
-│  │ • id (PK)   │    │ • id (PK)   │    │ • id (PK)   │                    │
-│  │ • username  │    │ • scientific│    │ • name      │                    │
-│  │ • email     │    │   name      │    │ • description│                   │
-│  │ • password  │    │ • category_id│   │ • created_at│                    │
-│  │ • avatar    │    │ • family    │    │ • updated_at│                    │
-│  │ • created_at│    │ • genus     │    └─────────────┘                    │
-│  │ • updated_at│    │ • species   │                                      │
-│  └─────────────┘    │ • image_urls│                                      │
-│         │           │ • toxicity  │                                      │
-│         │           └─────────────┘                                      │
-│         │                   │                                              │
-│         │                   │                                              │
-│         ▼                   ▼                                              │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                    │
-│  │  feedback   │    │plant_trans- │    │  favorites  │                    │
-│  │             │    │  lations    │    │             │                    │
-│  │ • id (PK)   │    │ • id (PK)   │    │ • id (PK)   │                    │
-│  │ • user_id   │    │ • plant_id  │    │ • user_id   │                    │
-│  │ • plant_id  │    │ • language  │    │ • plant_id  │                    │
-│  │ • is_correct│    │ • common_name│   │ • created_at│                    │
-│  │ • comment   │    │ • description│   │ • updated_at│                    │
-│  │ • created_at│    │ • uses       │    └─────────────┘                    │
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           DATABASE SCHEMA DESIGN                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│                                                                           │
+│  ┌─────────────┐    ┌──────────────┐    ┌────────────────┐                │
+│  │    users    │    │   plants     │    │plant_categories│                │
+│  │             │    │              │    │                │                │
+│  │ • id (PK)   │    │ • id (PK)    │    │ • id (PK)      │                │
+│  │ • username  │    │ • scientific │    │ • name         │                │
+│  │ • email     │    │   name       │    │ • description  │                │
+│  │ • password  │    │ • category_id│    │ • created_at   │                │
+│  │ • avatar    │    │ • family     │    │ • updated_at   │                │
+│  │ • created_at│    │ • genus      │    └────────────────┘                │
+│  │ • updated_at│    │ • species    │                                      │
+│  └─────────────┘    │ • image_urls │                                      │
+│         │           │ • toxicity   │                                      │
+│         │           └──────────────┘                                      │
+│         │                   │                                             │
+│         │                   │                                             │
+│         ▼                   ▼                                             │
+│  ┌─────────────┐    ┌──────────────┐    ┌──────────────┐                  │
+│  │  feedback   │    │plant         │    │ favorites    │                  │
+│  │             │    │translations  │    │              │                  │
+│  │ • id (PK)   │    │ • id (PK)    │    │ • id (PK)    │                  │
+│  │ • user_id   │    │ • plant_id   │    │ • user_id    │                  │
+│  │ • plant_id  │    │ • language   │    │ • plant_id   │                  │
+│  │ • is_correct│    │ • common_name│    │ • created_at │                  │
+│  │ • comment   │    │ • description│    │ • updated_at │                  │
+│  │ • created_at│    │ • uses       │    └──────────────┘                  │
 │  │ • updated_at│    │ • audio_url  │                                      │
-│  └─────────────┘    └─────────────┘                                      │
-│         │                                                                   │
-│         ▼                                                                   │
+│  └─────────────┘    └──────────────┘                                      │
+│         │                                                                 │
+│         ▼                                                                 │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                    │
 │  │notifications│    │activity_logs│    │   roles     │                    │
 │  │             │    │             │    │             │                    │
@@ -231,7 +232,9 @@ The database follows a normalized relational design with proper indexing and rel
 │  │ • read_at   │    │ • properties│    │ • created_at│                    │
 │  │ • created_at│    │ • created_at│    │ • updated_at│                    │
 │  └─────────────┘    └─────────────┘    └─────────────┘                    │
-└─────────────────────────────────────────────────────────────────────────────┘
+└───────────────────────────────────────────────────────────────────────────┘
+
+
 ```
 
 Machine Learning Pipeline Architecture:
@@ -269,21 +272,23 @@ The system integration architecture ensures seamless communication between compo
 
 Data Flow Architecture:
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           DATA FLOW ARCHITECTURE                           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
-│  │   Client    │    │   API       │    │   Cache     │    │  Database   │  │
-│  │  Request    │───▶│  Gateway    │───▶│   Layer     │───▶│   Layer     │  │
-│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘  │
-│         ▲                   │                   │                   │      │
-│         │                   ▼                   ▼                   ▼      │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
-│  │   Client    │    │   Business  │    │   Session   │    │   Query     │  │
-│  │  Response   │◀───│   Logic     │◀───│   Storage   │◀───│  Results    │  │
-│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────┐
+│                           DATA FLOW ARCHITECTURE                               │
+├────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                │
+│  ┌─────────────┐     ┌─────────────┐    ┌─────────────┐      ┌─────────────┐   │
+│  │   Client    │     │   API       │    │   Cache     │      │  Database   │   │
+│  │  Request    │──▶ │   Gateway    │──▶│   Layer     │───▶  │   Layer    │   │
+│  └─────────────┘     └─────────────┘    └─────────────┘      └─────────────┘   │
+│         ▲                   │                   │                   │          │
+│         │                   ▼                   ▼                   ▼          │
+│  ┌─────────────┐     ┌─────────────┐    ┌─────────────┐    ┌─────────────┐     │
+│  │   Client    │     │   Business  │    │   Session   │    │   Query     │     │
+│  │  Response   │◀───│   Logic     │◀───│   Storage   │◀───│  Results   │     │
+│  └─────────────┘     └─────────────┘    └─────────────┘    └─────────────┘     │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+
 ```
 
 API Integration Patterns:
@@ -308,43 +313,45 @@ The deployment architecture supports multiple environments with proper scaling a
 Environment Architecture:
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                        DEPLOYMENT ARCHITECTURE                             │
+│                        DEPLOYMENT ARCHITECTURE                              │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐  │
-│  │   PRODUCTION    │  │    STAGING      │  │        DEVELOPMENT         │  │
-│  │   ENVIRONMENT   │  │   ENVIRONMENT   │  │       ENVIRONMENT          │  │
+│  │   PRODUCTION    │  │    STAGING      │  │        DEVELOPMENT          │  │
+│  │   ENVIRONMENT   │  │   ENVIRONMENT   │  │       ENVIRONMENT           │  │
 │  │                 │  │                 │  │                             │  │
 │  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
-│  │ │ Load        │ │  │ │ Web Server  │ │  │ │ Local Development       │ │  │
-│  │ │ Balancer    │ │  │ │ (Single)    │ │  │ │ Environment             │ │  │
-│  │ │ (Nginx)     │ │  │ │             │ │  │ │                         │ │  │
+│  │ │ Web         │ │  │ │ Web Server  │ │  │ │ Local Development       │ │  │
+│  │ │ Server      │ │  │ │ (Single)    │ │  │ │ Environment             │ │  │
+│  │ │ (single)    │ │  │ │             │ │  │ │                         │ │  │
 │  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
 │  │                 │  │                 │  │                             │  │
 │  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
-│  │ │ Web Servers │ │  │ │ Application │ │  │ │ Laravel Sail            │ │  │
-│  │ │ (Multiple)  │ │  │ │ Server      │ │  │ │ Docker Environment      │ │  │
+│  │ │ Application │ │  │ │ Application │ │  │ │ Laravel Sail            │ │  │
+│  │ │ Server      │ │  │ │ Server      │ │  │ │ Docker Environment      │ │  │
 │  │ │             │ │  │ │             │ │  │ │                         │ │  │
 │  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
 │  │                 │  │                 │  │                             │  │
 │  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
 │  │ │ Database    │ │  │ │ Database    │ │  │ │ Local Database          │ │  │
-│  │ │ Cluster     │ │  │ │ (Single)    │ │  │ │ (MySQL/SQLite)          │ │  │
-│  │ │ (Master-Slave)│ │  │             │ │  │ │                         │ │  │
+│  │ │             │ │  │ │ (Single)    │ │  │ │ (PostgreSQL)            │ │  │
+│  │ │             │ │  │ |             │ │  │ │                         │ │  │
 │  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
 │  │                 │  │                 │  │                             │  │
 │  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
-│  │ │ Redis       │ │  │ │ Redis       │ │  │ │ Local Cache             │ │  │
-│  │ │ Cluster     │ │  │ │ (Single)    │ │  │ │ (File-based)            │ │  │
+│  │ │ Local Cache │ │  │ │ Local Cache │ │  │ │ Local Cache             │ │  │
+│  │ │             │ │  │ │             │ │  │ │ (File-based)            │ │  │
 │  │ │             │ │  │ │             │ │  │ │                         │ │  │
 │  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
 │  │                 │  │                 │  │                             │  │
 │  │ ┌─────────────┐ │  │ ┌─────────────┐ │  │ ┌─────────────────────────┐ │  │
-│  │ │ CDN         │ │  │ │ File Storage│ │  │ │ Local Storage           │ │  │
-│  │ │ (CloudFlare)│ │  │ │ (Local)     │ │  │ │ (Development)           │ │  │
+│  │ │ Local       │ │  │ │ Storage     │ │  │ │ Local Storage           │ │  │
+│  │ │ Storage     │ │  │ │ (Local)     │ │  │ │ (Development)           │ │  │
 │  │ └─────────────┘ │  │ └─────────────┘ │  │ └─────────────────────────┘ │  │
 │  └─────────────────┘  └─────────────────┘  └─────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────────┘
+
+
 ```
 
 Infrastructure Components:
@@ -364,7 +371,7 @@ Table 3.4.4: Infrastructure Components
 
 Security Architecture:
 The security architecture implements multiple layers of protection:
-
+    
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           SECURITY ARCHITECTURE                            │

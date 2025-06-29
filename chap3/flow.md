@@ -196,7 +196,7 @@
 #### 3.11.5.3 Model Bias and Fairness Testing
 #### 3.11.5.4 A/B Testing and Model Comparison
 
-## 3.12 DEPLOYMENT AND DEVOPS
+## 3.12 DEPLOYMENT AND DEVOPS (suspeneded)
 ### 3.12.1 Deployment Strategy and Environment Management
 #### 3.12.1.1 Development, Staging, and Production Environments
 #### 3.12.1.2 Environment Configuration Management

@@ -8,11 +8,22 @@ import 'offline_storage_service.dart';
 
 class AuthService {
   static const _tokenKey = 'access_token';
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final FlutterSecureStorage _secureStorage;
   static Map<String, dynamic>? _currentUser;
 
-  final ConnectivityService _connectivityService = ConnectivityService();
-  final OfflineStorageService _offlineStorage = OfflineStorageService();
+  final ConnectivityService _connectivityService;
+  final OfflineStorageService _offlineStorage;
+  final http.Client _httpClient;
+
+  AuthService({
+    FlutterSecureStorage? secureStorage,
+    ConnectivityService? connectivityService,
+    OfflineStorageService? offlineStorage,
+    http.Client? httpClient,
+  }) : _secureStorage = secureStorage ?? const FlutterSecureStorage(),
+       _connectivityService = connectivityService ?? ConnectivityService(),
+       _offlineStorage = offlineStorage ?? OfflineStorageService(),
+       _httpClient = httpClient ?? http.Client();
 
   // Get cached user info
   static Map<String, dynamic>? get currentUser => _currentUser;
@@ -29,7 +40,7 @@ class AuthService {
     // Always try online first
     try {
       print('🔐 [AuthService] Attempting online user data fetch...');
-      final response = await http
+      final response = await _httpClient
           .get(
             Uri.parse('${ApiConfig.baseUrl}/user'),
             headers: <String, String>{
@@ -88,7 +99,7 @@ class AuthService {
     if (_connectivityService.isConnected) {
       print('🔐 [AuthService] Attempting online login...');
       try {
-        final response = await http
+        final response = await _httpClient
             .post(
               Uri.parse('${ApiConfig.baseUrl}/login'),
               headers: <String, String>{
@@ -284,7 +295,7 @@ class AuthService {
     try {
       if (token != null && _connectivityService.isConnected) {
         print('🔐 [AuthService] Attempting online logout...');
-        await http
+        await _httpClient
             .post(
               Uri.parse('${ApiConfig.baseUrl}/logout'),
               headers: <String, String>{
@@ -407,7 +418,7 @@ class AuthService {
   Future<http.Response?> getAuthenticated(String endpoint) async {
     final token = await getToken();
     if (token == null) return null;
-    return http.get(
+    return _httpClient.get(
       Uri.parse('${ApiConfig.baseUrl}/$endpoint'),
       headers: <String, String>{
         'Authorization': 'Bearer $token',
@@ -427,7 +438,7 @@ class AuthService {
       throw Exception('Internet connection required for registration');
     }
 
-    final response = await http
+    final response = await _httpClient
         .post(
           Uri.parse('${ApiConfig.baseUrl}/register'),
           headers: <String, String>{
@@ -455,7 +466,7 @@ class AuthService {
       throw Exception('Internet connection required for password reset');
     }
 
-    final response = await http
+    final response = await _httpClient
         .post(
           Uri.parse('${ApiConfig.baseUrl}/send-temp-password'),
           headers: <String, String>{
@@ -539,7 +550,7 @@ class AuthService {
       };
     }
 
-    final response = await http
+    final response = await _httpClient
         .post(
           Uri.parse('${ApiConfig.baseUrl}/profile/change-password'),
           headers: <String, String>{

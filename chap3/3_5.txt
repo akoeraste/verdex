@@ -25,7 +25,7 @@ usecase
 ```
 
 Table 3.5.1: Actor Analysis
-| Actor  | Description                                 |
+| Actor  |                                  |
 |--------|---------------------------------------------|
 | User   | End-user of the mobile app                  |
 | Admin  | Manages content and user feedback           |
@@ -33,26 +33,33 @@ Table 3.5.1: Actor Analysis
 
 3.5.1.2 Activity Diagrams for Core Processes
 
-**Plant Identification Activity:**
+**Core User Processes Activity:**
 ```mermaid
 flowchart TD
-    A[Start] --> B[Capture/Select Image]
-    B --> C[Preprocess Image]
-    C --> D[Run ML Model]
-    D --> E[Display Results]
-    E --> F[User Feedback]
-    F --> G[End]
-```
-
-**Feedback Submission Activity:**
-```mermaid
-flowchart TD
-    A[Start] --> B[Open Feedback Form]
-    B --> C[Enter Feedback]
-    C --> D[Submit Feedback]
-    D --> E[Store in Database]
-    E --> F[Notify Admin]
-    F --> G[End]
+    A[User Opens App] --> B{Logged In?}
+    B -->|No| C[Login/Signup]
+    B -->|Yes| D[Main Dashboard]
+    C --> D
+    
+    D --> E{User Action?}
+    
+    %% Plant Identification
+    E -->|Identify Plant| F[Choose Image Source]
+    F --> G[Upload Image]
+    G --> H[ML Processing]
+    H --> I[Show Plant Details]
+    I --> D
+    
+    %% Language Change
+    E -->|Change Language| J[Select Language]
+    J --> K[Update UI]
+    K --> D
+    
+    %% Continue or Exit
+    D --> L{Continue?}
+    L -->|Yes| E
+    L -->|No| M[Logout]
+    M --> N[End]
 ```
 
 3.5.1.3 Sequence Diagrams for System Interactions
@@ -149,17 +156,115 @@ erDiagram
 
 3.5.4 User Interface Design and Wireframing
 
-**Sample Wireframe: Plant Identification Screen**
+**Complete Page Flow Diagram:**
 ```mermaid
 flowchart TD
-    A[Camera View]
-    B[Capture Button]
-    C[Result Panel]
-    D[Feedback Button]
-    A --> B
-    B --> C
-    C --> D
+    A[App Launch] --> B[Splash Screen]
+    B --> C{User Authenticated?}
+    
+    C -->|No| D[Welcome Screen]
+    C -->|Yes| E{Onboarding Complete?}
+    
+    D --> F[Language Selection]
+    D --> G[Login Screen]
+    D --> H[Signup Screen]
+    D --> I[Forgot Password Screen]
+    
+    E -->|No| J[Onboarding Screen]
+    E -->|Yes| K{Permissions Granted?}
+    
+    J --> L[Main Screen]
+    K -->|No| M[Permission Screen]
+    K -->|Yes| L
+    
+    G --> N[Main Screen]
+    H --> N
+    I --> G
+    M --> L
+    
+    %% Main App Navigation
+    L --> O[Home Screen]
+    L --> P[Identify Screen]
+    L --> Q[Settings Screen]
+    
+    %% Home Screen Navigation
+    O --> R[Plant Library Screen]
+    O --> S[Plant Details Screen]
+    O --> T[Search Screen]
+    O --> U[Favorites Screen]
+    O --> V[Notifications Screen]
+    O --> W[Feedback Screen]
+    
+    %% Identify Screen Flow
+    P --> X[Plant Result Screen]
+    X --> S
+    X --> W
+    
+    %% Settings Screen Navigation
+    Q --> Y[Edit Profile Screen]
+    Q --> Z[Change Password Screen]
+    Q --> AA[Language Settings Screen]
+    Q --> BB[About Us Screen]
+    Q --> CC[Terms Screen]
+    Q --> DD[Privacy Policy Screen]
+    Q --> EE[Debug Screen]
+    
+    %% Notifications Flow
+    V --> FF[Notification Details Screen]
+    FF --> V
+    
+    %% Feedback Flow
+    W --> GG[Feedback Success Screen]
+    GG --> O
+    
+    %% Return to Main
+    R --> O
+    S --> O
+    T --> O
+    U --> O
+    Y --> Q
+    Z --> Q
+    AA --> Q
+    BB --> Q
+    CC --> Q
+    DD --> Q
+    EE --> Q
+    
+    %% Logout Flow
+    Q --> HH[Logout]
+    HH --> D
 ```
+
+**Screen Descriptions:**
+- **App Launch**: Application initialization
+- **Splash Screen**: Loading screen with app logo
+- **Welcome Screen**: App introduction and language selection
+- **Language Selection**: Choose app language
+- **Login Screen**: User authentication
+- **Signup Screen**: New user registration
+- **Forgot Password Screen**: Password recovery
+- **Onboarding Screen**: App tutorial and introduction
+- **Permission Screen**: Camera and storage permissions
+- **Main Screen**: Bottom navigation container
+- **Home Screen**: Main dashboard with plant library access
+- **Identify Screen**: Plant identification interface
+- **Settings Screen**: App configuration and user settings
+- **Plant Library Screen**: Browse all plants
+- **Plant Details Screen**: Individual plant information
+- **Search Screen**: Plant search functionality
+- **Favorites Screen**: User's favorite plants
+- **Notifications Screen**: User notifications list
+- **Feedback Screen**: Submit user feedback
+- **Plant Result Screen**: ML identification results
+- **Edit Profile Screen**: Modify user information
+- **Change Password Screen**: Password update
+- **Language Settings Screen**: Language selection
+- **About Us Screen**: App information
+- **Terms Screen**: Terms of service
+- **Privacy Policy Screen**: Privacy policy
+- **Debug Screen**: Development debugging tools
+- **Notification Details Screen**: Individual notification view
+- **Feedback Success Screen**: Confirmation message
 
 3.5.5 API Design and Interface Specifications
 
