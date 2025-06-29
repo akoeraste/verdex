@@ -76,7 +76,7 @@ class TestRunner {
       await _runTestFile('test/services/auth_service_test.dart');
       await _runTestFile('test/services/plant_service_test.dart');
       await _runTestFile('test/services/connectivity_service_test.dart');
-      await _runTestFile('test/services/apple_classifier_service_test.dart');
+      // await _runTestFile('test/services/apple_classifier_service_test.dart');
 
       // Run utility tests
       await _runTestFile('test/unit/utils_test.dart');

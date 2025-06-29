@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:verdex/services/apple_classifier_service.dart';
+import 'package:verdex/services/plant_classifier_service.dart';
 
 class PlantResultScreen extends StatefulWidget {
   final File imageFile;
@@ -22,8 +22,8 @@ class _PlantResultScreenState extends State<PlantResultScreen>
   late Animation<Offset> _slideAnimation;
   late Animation<double> _scaleAnimation;
 
-  // Apple classifier service
-  final AppleClassifierService _classifierService = AppleClassifierService();
+  // Plant classifier service
+  final PlantClassifierService _classifierService = PlantClassifierService();
 
   // Prediction state
   bool _isPredicting = false;
@@ -77,7 +77,7 @@ class _PlantResultScreenState extends State<PlantResultScreen>
     _scaleController.forward();
   }
 
-  /// Run apple classification prediction
+  /// Run plant classification prediction
   Future<void> _runPrediction() async {
     setState(() {
       _isPredicting = true;
@@ -214,7 +214,7 @@ class _PlantResultScreenState extends State<PlantResultScreen>
 
                         const SizedBox(height: 24),
 
-                        // Apple Classification Result
+                        // Plant Classification Result
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
@@ -232,7 +232,6 @@ class _PlantResultScreenState extends State<PlantResultScreen>
                           ),
                           child: Column(
                             children: [
-                              // Loading State
                               if (_isPredicting) ...[
                                 const CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -250,72 +249,10 @@ class _PlantResultScreenState extends State<PlantResultScreen>
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'running_apple_classification'.tr(),
+                                  'running_plant_classification'.tr(),
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: const Color(0xFF666666),
-                                  ),
-                                ),
-                              ] else if (_errorMessage != null) ...[
-                                // Error State
-                                Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xFFFF6B6B),
-                                        Color(0xFFE74C3C),
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(30),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(
-                                          0xFFFF6B6B,
-                                        ).withOpacity(0.3),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Icon(
-                                    Icons.error_outline,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'analysis_failed'.tr(),
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFFFF6B6B),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  _errorMessage!,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: const Color(0xFF666666),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                ElevatedButton.icon(
-                                  onPressed: _runPrediction,
-                                  icon: const Icon(Icons.refresh),
-                                  label: Text('retry'.tr()),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFFF6B6B),
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
                                   ),
                                 ),
                               ] else if (_predictionResult != null) ...[
@@ -324,110 +261,71 @@ class _PlantResultScreenState extends State<PlantResultScreen>
                                   width: 60,
                                   height: 60,
                                   decoration: BoxDecoration(
-                                    gradient:
-                                        _predictionResult!['isApple']
-                                            ? const LinearGradient(
-                                              colors: [
-                                                Color(0xFF4CAF50),
-                                                Color(0xFF45A049),
-                                              ],
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                            )
-                                            : const LinearGradient(
-                                              colors: [
-                                                Color(0xFFFF9800),
-                                                Color(0xFFF57C00),
-                                              ],
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                            ),
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF4CAF50),
+                                        Color(0xFF45A049),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
                                     borderRadius: BorderRadius.circular(30),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: (_predictionResult!['isApple']
-                                                ? const Color(0xFF4CAF50)
-                                                : const Color(0xFFFF9800))
-                                            .withOpacity(0.3),
+                                        color: const Color(
+                                          0xFF4CAF50,
+                                        ).withOpacity(0.3),
                                         blurRadius: 12,
                                         offset: const Offset(0, 4),
                                       ),
                                     ],
                                   ),
                                   child: Icon(
-                                    _predictionResult!['isApple']
-                                        ? Icons.apple
-                                        : Icons.close,
+                                    Icons.eco,
                                     color: Colors.white,
                                     size: 28,
                                   ),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  _predictionResult!['isApple']
-                                      ? 'apple_detected'.tr()
-                                      : 'not_an_apple'.tr(),
+                                  _getPlantName(
+                                    _predictionResult!['predictedIndex'],
+                                  ),
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.w700,
-                                    color:
-                                        _predictionResult!['isApple']
-                                            ? const Color(0xFF4CAF50)
-                                            : const Color(0xFFFF9800),
+                                    color: const Color(0xFF4CAF50),
                                   ),
                                 ),
                                 const SizedBox(height: 16),
                                 // Confidence Display
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF8F9FA),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: const Color(0xFFE0E0E0),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'confidence'.tr(),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF1A1A1A),
+                                      ),
                                     ),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'confidence'.tr(),
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: const Color(0xFF1A1A1A),
-                                            ),
-                                          ),
-                                          Text(
-                                            '${_predictionResult!['confidencePercentage']}%',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w700,
-                                              color:
-                                                  _predictionResult!['isApple']
-                                                      ? const Color(0xFF4CAF50)
-                                                      : const Color(0xFFFF9800),
-                                            ),
-                                          ),
-                                        ],
+                                    Text(
+                                      '  ${_predictionResult!['confidencePercentage']}%',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF4CAF50),
                                       ),
-                                      const SizedBox(height: 8),
-                                      LinearProgressIndicator(
-                                        value: _predictionResult!['confidence'],
-                                        backgroundColor: const Color(
-                                          0xFFE0E0E0,
-                                        ),
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              _predictionResult!['isApple']
-                                                  ? const Color(0xFF4CAF50)
-                                                  : const Color(0xFFFF9800),
-                                            ),
-                                      ),
-                                    ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                LinearProgressIndicator(
+                                  value: _predictionResult!['confidence'],
+                                  backgroundColor: const Color(0xFFE0E0E0),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    const Color(0xFF4CAF50),
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -435,46 +333,34 @@ class _PlantResultScreenState extends State<PlantResultScreen>
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color:
-                                        _predictionResult!['isApple']
-                                            ? const Color(0xFFE8F5E8)
-                                            : const Color(0xFFFFF3E0),
+                                    color: const Color(0xFFE8F5E8),
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color:
-                                          _predictionResult!['isApple']
-                                              ? const Color(
-                                                0xFF4CAF50,
-                                              ).withOpacity(0.3)
-                                              : const Color(
-                                                0xFFFF9800,
-                                              ).withOpacity(0.3),
+                                      color: const Color(
+                                        0xFF4CAF50,
+                                      ).withOpacity(0.3),
                                     ),
                                   ),
                                   child: Row(
                                     children: [
                                       Icon(
-                                        _predictionResult!['isApple']
-                                            ? Icons.check_circle
-                                            : Icons.info_outline,
-                                        color:
-                                            _predictionResult!['isApple']
-                                                ? const Color(0xFF4CAF50)
-                                                : const Color(0xFFFF9800),
+                                        Icons.check_circle,
+                                        color: const Color(0xFF4CAF50),
                                         size: 20,
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
-                                          _predictionResult!['isApple']
-                                              ? 'apple_detected_message'.tr()
-                                              : 'not_apple_message'.tr(),
+                                          'plant_detected_message'.tr(
+                                            args: [
+                                              _getPlantName(
+                                                _predictionResult!['predictedIndex'],
+                                              ),
+                                            ],
+                                          ),
                                           style: TextStyle(
                                             fontSize: 14,
-                                            color:
-                                                _predictionResult!['isApple']
-                                                    ? const Color(0xFF2E7D32)
-                                                    : const Color(0xFFE65100),
+                                            color: const Color(0xFF2E7D32),
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -548,5 +434,45 @@ class _PlantResultScreenState extends State<PlantResultScreen>
         ),
       ),
     );
+  }
+
+  String _getPlantName(int index) {
+    // TODO: Replace with actual plant names in the order of your model's output
+    const plantNames = [
+      'Plant 1',
+      'Plant 2',
+      'Plant 3',
+      'Plant 4',
+      'Plant 5',
+      'Plant 6',
+      'Plant 7',
+      'Plant 8',
+      'Plant 9',
+      'Plant 10',
+      'Plant 11',
+      'Plant 12',
+      'Plant 13',
+      'Plant 14',
+      'Plant 15',
+      'Plant 16',
+      'Plant 17',
+      'Plant 18',
+      'Plant 19',
+      'Plant 20',
+      'Plant 21',
+      'Plant 22',
+      'Plant 23',
+      'Plant 24',
+      'Plant 25',
+      'Plant 26',
+      'Plant 27',
+      'Plant 28',
+      'Plant 29',
+      'Plant 30',
+    ];
+    if (index >= 0 && index < plantNames.length) {
+      return plantNames[index];
+    }
+    return 'Unknown Plant';
   }
 }

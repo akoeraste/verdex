@@ -38,7 +38,6 @@ class _SearchScreenState extends State<SearchScreen> {
   void _loadSearchHistory() {
     // Pending: Load from local storage
     _searchHistory = [
-      {'name': 'Apple', 'type': 'Fruit'},
       {'name': 'Tomato', 'type': 'Vegetable'},
       {'name': 'Basil', 'type': 'Herb'},
     ];

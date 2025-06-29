@@ -25,11 +25,6 @@ class _EducationalSnippetState extends State<EducationalSnippet> {
       text: 'banana_fact'.tr(),
       image: 'assets/images/banana.png',
     ),
-    _Fact(
-      title: 'did_you_know'.tr(),
-      text: 'apple_fact'.tr(),
-      image: 'assets/images/apple.png',
-    ),
   ];
 
   void _onPageChanged(int index) {

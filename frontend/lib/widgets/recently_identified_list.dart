@@ -9,7 +9,6 @@ class RecentlyIdentifiedList extends StatelessWidget {
   Widget build(BuildContext context) {
     // This would typically come from a service or state management
     final recentSearches = [
-      {'nameKey': 'apple', 'image': 'assets/images/apple.png'},
       {'nameKey': 'pear', 'image': 'assets/images/pear.png'},
       {'nameKey': 'banana', 'image': 'assets/images/banana.png'},
     ];
