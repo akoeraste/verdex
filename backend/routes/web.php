@@ -15,6 +15,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Health check route for Railway
+Route::get('/', function() {
+    return response()->json([
+        'status' => 'healthy',
+        'message' => 'Verdex Backend API is running',
+        'version' => '1.0.0',
+        'timestamp' => now()->toISOString()
+    ]);
+});
+
 Route::post('login', [AuthenticatedSessionController::class, 'login']);
 Route::post('register', [AuthenticatedSessionController::class, 'register']);
 Route::post('logout', [AuthenticatedSessionController::class, 'logout']);

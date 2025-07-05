@@ -6,6 +6,8 @@
 /vendor
 .env
 .env.backup
+.env.production
+.env.local
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
@@ -18,3 +20,13 @@ package-lock.json
 composer.lock
 yarn.lock
 /storage/media-library/temp
+/storage/logs/*.log
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+!storage/framework/cache/.gitkeep
+!storage/framework/sessions/.gitkeep
+!storage/framework/views/.gitkeep
+
+# Local development scripts
+check-deployment.php

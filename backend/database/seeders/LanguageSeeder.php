@@ -13,11 +13,8 @@ class LanguageSeeder extends Seeder
             ['code' => 'en', 'name' => 'English'],
             ['code' => 'fr', 'name' => 'French'],
             ['code' => 'pg', 'name' => 'Pidgin'],
-            ['code' => 'gm', 'name' => 'Gombale'],
-            ['code' => 'bli', 'name' => 'Bambili'],
-            ['code' => 'bui', 'name' => 'Bambui'],
-            ['code' => 'ns', 'name' => 'Nso'],
-            ['code' => 'km', 'name' => 'Kom'],
+            ['code' => 'gm', 'name' => 'Ngombale'],
+            ['code' => 'bm', 'name' => 'Bambili'],
         ];
         foreach ($languages as $lang) {
             DB::table('languages')->updateOrInsert(

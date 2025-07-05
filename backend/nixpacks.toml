@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ["php82", "php82Extensions.mysql", "php82Extensions.curl", "php82Extensions.mbstring", "php82Extensions.xml", "php82Extensions.zip", "php82Extensions.gd", "php82Extensions.fileinfo", "php82Extensions.openssl", "php82Extensions.pdo", "php82Extensions.pdo_mysql", "php82Extensions.tokenizer", "php82Extensions.json", "php82Extensions.bcmath", "php82Extensions.ctype", "php82Extensions.xmlwriter", "php82Extensions.dom", "php82Extensions.iconv", "php82Extensions.simplexml", "php82Extensions.spl", "php82Extensions.phar", "php82Extensions.session", "php82Extensions.sockets", "php82Extensions.zlib", "php82Extensions.calendar", "php82Extensions.exif", "php82Extensions.ftp", "php82Extensions.gettext", "php82Extensions.hash", "php82Extensions.ldap", "php82Extensions.mysqli", "php82Extensions.odbc", "php82Extensions.pdo_odbc", "php82Extensions.pdo_pgsql", "php82Extensions.pdo_sqlite", "php82Extensions.pgsql", "php82Extensions.sqlite3", "php82Extensions.tidy", "php82Extensions.xmlreader", "php82Extensions.xmlrpc", "php82Extensions.xsl"]
+
+[phases.install]
+cmds = ["composer install --no-dev --optimize-autoloader"]
+
+[phases.build]
+cmds = [
+  "php artisan config:cache",
+  "php artisan route:cache",
+  "php artisan view:cache",
+  "php artisan storage:link"
+]
+
+[start]
+cmd = "php artisan serve --host=0.0.0.0 --port=$PORT" 

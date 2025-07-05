@@ -22,6 +22,7 @@ class CreateAdminUserSeeder extends Seeder
             'username' => 'devtea',
             'email' => 'prodevtea@gmail.com',
             'password' => bcrypt('Prime123'),
+            'avatar' => '/storage/avatars/default.png',
             'email_verified_at' => now(),
         ]);
 

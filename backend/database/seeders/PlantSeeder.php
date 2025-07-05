@@ -16,17 +16,17 @@ class PlantSeeder extends Seeder
         $plantData = [
             'aloevera' => [
                 'en' => [
-                    'common_name' => 'Aloevera',
+                    'common_name' => 'Aloe Vera',
                     'description' => 'A succulent plant species known for its medicinal properties, particularly for skin care and wound healing.',
                     'uses' => 'Medicinal, skincare, wound healing, digestive health',
                 ],
                 'fr' => [
                     'common_name' => 'Aloès',
-                    'description' => 'Une plante succulente connue pour ses propriétés médicinales, notamment pour les soins de la peau et la cicatrisation des plaies.',
+                    'description' => 'Une plante succulente connue pour ses propriétés médicinales, particulièrement pour les soins de la peau et la cicatrisation des plaies.',
                     'uses' => 'Médicinal, soins de la peau, cicatrisation, santé digestive',
                 ],
                 'pg' => [
-                    'common_name' => 'Aloevera',
+                    'common_name' => 'Aloe Vera',
                     'description' => 'Na plant wey people dey use for medicine, e good for skin and to heal wound.',
                     'uses' => 'Medicine, skin care, wound healing, belle (stomach) health',
                 ],
@@ -225,7 +225,7 @@ class PlantSeeder extends Seeder
                     'uses' => 'Food, nutrition, traditional medicine',
                 ],
                 'fr' => [
-                    'common_name' => 'Guava',
+                    'common_name' => 'Goyave ',
                     'description' => 'Un arbre tropical produisant des fruits doux et aromatiques riches en vitamine C.',
                     'uses' => 'Alimentation, nutrition, médecine traditionnelle',
                 ],
@@ -361,8 +361,8 @@ class PlantSeeder extends Seeder
                     'uses' => 'Spice, culinary, traditional medicine',
                 ],
                 'fr' => [
-                    'common_name' => 'Poivron Chili',
-                    'description' => 'Une espèce de poivron cultivé pour ses fruits épicés.',
+                    'common_name' => 'Piment',
+                    'description' => 'Une espèce de piment cultivé pour ses fruits épicés.',
                     'uses' => 'Épice, cuisine, médecine traditionnelle',
                 ],
                 'pg' => [
@@ -379,7 +379,7 @@ class PlantSeeder extends Seeder
                 ],
                 'fr' => [
                     'common_name' => 'Ananas',
-                    'description' => 'Un arbre à fruits tropical produisant des fruits en forme de grappe.',
+                    'description' => 'Une plante tropicale produisant des fruits comestibles composés de baies coalescentes.',
                     'uses' => 'Alimentation, nutrition, médecine traditionnelle',
                 ],
                 'pg' => [
@@ -396,7 +396,7 @@ class PlantSeeder extends Seeder
                 ],
                 'fr' => [
                     'common_name' => 'Pomelo',
-                    'description' => 'Le plus grand fruit de citrus, natif d\'Asie du Sud-Est.',
+                    'description' => 'Le plus grand fruit d\'agrumes, originaire d\'Asie du Sud-Est.',
                     'uses' => 'Alimentation, nutrition, médecine traditionnelle',
                 ],
                 'pg' => [
@@ -412,7 +412,7 @@ class PlantSeeder extends Seeder
                     'uses' => 'Culinary, traditional medicine',
                 ],
                 'fr' => [
-                    'common_name' => 'Poireau',
+                    'common_name' => 'Échalote',
                     'description' => 'Une variété d\'oignon avec une saveur plus douce, couramment utilisée dans la cuisine.',
                     'uses' => 'Cuisine, médecine traditionnelle',
                 ],
@@ -429,8 +429,8 @@ class PlantSeeder extends Seeder
                     'uses' => 'Food, oil, animal feed, industrial products',
                 ],
                 'fr' => [
-                    'common_name' => 'Haricot',
-                    'description' => 'Une espèce de légume de la famille des Fabaceae, largement cultivée pour son haricot comestible.',
+                    'common_name' => 'Soja',
+                    'description' => 'Une espèce de légumineuse originaire d\'Asie de l\'Est, largement cultivée pour ses graines comestibles.',
                     'uses' => 'Alimentation, huile, alimentation animale, produits industriels',
                 ],
                 'pg' => [
@@ -447,7 +447,7 @@ class PlantSeeder extends Seeder
                 ],
                 'fr' => [
                     'common_name' => 'Épinards',
-                    'description' => 'Un légume vert résistant à la gelée, riche en fer et autres nutriments.',
+                    'description' => 'Un légume vert feuillu, riche en fer et autres nutriments.',
                     'uses' => 'Alimentation, nutrition, médecine traditionnelle',
                 ],
                 'pg' => [
@@ -735,6 +735,42 @@ class PlantSeeder extends Seeder
                     }
                 }
             }
+            
+            // Get audio files for each language
+            $audioFolder = storage_path('app/public/plants/' . $name . '/audio');
+            $audioUrls = [
+                'en' => null,
+                'fr' => null,
+                'pg' => null
+            ];
+            
+            if (is_dir($audioFolder)) {
+                $audioFiles = scandir($audioFolder);
+                $foundAudioFiles = [];
+                
+                foreach ($audioFiles as $audioFile) {
+                    if (in_array(strtolower(pathinfo($audioFile, PATHINFO_EXTENSION)), ['mp3','wav','ogg'])) {
+                        // Extract language code from filename (e.g., banana_en_1750930216.mp3)
+                        if (preg_match('/_([a-z]{2})_\d+\.(mp3|wav|ogg)$/i', $audioFile, $matches)) {
+                            $langCode = $matches[1];
+                            if (in_array($langCode, ['en', 'fr', 'pg'])) {
+                                $audioUrls[$langCode] = '/storage/plants/' . $name . '/audio/' . $audioFile;
+                                $foundAudioFiles[] = $langCode;
+                            }
+                        }
+                    }
+                }
+                
+                if (!empty($foundAudioFiles)) {
+                    $this->command->info("  🔊 Audio files found for {$name}: " . implode(', ', $foundAudioFiles));
+                    foreach ($foundAudioFiles as $lang) {
+                        $this->command->line("     - {$lang}: {$audioUrls[$lang]}");
+                    }
+                }
+            } else {
+                $this->command->line("  🔇 No audio folder found for {$name}");
+            }
+            
             $categoryName = $categoryMap[$name] ?? 'Uncategorized';
             $category = $categories[$categoryName] ?? $defaultCategory;
             
@@ -771,7 +807,7 @@ class PlantSeeder extends Seeder
                     'plant_id' => $plant->id,
                     'language_code' => 'en',
                 ],
-                $en + ['audio_url' => null]
+                $en + ['audio_url' => $audioUrls['en']]
             );
             // French
             $fr = $translations['fr'] ?? [
@@ -784,7 +820,7 @@ class PlantSeeder extends Seeder
                     'plant_id' => $plant->id,
                     'language_code' => 'fr',
                 ],
-                $fr + ['audio_url' => null]
+                $fr + ['audio_url' => $audioUrls['fr']]
             );
             // Pidgin
             $pg = $translations['pg'] ?? [
@@ -797,11 +833,22 @@ class PlantSeeder extends Seeder
                     'plant_id' => $plant->id,
                     'language_code' => 'pg',
                 ],
-                $pg + ['audio_url' => null]
+                $pg + ['audio_url' => $audioUrls['pg']]
             );
         }
+        
         // Ensure all plants have a category
         Plant::whereNull('plant_category_id')->update(['plant_category_id' => $defaultCategory->id]);
-        $this->command->info('Basic plants seeded with images and translations! All plants have a category.');
+        
+        // Summary of audio files
+        $plantsWithAudio = PlantTranslation::whereNotNull('audio_url')->distinct('plant_id')->count();
+        $totalAudioFiles = PlantTranslation::whereNotNull('audio_url')->count();
+        
+        $this->command->info('');
+        $this->command->info('=== SEEDING SUMMARY ===');
+        $this->command->info("📊 Total plants processed: " . count($plantNames));
+        $this->command->info("🎵 Plants with audio files: {$plantsWithAudio}");
+        $this->command->info("🔊 Total audio files assigned: {$totalAudioFiles}");
+        $this->command->info('✅ Basic plants seeded with images, translations, and audio files! All plants have a category.');
     }
 } 
