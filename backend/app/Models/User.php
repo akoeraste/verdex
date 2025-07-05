@@ -59,4 +59,14 @@ class User extends Authenticatable
             ->logOnly(['name', 'text']);
         // Chain fluent methods for configuration options
     }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function feedback()
+    {
+        return $this->hasMany(Feedback::class);
+    }
 }
