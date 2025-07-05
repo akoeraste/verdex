@@ -1,277 +1,569 @@
 <template>
   <div class="doc-layout">
-    <nav class="doc-navbar floating-navbar">
-      <div class="doc-navbar-center">
-        <router-link v-for="item in menu" :key="item.path" :to="item.path" class="doc-navbar-link">
-          <i :class="item.icon" style="margin-right: 8px;"></i>{{ item.label }}
-        </router-link>
+    <!-- Modern floating navigation bar -->
+    <nav class="doc-navbar">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <router-link to="/documentation" class="brand-link">
+            <img src="/logo.png" alt="Verdex Logo" class="brand-logo" />
+            <span class="brand-text">Verdex Docs</span>
+          </router-link>
+        </div>
+        <div class="nav-menu">
+
+          <!-- Overview Section -->
+          <router-link to="/documentation/" class="nav-link">
+            <i class="bi bi-info-circle"></i>
+            <span>Overview</span>
+          </router-link>
+          <!-- ML Section -->
+          <router-link to="/documentation/ml" class="nav-link">
+            <i class="bi bi-cpu"></i>
+            <span>ML</span>
+          </router-link>
+
+          <!-- Frontend Section -->
+          <div class="nav-dropdown">
+            <button class="nav-dropdown-btn" @click="toggleDropdown('frontend')">
+              <i class="bi bi-phone"></i>
+              <span>Frontend</span>
+              <i class="bi bi-chevron-down dropdown-arrow"></i>
+            </button>
+            <div class="nav-dropdown-menu" :class="{ open: openDropdown === 'frontend' }">
+              <router-link to="/documentation/frontend" class="dropdown-item">
+                <i class="bi bi-phone"></i>
+                <span>Frontend</span>
+              </router-link>
+              <router-link to="/documentation/connect" class="dropdown-item">
+                <i class="bi bi-link-45deg"></i>
+                <span>Connect</span>
+              </router-link>
+            </div>
+          </div>
+
+          <!-- Backend Section -->
+          <div class="nav-dropdown">
+            <button class="nav-dropdown-btn" @click="toggleDropdown('backend')">
+              <i class="bi bi-server"></i>
+              <span>Backend</span>
+              <i class="bi bi-chevron-down dropdown-arrow"></i>
+            </button>
+            <div class="nav-dropdown-menu" :class="{ open: openDropdown === 'backend' }">
+              <router-link to="/documentation/backend" class="dropdown-item">
+                <i class="bi bi-server"></i>
+                <span>Backend</span>
+              </router-link>
+              <router-link to="/documentation/api" class="dropdown-item">
+                <i class="bi bi-code-slash"></i>
+                <span>API</span>
+              </router-link>
+            </div>
+          </div>
+
+          <!-- Project Structure Section -->
+          <router-link to="/documentation/project-structure" class="nav-link">
+            <i class="bi bi-diagram-3"></i>
+            <span>Project Structure</span>
+          </router-link>
+
+        </div>
+        <div class="nav-actions">
+          <button v-if="sidebarSections.length" class="mobile-menu-toggle" @click="sidebarOpen = !sidebarOpen">
+            <i class="bi bi-list"></i>
+          </button>
+          <router-link to="/" class="login-btn">
+            <i class="bi bi-person-circle"></i>
+            <span>Home</span>
+          </router-link>
+        </div>
       </div>
     </nav>
+
+    <!-- Main content area -->
     <div class="doc-main">
+      <!-- Sidebar navigation -->
       <aside v-if="sidebarSections.length" class="doc-sidebar" :class="{ open: sidebarOpen }">
-        <button class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen">
-          <i :class="sidebarOpen ? 'bi bi-x-lg' : 'bi bi-list'" />
-        </button>
+        <div class="sidebar-header">
+          <h3 class="sidebar-title">Navigation</h3>
+          <button class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen">
+            <i :class="sidebarOpen ? 'bi bi-x-lg' : 'bi bi-list'" />
+          </button>
+        </div>
         <nav class="sidebar-nav">
           <div v-for="section in sidebarSections" :key="section.id" class="sidebar-section">
-            <div class="sidebar-section-title">VERDEX</div>
-            <div class="sidebar-section-title">{{ section.title }}</div>
-            <ul>
+            <h4 class="section-title">{{ section.title }}</h4>
+            <ul class="section-links">
               <li v-for="item in section.items" :key="item.id">
-                <a :href="'#' + item.id" @click="sidebarOpen = false">{{ item.label }}</a>
+                <a :href="'#' + item.id" @click="sidebarOpen = false" class="section-link">
+                  {{ item.label }}
+                </a>
               </li>
             </ul>
           </div>
         </nav>
       </aside>
-      <main class="doc-content static-sidebar">
-        <slot />
+
+      <!-- Main content -->
+      <main class="doc-content">
+        <div class="content-wrapper">
+          <slot />
+        </div>
       </main>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
-
-const menu = [
-  { label: 'Verdex', path: '/documentation/', icon: 'bi bi-link-45deg' },
-  { label: 'Connect', path: '/documentation/connect', icon: 'bi bi-link-45deg' },
-  { label: 'Backend', path: '/documentation/backend', icon: 'bi bi-server' },
-  { label: 'API', path: '/documentation/api', icon: 'bi bi-code-slash' },
-  { label: 'Frontend', path: '/documentation/frontend', icon: 'bi bi-phone' },
-  { label: 'Login', path: '/login', icon: 'bi bi-phone' },
-];
 
 const route = useRoute();
 const sidebarOpen = ref(false);
+const openDropdown = ref(null);
 
-// Sidebar sections are provided by each doc page via a prop or inject
+const toggleDropdown = (dropdown) => {
+  if (openDropdown.value === dropdown) {
+    openDropdown.value = null;
+  } else {
+    openDropdown.value = dropdown;
+  }
+};
+
+// Close dropdown when clicking outside
+const handleClickOutside = (event) => {
+  if (!event.target.closest('.nav-dropdown')) {
+    openDropdown.value = null;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
+
 const sidebarSections = computed(() => {
-  // This will be injected or set by the child page
   return route.meta.sidebarSections || [];
 });
 </script>
 
 <style scoped>
-body {
+/* Global styles */
+.doc-layout {
   min-height: 100vh;
-  background: linear-gradient(120deg, #f8fafc 0%, #e3f2fd 100%);
-  position: relative;
+  background: linear-gradient(135deg, #e1e6fc 0%, #f4ebfc 100%);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
-.floating-navbar {
-  position: fixed;
-  top: 2.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: auto;
-  max-width: 1100px;
-  z-index: 100;
-  border-radius: 2rem;
-  background: linear-gradient(90deg, #464848 0%, #076423 100%);
-  backdrop-filter: blur(12px) saturate(1.3);
-  box-shadow:
-    0 8px 32px 0 rgba(67, 233, 123, 0.18),
-    0 1.5px 8px rgba(34, 34, 59, 0.10),
-    0 0 0 4px #fa8bff33,
-    0 0 0 8px #2bd2ff22,
-    0 0 32px 0 #43e97b44;
-  border: none;
-  padding: 0.8rem 0;
-  margin-bottom: 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: box-shadow 0.2s, background 0.2s;
-}
+
+/* Modern Navigation Bar */
 .doc-navbar {
-  background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
-  box-shadow: none;
-  border: solid 1px black;
-  margin-bottom: 0;
-  padding: 10px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.08);
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
   display: flex;
   align-items: center;
-  gap: 2rem;
+  justify-content: space-between;
+  height: 70px;
 }
-.doc-navbar-appname {
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: #fff;
-  margin-right: 2.5rem;
-  padding: 0.3rem 1.2rem;
-  border-radius: 1.2rem;
-  background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
-  box-shadow: 0 2px 12px #43e97b33;
-  user-select: none;
-  transition: background 0.18s, color 0.18s;
-}
-.doc-navbar-center {
+
+.nav-brand {
   display: flex;
-  justify-content: center;
-  gap: 2.5rem;
+  align-items: center;
 }
-.doc-navbar-link {
-  color: #22223b;
-  font-weight: 600;
-  font-size: 1.1rem;
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   text-decoration: none;
-  padding: 0.5rem 2rem;
-  border-radius: 1.2rem;
-  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  color: #1a1a1a;
+  font-weight: 700;
+  font-size: 1.25rem;
+  transition: transform 0.2s ease;
+}
+
+.brand-link:hover {
+  transform: translateY(-1px);
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: contain;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.brand-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Dropdown Navigation */
+.nav-dropdown {
   position: relative;
 }
-.doc-navbar-link.router-link-exact-active,
-.doc-navbar-link:hover {
-  background: linear-gradient(90deg, #d3ebe871 0%, #d3ebe871 100%);
-  color: #000000;
-  box-shadow: 0 2px 12px #00000033, 0 1px 4px #09b1dfa4;
-}
-.doc-main {
+
+.nav-dropdown-btn {
   display: flex;
-  min-height: 80vh;
-  margin-top: 7.5rem; /* space for floating navbar */
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.doc-sidebar {
-  width: 260px;
-  background: rgba(255,255,255,0.98);
-  border-radius: 1.5rem;
-  margin-top: 0.1rem;
-  margin-left: 0.5rem;
-  margin-bottom: 0.5rem;
-  box-shadow: 0 4px 24px 0 #43e97b22, 0 1.5px 8px #2bd2ff11;
-  padding: 2rem 1.2rem 2rem 1.2rem;
-  position: sticky;
-  top: 1.5rem;
-  height: fit-content;
-  min-height: 60vh;
-  transition: box-shadow 0.2s, background 0.2s;
-  display: flex;
-  flex-direction: column;
-}
-.sidebar-toggle {
-  display: none;
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  color: #4a5568;
   background: none;
   border: none;
-  font-size: 1.5rem;
-  color: #2e7d32;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
   cursor: pointer;
+  font-family: inherit;
 }
+
+.nav-dropdown-btn:hover {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.08);
+  transform: translateY(-1px);
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  color: #4a5568;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.08);
+  transform: translateY(-1px);
+}
+
+.nav-link.router-link-active {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.12);
+  font-weight: 600;
+}
+
+.nav-dropdown-btn i {
+  font-size: 1.1rem;
+}
+
+.dropdown-arrow {
+  transition: transform 0.2s ease;
+  font-size: 0.8rem;
+}
+
+.nav-dropdown:hover .dropdown-arrow,
+.nav-dropdown-menu.open + .nav-dropdown-btn .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s ease;
+  z-index: 1001;
+  margin-top: 0.5rem;
+}
+
+.nav-dropdown-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  color: #4a5568;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.08);
+}
+
+.dropdown-item.router-link-active {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.12);
+  font-weight: 600;
+}
+
+.dropdown-item i {
+  font-size: 1.1rem;
+  width: 16px;
+  text-align: center;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(102, 126, 234, 0.1);
+  border: none;
+  border-radius: 10px;
+  color: #667eea;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.2rem;
+}
+
+.mobile-menu-toggle:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: translateY(-1px);
+}
+
+.login-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  color: white;
+}
+
+/* Main content area */
+.doc-main {
+  display: flex;
+  min-height: calc(100vh - 70px);
+  margin-top: 70px;
+}
+
+/* Sidebar */
+.doc-sidebar {
+  width: 280px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  overflow-y: auto;
+  position: fixed;
+  top: 70px;
+  left: 0;
+  height: calc(100vh - 70px);
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+/* Hide sidebar toggle on desktop */
+.sidebar-toggle {
+  display: none;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(102, 126, 234, 0.1);
+  border: none;
+  border-radius: 8px;
+  color: #667eea;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(102, 126, 234, 0.2);
+}
+
 .sidebar-nav {
-  margin-top: 2rem;
+  padding: 1.5rem;
 }
+
 .sidebar-section {
   margin-bottom: 2rem;
 }
-.sidebar-section-title {
+
+.sidebar-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #2e7d32;
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1rem 0;
 }
-.sidebar-section-title2 {
-  font-weight: 900;
-  color: #2e7d32;
-  margin-bottom: 1rem;
-  font-size: 2.1rem;
-}
-.sidebar-section ul {
+
+.section-links {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-.sidebar-section li {
-  margin-bottom: 0.5rem;
-}
-.sidebar-section a {
-  color: #22223b;
+
+.section-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #4a5568;
   text-decoration: none;
-  font-size: 1rem;
-  border-radius: 0.7rem;
-  padding: 0.2rem 0.7rem;
-  display: inline-block;
-  transition: color 0.15s, background 0.15s;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  margin-bottom: 0.25rem;
 }
-.sidebar-section a:hover {
-  color: #0c0c0c;
-  font-weight: 600;
-  background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+
+.section-link:hover {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.08);
 }
-.doc-content.static-sidebar {
+
+/* Main content */
+.doc-content {
   flex: 1;
-  padding: 2.5rem 2rem 2rem 2rem;
-  max-width: 100vw;
-  overflow-x: auto;
-  min-height: calc(100vh - 7.5rem);
-  overflow-y: auto;
-  background: transparent;
-  border-radius: 1.5rem;
-  margin: 0.5rem 0.5rem 0.5rem 0.5rem;
-  box-shadow: 0 2px 12px #fa8bff11;
+  margin-left: 280px;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px 0 0 0;
+  margin-top: 1rem;
+  margin-right: 1rem;
+  min-height: calc(100vh - 90px);
 }
-@media (max-width: 1200px) {
-  .doc-main {
-    flex-direction: column;
-    margin-top: 8.5rem;
-    max-width: 100vw;
-  }
+
+.content-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
   .doc-sidebar {
-    width: 100vw;
-    border-radius: 1.5rem;
-    margin: 0.5rem 0.5rem 0 0.5rem;
-    position: static;
-    top: unset;
-    box-shadow: 0 2px 12px #43e97b22;
-    min-height: unset;
-    height: auto;
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 1.2rem 0.5rem;
+    transform: translateX(-100%);
   }
-  .sidebar-nav {
-    margin-top: 0;
+  
+  .doc-sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .doc-content {
+    margin-left: 0;
+  }
+  
+  .sidebar-toggle {
     display: flex;
-    flex-direction: row;
-    gap: 2rem;
-  }
-  .sidebar-section {
-    margin-bottom: 0;
-    margin-right: 2rem;
   }
 }
-@media (max-width: 700px) {
-  .floating-navbar {
-    width: 98vw;
-    max-width: 98vw;
-    top: 1rem;
-    border-radius: 1.1rem;
-    padding: 0.5rem 0.2rem;
+
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 0 1rem;
   }
-  .doc-main {
-    margin-top: 4.5rem;
+  
+  .nav-menu {
+    display: none;
   }
-  .doc-sidebar {
-    border-radius: 1.1rem;
-    margin: 0.2rem 0.2rem 0 0.2rem;
-    padding: 0.7rem 0.2rem;
+  
+  .brand-text {
+    display: none;
   }
-  .doc-content.static-sidebar {
-    padding: 1.2rem 0.5rem 1rem 0.5rem;
-    border-radius: 1.1rem;
-    margin: 0.2rem 0.2rem 0.2rem 0.2rem;
+  
+  .mobile-menu-toggle {
+    display: flex;
   }
-  .doc-navbar-appname {
-    font-size: 1.1rem;
-    margin-right: 1rem;
-    padding: 0.2rem 0.7rem;
+  
+  .doc-content {
+    padding: 1.5rem;
+    margin: 0.5rem;
+    border-radius: 16px;
+  }
+  
+  .content-wrapper {
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .doc-content {
+    padding: 1rem;
+    margin: 0.25rem;
   }
 }
 </style> 

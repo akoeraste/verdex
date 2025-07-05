@@ -1,6 +1,13 @@
 import { ref, reactive, watch } from 'vue'
 import axios from 'axios'
 
+const defaultPagination = {
+  current_page: 1,
+  last_page: 1,
+  per_page: 5,
+  total: 0
+};
+
 export function usePlants() {
     const plants = ref([])
     const plant = ref(null)
@@ -8,7 +15,7 @@ export function usePlants() {
     const error = ref(null)
     const categories = ref([])
     const languages = ref([])
-    const pagination = ref({})
+    const pagination = ref({ ...defaultPagination })
 
     // Form data structure
     const formData = reactive({
@@ -26,9 +33,9 @@ export function usePlants() {
     const getPlants = async (page = 1, search = '') => {
         loading.value = true
         error.value = null
+        console.log('getPlants called with page:', page)
         try {
-            console.log('Fetching plants from API...')
-            let url = `/api/plants?page=${page}`
+            let url = `/api/test/plants?page=${page}`
             if (search) {
                 url += `&search=${search}`
             }
@@ -36,15 +43,17 @@ export function usePlants() {
             console.log('API Response:', response.data)
             plants.value = response.data.data
             pagination.value = {
-                current_page: response.data.current_page,
-                last_page: response.data.last_page,
-                per_page: response.data.per_page,
-                total: response.data.total
+                current_page: response.data.current_page ?? 1,
+                last_page: response.data.last_page ?? 1,
+                per_page: response.data.per_page ?? 5,
+                total: response.data.total ?? 0
             }
             console.log('Plants loaded:', plants.value)
+            console.log('Pagination data:', pagination.value)
         } catch (err) {
             console.error('Error fetching plants:', err)
             error.value = err.response?.data?.message || 'Failed to fetch plants'
+            pagination.value = { ...defaultPagination }
         } finally {
             loading.value = false
         }
@@ -56,8 +65,8 @@ export function usePlants() {
         error.value = null
         try {
             console.log('Fetching plant with ID:', id)
-            const response = await axios.get(`/api/plants/${id}`)
-            console.log('Plant API response:', response.data)
+            const response = await axios.get(`/web/plants/${id}`)
+            console.log('Plant web API response:', response.data)
             plant.value = response.data.data
             console.log('Plant data set to:', plant.value)
             return response.data.data
@@ -72,7 +81,7 @@ export function usePlants() {
     // Get categories for dropdown
     const getCategories = async () => {
         try {
-            const response = await axios.get('/api/plant-categories-list')
+            const response = await axios.get('/web/plant-categories-list')
             categories.value = response.data
         } catch (err) {
             console.error('Failed to fetch categories:', err)
@@ -82,7 +91,7 @@ export function usePlants() {
     // Get languages for dropdown
     const getLanguages = async () => {
         try {
-            const response = await axios.get('/api/languages-list')
+            const response = await axios.get('/web/languages-list')
             languages.value = response.data
         } catch (err) {
             console.error('Failed to fetch languages:', err)
@@ -138,8 +147,8 @@ export function usePlants() {
                 console.log('FormData entry:', key, value)
             }
 
-            console.log('Sending request to /api/plants')
-            const response = await axios.post('/api/plants', data, {
+            console.log('Sending request to /web/plants')
+            const response = await axios.post('/web/plants', data, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -210,7 +219,7 @@ export function usePlants() {
             for (let [key, value] of data.entries()) {
                 console.log('FormData entry:', key, value)
             }
-            const response = await axios.post(`/api/plants/${id}`, data, {
+            const response = await axios.post(`/web/plants/${id}`, data, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -246,7 +255,7 @@ export function usePlants() {
         loading.value = true
         error.value = null
         try {
-            await axios.delete(`/api/plants/${id}`)
+            await axios.delete(`/web/plants/${id}`)
         } catch (err) {
             error.value = err.response?.data?.message || 'Failed to delete plant'
             throw err

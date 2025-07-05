@@ -13,6 +13,8 @@ const DocumentationConnect = () => import('@/views/documentation/Connect.vue');
 const DocumentationBackend = () => import('@/views/documentation/Backend.vue');
 const DocumentationApi = () => import('@/views/documentation/Api.vue');
 const DocumentationFrontend = () => import('@/views/documentation/Frontend.vue');
+const DocumentationML = () => import('@/views/documentation/ML.vue');
+const DocumentationProjectStructure = () => import('@/views/documentation/ProjectStructure.vue');
 
 function requireLogin(to, from, next) {
     const auth = useAuthStore()
@@ -41,9 +43,15 @@ function guest(to, from, next) {
 export default [
     {
         path: '/',
-        redirect: (to) => {
+        name: 'root',
+        component: () => import('../views/login/Login.vue'),
+        beforeEnter: (to, from, next) => {
             const auth = useAuthStore();
-            return auth.authenticated ? '/admin' : '/login';
+            if (auth.authenticated) {
+                next('/admin');
+            } else {
+                next();
+            }
         },
     },
     {
@@ -274,6 +282,57 @@ export default [
         path: '/documentation',
         component: DocumentationIndex,
     },
+    {
+        name: 'docs',
+        path: '/docs',
+        component: DocumentationIndex,
+    },
+    {
+        name: 'documentation-ml',
+        path: '/documentation/ml',
+        component: DocumentationML,
+        meta: {
+            sidebarSections: [
+                { id: 'ml', title: 'ML Docs', items: [
+                    { id: 'overview', label: 'Overview' },
+                    { id: 'features', label: 'Features' },
+                    { id: 'model-architecture', label: 'Model Architecture' },
+                    { id: 'dataset', label: 'Dataset' },
+                    { id: 'performance', label: 'Performance Metrics' },
+                    { id: 'deployment', label: 'Model Deployment' },
+                    { id: 'api-integration', label: 'API Integration' },
+                    { id: 'mobile-integration', label: 'Mobile Integration' },
+                    { id: 'model-updates', label: 'Model Updates' },
+                    { id: 'data-privacy', label: 'Data Privacy' },
+                    { id: 'future-improvements', label: 'Future Improvements' },
+                    { id: 'troubleshooting', label: 'Troubleshooting' },
+                    { id: 'contributing', label: 'Contributing to ML' },
+                ]}
+            ]
+        },
+    },
+    {
+        name: 'documentation-project-structure',
+        path: '/documentation/project-structure',
+        component: DocumentationProjectStructure,
+        meta: {
+            sidebarSections: [
+                { id: 'project-structure', title: 'Project Structure', items: [
+                    { id: 'overview', label: 'Overview' },
+                    { id: 'backend-structure', label: 'Backend Structure' },
+                    { id: 'frontend-structure', label: 'Frontend Structure' },
+                    { id: 'api-structure', label: 'API Structure' },
+                    { id: 'database-schema', label: 'Database Schema' },
+                    { id: 'ml-integration', label: 'ML Integration' },
+                    { id: 'deployment-structure', label: 'Deployment Structure' },
+                    { id: 'development-workflow', label: 'Development Workflow' },
+                    { id: 'configuration', label: 'Configuration' },
+                    { id: 'security', label: 'Security' },
+                    { id: 'monitoring', label: 'Monitoring & Logging' },
+                ]}
+            ]
+        },
+    },
     
     {
         name: 'documentation-connect',
@@ -284,14 +343,15 @@ export default [
                 { id: 'connect', title: 'Connect Docs', items: [
                     { id: 'overview', label: 'Overview' },
                     { id: 'api-base-url', label: 'API Base URL' },
-                    { id: 'authentication-flow', label: 'Authentication Flow' },
-                    { id: 'how-frontend-calls', label: 'Frontend API Calls' },
+                    { id: 'authentication', label: 'Authentication' },
+                    { id: 'api-calls', label: 'Making API Calls' },
                     { id: 'error-handling', label: 'Error Handling' },
-                    { id: 'data-formats', label: 'Data Formats' },
-                    { id: 'cors-security', label: 'CORS & Security' },
-                    { id: 'example-integration', label: 'Example Integration' },
-                    { id: 'troubleshooting', label: 'Troubleshooting' },
+                    { id: 'rate-limiting', label: 'Rate Limiting' },
                     { id: 'best-practices', label: 'Best Practices' },
+                    { id: 'sdk-libraries', label: 'SDK & Libraries' },
+                    { id: 'webhooks', label: 'Webhooks' },
+                    { id: 'testing', label: 'Testing' },
+                    { id: 'support', label: 'Support' },
                 ]}
             ]
         },
@@ -306,15 +366,15 @@ export default [
                     { id: 'overview', label: 'Overview' },
                     { id: 'features', label: 'Features' },
                     { id: 'project-structure', label: 'Project Structure' },
-                    { id: 'main-modules', label: 'Main Modules' },
+                    { id: 'main-modules', label: 'Main Modules/Services' },
                     { id: 'database-schema', label: 'Database Schema' },
-                    { id: 'auth', label: 'Auth' },
+                    { id: 'auth', label: 'Authentication & Authorization' },
                     { id: 'api-structure', label: 'API Structure' },
-                    { id: 'notifications', label: 'Notifications' },
-                    { id: 'caching', label: 'Caching' },
+                    { id: 'notifications', label: 'Notifications & Feedback' },
+                    { id: 'caching', label: 'Caching & Performance' },
                     { id: 'testing', label: 'Testing' },
                     { id: 'deployment', label: 'Deployment' },
-                    { id: 'contribution', label: 'Contribution' },
+                    { id: 'contribution', label: 'Contribution Guidelines' },
                     { id: 'troubleshooting', label: 'Troubleshooting' },
                     { id: 'future', label: 'Future Improvements' },
                 ]}

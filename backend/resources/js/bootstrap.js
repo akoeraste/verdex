@@ -21,10 +21,12 @@ window.axios.interceptors.response.use(
         const publicRoutes = [
             '/login',
             '/documentation',
-            '/documentation/connect',
-            '/documentation/backend',
-            '/documentation/api',
-            '/documentation/frontend'
+'/documentation/connect',
+'/documentation/backend',
+'/documentation/api',
+'/documentation/frontend',
+'/documentation/ml',
+'/documentation/project-structure'
         ];
         if (
             (error.response?.status === 401 || error.response?.status === 403 || error.response?.status === 419) &&

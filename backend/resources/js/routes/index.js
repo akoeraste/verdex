@@ -7,19 +7,11 @@ const router = createRouter({
     routes
 })
 
-// Add global navigation guard for public documentation routes
-const publicRoutes = [
-    '/login',
-    '/documentation',
-    '/documentation/connect',
-    '/documentation/backend',
-    '/documentation/api',
-    '/documentation/frontend'
-];
-
 router.beforeEach((to, from, next) => {
     const auth = useAuthStore();
-    if (publicRoutes.includes(to.path)) {
+    
+    // Allow all documentation routes (including sub-routes)
+    if (to.path.startsWith('/docs') || to.path.startsWith('/documentation') || to.path === '/login') {
         next();
     } else if (!auth.authenticated) {
         next('/login');

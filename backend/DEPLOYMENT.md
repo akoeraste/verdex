@@ -34,16 +34,29 @@
    LOG_LEVEL=error
    ```
 
-3. **Generate Application Key**
+3. **Build & Start Commands (Optional)**
+   Railway will auto-detect the configuration, but if you need to set manually:
+   
+   **Build Command:**
+   ```bash
+   composer install --no-dev --optimize-autoloader && composer run build
+   ```
+   
+   **Start Command:**
+   ```bash
+   php artisan serve --host=0.0.0.0 --port=$PORT
+   ```
+
+4. **Generate Application Key**
    ```bash
    php artisan key:generate
    ```
 
-4. **Database Setup**
+5. **Database Setup**
    - Railway will automatically run migrations
    - Seeders will populate the database with plants and audio files
 
-5. **Storage Setup**
+6. **Storage Setup**
    - The deployment script creates storage links automatically
    - For production, consider using S3 or similar for file storage
 

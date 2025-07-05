@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-
+use App\Http\Controllers\PlantController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,8 +15,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Health check route for Railway
+// Landing page route
 Route::get('/', function() {
+    return view('landing');
+})->name('landing');
+
+// Health check route for Railway (moved to /health)
+Route::get('/health', function() {
     return response()->json([
         'status' => 'healthy',
         'message' => 'Verdex Backend API is running',
@@ -33,6 +38,31 @@ Route::post('logout', [AuthenticatedSessionController::class, 'logout']);
 Route::get('login', function() {
     return view('main-view');
 })->name('login');
+
+// Web routes for plants (session authenticated)
+Route::middleware(['auth'])->group(function () {
+    Route::get('web/plants', [PlantController::class, 'index']);
+    Route::post('web/plants', [PlantController::class, 'store']);
+    Route::get('web/plants/{plant}', [PlantController::class, 'show']);
+    Route::put('web/plants/{plant}', [PlantController::class, 'update']);
+    Route::delete('web/plants/{plant}', [PlantController::class, 'destroy']);
+    Route::put('web/plants/{plant}/translations', [PlantController::class, 'updateTranslations']);
+    Route::get('web/plant-categories-list', [PlantController::class, 'getCategories']);
+    Route::get('web/languages-list', [PlantController::class, 'getLanguages']);
+});
+
+// Documentation routes (public access)
+Route::get('docs', function() {
+    return view('main-view');
+})->name('docs');
+
+Route::get('documentation', function() {
+    return view('main-view');
+})->name('documentation');
+
+Route::get('documentation/{any?}', function() {
+    return view('main-view');
+})->name('documentation.any')->where('any', '.*');
 
 Route::get('admin/{any?}', function() {
     return view('main-view');

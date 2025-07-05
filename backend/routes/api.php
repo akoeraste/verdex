@@ -15,6 +15,32 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
+// Public test route for plants (no auth required)
+Route::get('test/plants', function (\Illuminate\Http\Request $request) {
+    $query = \App\Models\Plant::with(['plantCategory', 'translations']);
+    if ($request->has('search')) {
+        $searchTerm = $request->input('search');
+        $query->where(function ($q) use ($searchTerm) {
+            $q->where('scientific_name', 'like', "%{$searchTerm}%")
+                ->orWhere('family', 'like', "%{$searchTerm}%")
+                ->orWhere('genus', 'like', "%{$searchTerm}%")
+                ->orWhere('species', 'like', "%{$searchTerm}%")
+                ->orWhereHas('translations', function ($translationQuery) use ($searchTerm) {
+                    $translationQuery->where('common_name', 'like', "%{$searchTerm}%")
+                        ->orWhere('description', 'like', "%{$searchTerm}%")
+                        ->orWhere('uses', 'like', "%{$searchTerm}%");
+                });
+        });
+    }
+    $plants = $query->paginate(5);
+    return response()->json([
+        'data' => \App\Http\Resources\PlantResource::collection($plants),
+        'current_page' => $plants->currentPage(),
+        'last_page' => $plants->lastPage(),
+        'per_page' => $plants->perPage(),
+        'total' => $plants->total()
+    ]);
+});
 
 Route::post('forget-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('forget.password.post');
 Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('password.reset');

@@ -110,6 +110,45 @@
             </li>
           </ul>
         </li>
+        <!-- Documentation -->
+        <li>
+          <div class="sidebar-section" @click="toggle('documentation')">
+            <span>Documentation</span>
+            <span class="chevron">{{ open === 'documentation' ? '▲' : '▼' }}</span>
+          </div>
+          <ul v-show="open === 'documentation'" class="sidebar-dropdown">
+            <li>
+              <router-link to="/documentation" class="sidebar-link" :class="{ active: route.path === '/documentation' }">
+                <span class="icon-wrap">📚</span>
+                <span>Overview</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/documentation/connect" class="sidebar-link" :class="{ active: route.path.startsWith('/documentation/connect') }">
+                <span class="icon-wrap">🔗</span>
+                <span>Connect</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/documentation/backend" class="sidebar-link" :class="{ active: route.path.startsWith('/documentation/backend') }">
+                <span class="icon-wrap">⚙️</span>
+                <span>Backend</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/documentation/api" class="sidebar-link" :class="{ active: route.path.startsWith('/documentation/api') }">
+                <span class="icon-wrap">🔌</span>
+                <span>API</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/documentation/frontend" class="sidebar-link" :class="{ active: route.path.startsWith('/documentation/frontend') }">
+                <span class="icon-wrap">📱</span>
+                <span>Frontend</span>
+              </router-link>
+            </li>
+          </ul>
+        </li>
       </ul>
     </div>
   </nav>
@@ -136,6 +175,8 @@ const setOpenSection = (path) => {
     open.value = 'settings';
   } else if (path.startsWith('/admin/usage-stats') || path.startsWith('/admin/search-trends') || path.startsWith('/admin/activity-log-logs')) {
     open.value = 'analytics';
+  } else if (path.startsWith('/documentation')) {
+    open.value = 'documentation';
   }
 };
 

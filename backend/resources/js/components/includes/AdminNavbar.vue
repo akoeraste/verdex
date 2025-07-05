@@ -8,6 +8,10 @@
         </router-link>
       </div>
       <div class="navbar-actions">
+        <router-link to="/documentation" class="navbar-doc-link">
+          <i class="bi bi-book"></i>
+          <span>Documentation</span>
+        </router-link>
         <div class="navbar-user" @click="toggleDropdown">
           <span class="navbar-user-greet clickable">Hi, {{ username }}</span>
           <img :src="avatarUrl" alt="Avatar" class="navbar-user-avatar" />
@@ -109,6 +113,28 @@ function toggleDropdown() { showDropdown.value = !showDropdown.value; }
   align-items: center;
   gap: 2rem;
   margin-left: auto;
+}
+.navbar-doc-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 0.8rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(67,233,123,0.2);
+}
+.navbar-doc-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(67,233,123,0.3);
+  color: #fff;
+}
+.navbar-doc-link i {
+  font-size: 1.1rem;
 }
 .navbar-user {
   position: relative;

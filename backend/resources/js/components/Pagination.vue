@@ -1,18 +1,18 @@
 <template>
-  <nav v-if="pagination && pagination.last_page && pagination.last_page > 1" aria-label="Page navigation">
+  <nav v-if="safePagination.last_page > 1" aria-label="Page navigation">
     <ul class="pagination">
-      <li class="page-item" :class="{ disabled: pagination.current_page === 1 }">
-        <a class="page-link" href="#" @click.prevent="changePage(pagination.current_page - 1)">
+      <li class="page-item" :class="{ disabled: safePagination.current_page === 1 }">
+        <a class="page-link" href="#" @click.prevent="changePage(safePagination.current_page - 1)">
           Previous
         </a>
       </li>
-      <li v-for="page in pages" :key="page" class="page-item" :class="{ active: page === pagination.current_page }">
+      <li v-for="page in pages" :key="page" class="page-item" :class="{ active: page === safePagination.current_page }">
         <a class="page-link" href="#" @click.prevent="changePage(page)">
           {{ page }}
         </a>
       </li>
-      <li class="page-item" :class="{ disabled: pagination.current_page === pagination.last_page }">
-        <a class="page-link" href="#" @click.prevent="changePage(pagination.current_page + 1)">
+      <li class="page-item" :class="{ disabled: safePagination.current_page === safePagination.last_page }">
+        <a class="page-link" href="#" @click.prevent="changePage(safePagination.current_page + 1)">
           Next
         </a>
       </li>
@@ -32,16 +32,23 @@ const props = defineProps({
 
 const emit = defineEmits(['page-changed']);
 
+const safePagination = computed(() => ({
+  current_page: props.pagination.value?.current_page ?? 1,
+  last_page: props.pagination.value?.last_page ?? 1,
+  per_page: props.pagination.value?.per_page ?? 5,
+  total: props.pagination.value?.total ?? 0
+}));
+
 const pages = computed(() => {
   const pagesArray = [];
-  for (let i = 1; i <= props.pagination.last_page; i++) {
+  for (let i = 1; i <= safePagination.value.last_page; i++) {
     pagesArray.push(i);
   }
   return pagesArray;
 });
 
 const changePage = (page) => {
-  if (page > 0 && page <= props.pagination.last_page) {
+  if (page > 0 && page <= safePagination.value.last_page) {
     emit('page-changed', page);
   }
 };
@@ -67,6 +74,7 @@ const changePage = (page) => {
   border-radius: 0.25rem;
   text-decoration: none;
   transition: all 0.2s;
+  background: #fff;
 }
 
 .page-link:hover {

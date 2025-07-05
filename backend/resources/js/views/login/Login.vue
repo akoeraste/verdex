@@ -1,8 +1,8 @@
 <template>
   <div class="login-bg">
-    <button class="doc-btn" @click="$router.push('/documentation')">
-      <i class="bi bi-journal-code"></i> Visit Documentation
-    </button>
+    <a href="/" class="doc-btn">
+      <i class="bi bi-journal-code"></i> Go Home
+    </a>
     <div class="login-container">
       <div class="login-card">
         <p class="login-welcome"><strong>Welcome back!</strong> <br> Please sign In.</p>
@@ -42,7 +42,7 @@ const { loginForm, validationErrors, processing, submitLogin } = useAuth();
 <style scoped>
 .login-bg {
   min-height: 100vh;
-  background: linear-gradient(120deg, #e3f2fd 0%, #f8fafc 100%);
+  background: linear-gradient(135deg, rgba(131, 213, 234, 0.63) 0%, rgba(233, 211, 255, 0.53) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -55,9 +55,11 @@ const { loginForm, validationErrors, processing, submitLogin } = useAuth();
   justify-content: center;
 }
 .login-card {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
   border-radius: 1.5rem;
-  box-shadow: 0 8px 32px rgba(67,233,123,0.10), 0 1.5px 8px rgba(34,34,59,0.07);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 3rem 2.5rem 2.5rem 2.5rem;
   max-width: 400px;
   width: 100%;
@@ -113,7 +115,7 @@ background-color: rgba(29, 29, 29, 0.762);
   transition: border 0.2s;
 }
 .login-input:focus {
-  border: 1.5px solid #43e97b;
+  border: 1.5px solid #667eea;
   background: #fff;
 }
 .login-error {
@@ -128,7 +130,7 @@ background-color: rgba(29, 29, 29, 0.762);
   margin-bottom: 0.5rem;
 }
 .login-checkbox {
-  accent-color: #43e97b;
+  accent-color: #667eea;
   width: 1.1rem;
   height: 1.1rem;
 }
@@ -139,19 +141,19 @@ background-color: rgba(29, 29, 29, 0.762);
 .login-btn {
   width: 100%;
   padding: 0.9rem 0;
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
   border: none;
   border-radius: 2rem;
   font-weight: 700;
   font-size: 1.1rem;
-  box-shadow: 0 2px 8px rgba(67,233,123,0.12);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
 }
 .login-btn:hover {
-  background: linear-gradient(135deg, #fa8bff 0%, #2bd2ff 100%);
-  box-shadow: 0 4px 16px rgba(250,139,255,0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
 }
 .login-btn.disabled {
   opacity: 0.6;
@@ -162,24 +164,27 @@ background-color: rgba(29, 29, 29, 0.762);
   top: 2.2rem;
   right: 2.2rem;
   z-index: 100;
-  background: #fff;
-  color: #2e7d32;
-  border: 1.5px solid #2e7d32;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  color: #667eea;
+  border: 1.5px solid rgba(102, 126, 234, 0.2);
   border-radius: 2rem;
   padding: 0.6rem 1.5rem;
   font-weight: 600;
   font-size: 1.05rem;
-  box-shadow: 0 2px 8px rgba(34,34,59,0.07);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  transition: background 0.15s, color 0.15s, border 0.15s;
+  transition: all 0.3s ease;
+  text-decoration: none;
 }
 .doc-btn:hover {
-  background: #2e7d32;
-  color: #fff;
-  border: 1.5px solid #43e97b;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
 }
 @media (max-width: 600px) {
   .login-card {

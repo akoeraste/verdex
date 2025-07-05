@@ -19,13 +19,6 @@ class PlantResource extends JsonResource
             'toxicity_level' => $this->toxicity_level,
             'image_urls' => json_decode($this->image_urls) ?? [],
             'translations' => PlantTranslationResource::collection($this->translations),
-            'audio_files' => $this->audioFiles->map(function ($audioFile) {
-                return [
-                    'id' => $audioFile->id,
-                    'language' => $audioFile->language,
-                    'audio_url' => $audioFile->audio_url,
-                ];
-            }),
             'created_at' => $this->created_at->toDateString(),
             'updated_at' => $this->updated_at->toDateString(),
         ];
