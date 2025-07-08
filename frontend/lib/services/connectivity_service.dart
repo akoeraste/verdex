@@ -8,7 +8,7 @@ class ConnectivityService extends ChangeNotifier {
   ConnectivityService._internal();
 
   final Connectivity _connectivity = Connectivity();
-  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   bool _isConnected = true;
   bool _isInitialized = false;
 
@@ -19,23 +19,23 @@ class ConnectivityService extends ChangeNotifier {
     if (_isInitialized) return;
 
     // Get initial connectivity status
-    final result = await _connectivity.checkConnectivity();
-    _isConnected = result != ConnectivityResult.none;
+    final results = await _connectivity.checkConnectivity();
+    _isConnected = !results.contains(ConnectivityResult.none);
     _isInitialized = true;
 
     print(
-      '🌐 [ConnectivityService] App launched - Connection status: ${_isConnected ? "ONLINE" : "OFFLINE"} (${result.name})',
+      '🌐 [ConnectivityService] App launched - Connection status: ${_isConnected ? "ONLINE" : "OFFLINE"} (${results.map((r) => r.name).join(', ')})',
     );
 
     // Listen to connectivity changes (reactive monitoring only)
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
-      ConnectivityResult result,
+      List<ConnectivityResult> results,
     ) {
       final wasConnected = _isConnected;
-      _isConnected = result != ConnectivityResult.none;
+      _isConnected = !results.contains(ConnectivityResult.none);
 
       print(
-        '🌐 [ConnectivityService] Connection changed: ${_isConnected ? "ONLINE" : "OFFLINE"} (${result.name})',
+        '🌐 [ConnectivityService] Connection changed: ${_isConnected ? "ONLINE" : "OFFLINE"} (${results.map((r) => r.name).join(', ')})',
       );
 
       if (wasConnected != _isConnected) {
@@ -46,18 +46,19 @@ class ConnectivityService extends ChangeNotifier {
     notifyListeners();
   }
 
+  @override
   void dispose() {
     _connectivitySubscription?.cancel();
     super.dispose();
   }
 
   Future<bool> checkConnectivity() async {
-    final result = await _connectivity.checkConnectivity();
+    final results = await _connectivity.checkConnectivity();
     final wasConnected = _isConnected;
-    _isConnected = result != ConnectivityResult.none;
+    _isConnected = !results.contains(ConnectivityResult.none);
 
     print(
-      '🌐 [ConnectivityService] Manual check - Connection status: ${_isConnected ? "ONLINE" : "OFFLINE"} (${result.name})',
+      '🌐 [ConnectivityService] Manual check - Connection status: ${_isConnected ? "ONLINE" : "OFFLINE"} (${results.map((r) => r.name).join(', ')})',
     );
 
     if (wasConnected != _isConnected) {

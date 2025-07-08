@@ -6,6 +6,12 @@ export const useAuthStore = defineStore('auth', () => {
     const authenticated = ref(false)
     const user = ref({})
 
+    // Set Authorization header from localStorage if token exists
+    const token = localStorage.getItem('access_token');
+    if (token) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+
     const login = (() => {
         return axios.get('/api/user').then(({data}) => {
             if (data.success) {

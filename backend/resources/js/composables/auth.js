@@ -48,10 +48,15 @@ export default function useAuth() {
         processing.value = true
         validationErrors.value = {}
 
-        await axios.post('/login', loginForm)
+        console.log('Submitting login form:', JSON.parse(JSON.stringify(loginForm)))
+        await axios.post('/api/login', loginForm)
             .then(async response => {
+                const token = response.data.access_token;
+                if (token) {
+                    localStorage.setItem('access_token', token);
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                }
                 await authStore.getUser()
-                // await authStore.dispatch('auth/getUser')
                 await loginUser()
                 swal({
                     icon: 'success',
@@ -63,7 +68,7 @@ export default function useAuth() {
             })
             .catch(error => {
                 if (error.response?.data) {
-                    validationErrors.value = error.response.data.errors
+                    validationErrors.value = error.response.data.errors || error.response.data.message || error.response.data
                 }
             })
             .finally(() => processing.value = false)
@@ -75,7 +80,7 @@ export default function useAuth() {
         processing.value = true
         validationErrors.value = {}
 
-        await axios.post('/register', registerForm)
+        await axios.post('/api/register', registerForm)
             .then(async response => {
                 // await store.dispatch('auth/getUser')
                 // await loginUser()
@@ -161,11 +166,13 @@ export default function useAuth() {
 
         processing.value = true
 
-        axios.post('/logout')
+        axios.post('/api/logout')
             .then(response => {
                 user.name = ''
                 user.email = ''
                 authStore.logout()
+                localStorage.removeItem('access_token');
+                delete axios.defaults.headers.common['Authorization'];
                 router.push({ name: 'auth.login' })
             })
             .catch(error => {
