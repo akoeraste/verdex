@@ -1,17 +1,8 @@
 [phases.setup]
-nixPkgs = ["php82", "composer", "git"]
+nixPkgs = ["php82", "composer"]
 
 [phases.install]
-cmds = [
-    "composer install --no-dev --optimize-autoloader --no-scripts",
-    "composer dump-autoload --optimize"
-]
-
-[phases.build]
-cmds = [
-    "php artisan key:generate --no-interaction || true",
-    "php artisan storage:link --no-interaction || true"
-]
+cmds = ["composer install --no-dev --optimize-autoloader --no-scripts"]
 
 [start]
-cmd = "php -S 0.0.0.0:$PORT -t public" 
+cmd = "php -S 0.0.0.0:$PORT -t public index.php" 
