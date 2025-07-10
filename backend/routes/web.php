@@ -14,7 +14,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return response()->json([
+        'status' => 'healthy',
+        'message' => 'Verdex Backend is running',
+        'timestamp' => now(),
+        'environment' => config('app.env'),
+        'version' => '1.0.0'
+    ]);
 });
 
 // Railway health check endpoint
@@ -23,7 +29,8 @@ Route::get('/health', function () {
         'status' => 'healthy',
         'timestamp' => now(),
         'environment' => config('app.env'),
-        'version' => '1.0.0'
+        'version' => '1.0.0',
+        'message' => 'Health check passed'
     ]);
 });
 

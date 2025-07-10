@@ -1,1 +1,2 @@
-web: php artisan serve --host=0.0.0.0 --port=$PORT 
+# Removed Procfile - using Dockerfile with nginx + php-fpm instead
+# This file can be deleted or left empty 

@@ -2,6 +2,8 @@ FROM php:8.2-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
+    nginx \
+    supervisor \
     git \
     curl \
     libpng-dev \
@@ -26,21 +28,22 @@ WORKDIR /var/www
 # Copy existing application directory contents
 COPY . /var/www
 
-# Copy existing application directory permissions
-COPY --chown=www-data:www-data . /var/www
-
-# Install dependencies (skip problematic scripts)
+# Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-scripts
-RUN composer dump-autoload --optimize
 
-# Make setup script executable
-RUN chmod +x railway-setup.sh
+# Copy nginx configuration
+COPY ./nginx.conf /etc/nginx/nginx.conf
 
-# Change current user to www
-USER www-data
+# Copy supervisor configuration
+COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Expose port 8000
-EXPOSE 8000
+# Set permissions
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 775 /var/www/storage \
+    && chmod -R 775 /var/www/bootstrap/cache
 
-# Start server with setup script
-CMD bash railway-setup.sh && php artisan serve --host=0.0.0.0 --port=8000 
+# Expose port 8080 (Railway will inject $PORT)
+EXPOSE 8080
+
+# Start supervisor (manages nginx + php-fpm)
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"] 
