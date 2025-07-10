@@ -4,6 +4,7 @@ FROM php:8.2-fpm
 RUN apt-get update && apt-get install -y \
     nginx \
     supervisor \
+    gettext-base \
     git \
     curl \
     libpng-dev \
@@ -31,8 +32,8 @@ COPY . /var/www
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Copy nginx configuration
-COPY ./nginx.conf /etc/nginx/nginx.conf
+# Copy nginx configuration template
+COPY ./nginx.conf /etc/nginx/nginx.conf.template
 
 # Copy supervisor configuration
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -42,8 +43,12 @@ RUN chown -R www-data:www-data /var/www \
     && chmod -R 775 /var/www/storage \
     && chmod -R 775 /var/www/bootstrap/cache
 
-# Expose port 8080 (Railway will inject $PORT)
+# Expose port (Railway will inject $PORT)
 EXPOSE 8080
 
-# Start supervisor (manages nginx + php-fpm)
+# Entrypoint script to substitute $PORT in nginx.conf
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"] 
