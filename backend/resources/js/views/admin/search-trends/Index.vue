@@ -47,11 +47,11 @@ const topTerms = ref([
 ]);
 const searchFreq = ref([5, 8, 6, 10, 7, 12, 9]);
 const recentSearches = ref([
-  { id: 1, user: 'prime', term: 'Mango', date: '2025-06-01' },
-  { id: 2, user: 'admin', term: 'Banana', date: '2025-06-01' },
-  { id: 3, user: 'prime', term: 'Cassava', date: '2025-06-02' },
-  { id: 4, user: 'prime', term: 'Aloevera', date: '2025-06-03' },
-  { id: 5, user: 'admin', term: 'Spinach', date: '2025-06-04' },
+  { id: 1, user: 'prime', term: 'Mango', date: '2024-06-01' },
+  { id: 2, user: 'admin', term: 'Banana', date: '2024-06-01' },
+  { id: 3, user: 'prime', term: 'Cassava', date: '2024-06-02' },
+  { id: 4, user: 'prime', term: 'Aloevera', date: '2024-06-03' },
+  { id: 5, user: 'admin', term: 'Spinach', date: '2024-06-04' },
 ]);
 
 onMounted(() => {

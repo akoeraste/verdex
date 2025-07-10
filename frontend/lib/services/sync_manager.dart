@@ -12,13 +12,13 @@ class SyncManager {
 
   final LocalDbService _localDbService = LocalDbService();
   Timer? _timer;
-  StreamSubscription<List<ConnectivityResult>>? _connectivitySub;
+  StreamSubscription? _connectivitySub;
 
   void start() {
     _sync();
     _timer = Timer.periodic(const Duration(minutes: 5), (_) => _sync());
-    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
-      if (!results.contains(ConnectivityResult.none)) {
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((result) {
+      if (result != ConnectivityResult.none) {
         _sync();
       }
     });
@@ -41,8 +41,8 @@ class SyncManager {
       final postsToSync = await _localDbService.getPostsNeedingSync();
       final categoriesToSync = await _localDbService.getCategoriesNeedingSync();
       final rolesToSync = await _localDbService.getRolesNeedingSync();
-      final permissionsToSync = await _localDbService
-          .getPermissionsNeedingSync();
+      final permissionsToSync =
+          await _localDbService.getPermissionsNeedingSync();
 
       final uploadData = {
         'plants': plantsToSync,

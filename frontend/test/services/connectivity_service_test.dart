@@ -23,7 +23,7 @@ void main() {
         // Arrange
         when(
           mockConnectivity.onConnectivityChanged,
-        ).thenAnswer((_) => Stream.value([ConnectivityResult.wifi]));
+        ).thenAnswer((_) => Stream.value(ConnectivityResult.wifi));
 
         // Act
         await connectivityService.initialize();
@@ -36,7 +36,7 @@ void main() {
         // Arrange
         when(
           mockConnectivity.checkConnectivity(),
-        ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+        ).thenAnswer((_) async => ConnectivityResult.wifi);
 
         // Act
         await connectivityService.initialize();
@@ -51,7 +51,7 @@ void main() {
         // Arrange
         when(
           mockConnectivity.checkConnectivity(),
-        ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+        ).thenAnswer((_) async => ConnectivityResult.wifi);
 
         // Act
         await connectivityService.initialize();
@@ -64,7 +64,7 @@ void main() {
         // Arrange
         when(
           mockConnectivity.checkConnectivity(),
-        ).thenAnswer((_) async => [ConnectivityResult.mobile]);
+        ).thenAnswer((_) async => ConnectivityResult.mobile);
 
         // Act
         await connectivityService.initialize();
@@ -77,7 +77,7 @@ void main() {
         // Arrange
         when(
           mockConnectivity.checkConnectivity(),
-        ).thenAnswer((_) async => [ConnectivityResult.ethernet]);
+        ).thenAnswer((_) async => ConnectivityResult.ethernet);
 
         // Act
         await connectivityService.initialize();
@@ -90,7 +90,7 @@ void main() {
         // Arrange
         when(
           mockConnectivity.checkConnectivity(),
-        ).thenAnswer((_) async => [ConnectivityResult.none]);
+        ).thenAnswer((_) async => ConnectivityResult.none);
 
         // Act
         await connectivityService.initialize();
@@ -103,7 +103,7 @@ void main() {
         // Arrange
         when(
           mockConnectivity.checkConnectivity(),
-        ).thenAnswer((_) async => [ConnectivityResult.bluetooth]);
+        ).thenAnswer((_) async => ConnectivityResult.bluetooth);
 
         // Act
         await connectivityService.initialize();
@@ -116,17 +116,17 @@ void main() {
     group('Connectivity Change Tests', () {
       test('should update status when connectivity changes', () async {
         // Arrange
-        final connectivityStream = StreamController<List<ConnectivityResult>>();
+        final connectivityStream = StreamController<ConnectivityResult>();
         when(
           mockConnectivity.onConnectivityChanged,
         ).thenAnswer((_) => connectivityStream.stream);
         when(
           mockConnectivity.checkConnectivity(),
-        ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+        ).thenAnswer((_) async => ConnectivityResult.wifi);
 
         // Act
         await connectivityService.initialize();
-        connectivityStream.add([ConnectivityResult.none]);
+        connectivityStream.add(ConnectivityResult.none);
 
         // Wait for the stream to process
         await Future.delayed(const Duration(milliseconds: 100));
@@ -137,13 +137,13 @@ void main() {
 
       test('should notify listeners when connectivity changes', () async {
         // Arrange
-        final connectivityStream = StreamController<List<ConnectivityResult>>();
+        final connectivityStream = StreamController<ConnectivityResult>();
         when(
           mockConnectivity.onConnectivityChanged,
         ).thenAnswer((_) => connectivityStream.stream);
         when(
           mockConnectivity.checkConnectivity(),
-        ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+        ).thenAnswer((_) async => ConnectivityResult.wifi);
 
         bool listenerCalled = false;
         connectivityService.addListener(() {
@@ -152,7 +152,7 @@ void main() {
 
         // Act
         await connectivityService.initialize();
-        connectivityStream.add([ConnectivityResult.none]);
+        connectivityStream.add(ConnectivityResult.none);
 
         // Wait for the stream to process
         await Future.delayed(const Duration(milliseconds: 100));
@@ -178,13 +178,13 @@ void main() {
 
       test('should handle stream errors gracefully', () async {
         // Arrange
-        final connectivityStream = StreamController<List<ConnectivityResult>>();
+        final connectivityStream = StreamController<ConnectivityResult>();
         when(
           mockConnectivity.onConnectivityChanged,
         ).thenAnswer((_) => connectivityStream.stream);
         when(
           mockConnectivity.checkConnectivity(),
-        ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+        ).thenAnswer((_) async => ConnectivityResult.wifi);
 
         // Act
         await connectivityService.initialize();
@@ -201,13 +201,13 @@ void main() {
     group('Disposal Tests', () {
       test('should dispose resources properly', () async {
         // Arrange
-        final connectivityStream = StreamController<List<ConnectivityResult>>();
+        final connectivityStream = StreamController<ConnectivityResult>();
         when(
           mockConnectivity.onConnectivityChanged,
         ).thenAnswer((_) => connectivityStream.stream);
         when(
           mockConnectivity.checkConnectivity(),
-        ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+        ).thenAnswer((_) async => ConnectivityResult.wifi);
 
         await connectivityService.initialize();
 
@@ -224,7 +224,7 @@ void main() {
         // Arrange
         when(
           mockConnectivity.checkConnectivity(),
-        ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+        ).thenAnswer((_) async => ConnectivityResult.wifi);
 
         // Act
         final isConnected = await connectivityService.checkConnectivity();
@@ -237,7 +237,7 @@ void main() {
         // Arrange
         when(
           mockConnectivity.checkConnectivity(),
-        ).thenAnswer((_) async => [ConnectivityResult.none]);
+        ).thenAnswer((_) async => ConnectivityResult.none);
 
         // Act
         final isConnected = await connectivityService.checkConnectivity();
