@@ -4,7 +4,8 @@ import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
 class PlantClassifierService {
-  static const String _modelPath = 'plant_classifier_mobile.tflite';
+  static const String _modelPath =
+      'assets/model/plant_classifier_mobile.tflite';
   static const int _inputSize = 224;
   static const int _numClasses = 30;
   static const double _confidenceThreshold = 0.5;

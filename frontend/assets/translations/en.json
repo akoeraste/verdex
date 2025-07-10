@@ -331,5 +331,10 @@
   "authentication": "Authentication",
   "plants_data": "Plants Data",
   "cache_status": "Cache Status",
-  "login_timeout": "Login timeout"
+  "login_timeout": "Login timeout",
+  "identification_result": "Identification Result",
+  "running_plant_classification": "Running plant classification...",
+  "confirm_photo": "Confirm Photo",
+  "plant_detect_message": "Plant detection in progress...",
+  "identify_another_plant": "Identify Another Plant"
 } 

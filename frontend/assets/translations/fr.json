@@ -333,5 +333,8 @@
   "plants_data": "Données des plantes",
   "cache_status": "État du cache",
   "login_timeout": "Délai d'attente de connexion",
-  "confirm_password": "Confirmer le mot de passe"
+  "confirm_password": "Confirmer le mot de passe",
+  "confirm_photo": "Confirmer la photo",
+  "plant_detect_message": "Détection de plante en cours...",
+  "identify_another_plant": "Identifier une autre plante"
 }

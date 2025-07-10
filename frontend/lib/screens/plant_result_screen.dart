@@ -54,12 +54,10 @@ class _PlantResultScreenState extends State<PlantResultScreen>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
 
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
@@ -297,6 +295,20 @@ class _PlantResultScreenState extends State<PlantResultScreen>
                                     color: const Color(0xFF4CAF50),
                                   ),
                                 ),
+                                const SizedBox(height: 8),
+                                // View Details Button
+                                ElevatedButton(
+                                  onPressed: () {
+                                    final plantName = _getPlantName(
+                                      _predictionResult!['predictedIndex'],
+                                    );
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/plant-details/${plantName.toLowerCase()}',
+                                    );
+                                  },
+                                  child: Text('View Details'),
+                                ),
                                 const SizedBox(height: 16),
                                 // Confidence Display
                                 Row(
@@ -437,38 +449,38 @@ class _PlantResultScreenState extends State<PlantResultScreen>
   }
 
   String _getPlantName(int index) {
-    // TODO: Replace with actual plant names in the order of your model's output
+    // Replace with actual plant names in the order of your model's output
     const plantNames = [
-      'Plant 1',
-      'Plant 2',
-      'Plant 3',
-      'Plant 4',
-      'Plant 5',
-      'Plant 6',
-      'Plant 7',
-      'Plant 8',
-      'Plant 9',
-      'Plant 10',
-      'Plant 11',
-      'Plant 12',
-      'Plant 13',
-      'Plant 14',
-      'Plant 15',
-      'Plant 16',
-      'Plant 17',
-      'Plant 18',
-      'Plant 19',
-      'Plant 20',
-      'Plant 21',
-      'Plant 22',
-      'Plant 23',
-      'Plant 24',
-      'Plant 25',
-      'Plant 26',
-      'Plant 27',
-      'Plant 28',
-      'Plant 29',
-      'Plant 30',
+      'Tomato',
+      'Mango',
+      'Banana',
+      'Apple',
+      'Pear',
+      'Orange',
+      'Grape',
+      'Pineapple',
+      'Strawberry',
+      'Watermelon',
+      'Lemon',
+      'Peach',
+      'Plum',
+      'Cherry',
+      'Avocado',
+      'Coconut',
+      'Papaya',
+      'Guava',
+      'Kiwi',
+      'Blueberry',
+      'Raspberry',
+      'Blackberry',
+      'Fig',
+      'Pomegranate',
+      'Lychee',
+      'Jackfruit',
+      'Passionfruit',
+      'Dragonfruit',
+      'Date',
+      'Olive',
     ];
     if (index >= 0 && index < plantNames.length) {
       return plantNames[index];

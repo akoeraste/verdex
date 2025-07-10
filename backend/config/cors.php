@@ -15,16 +15,15 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'storage/*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        env('FRONTEND_URL', 'http://localhost:3000'),
-        env('APP_URL', 'http://localhost:8000'),
+        env('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:8080'),
         'https://*.railway.app',
         'https://*.vercel.app',
-        'https://*.netlify.app'
+        'https://*.netlify.app',
     ],
 
     'allowed_origins_patterns' => [],
@@ -35,6 +34,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
+    'supports_credentials' => false,
 
 ];
