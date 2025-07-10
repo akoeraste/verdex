@@ -33,16 +33,8 @@ COPY --chown=www-data:www-data . /var/www
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 RUN composer dump-autoload --optimize
 
-# Generate key if not exists
-RUN php artisan key:generate --no-interaction || true
-
-# Cache configurations
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
-
-# Create storage link
-RUN php artisan storage:link
+# Make setup script executable
+RUN chmod +x railway-setup.sh
 
 # Change current user to www
 USER www-data
@@ -50,5 +42,5 @@ USER www-data
 # Expose port 8000
 EXPOSE 8000
 
-# Start server
-CMD php artisan serve --host=0.0.0.0 --port=8000 
+# Start server with setup script
+CMD bash railway-setup.sh && php artisan serve --host=0.0.0.0 --port=8000 

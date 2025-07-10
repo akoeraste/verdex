@@ -70,31 +70,54 @@ MAIL_FROM_NAME="Verdex"
 
 1. Railway will automatically detect the Laravel project
 2. The build process will:
-   - Install dependencies with `composer install --no-dev --optimize-autoloader`
+   - Install dependencies with `composer install --no-dev --optimize-autoloader --no-scripts`
+   - Run the automated setup script (`railway-setup.sh`)
+   - Generate application key (if needed)
    - Run database migrations
-   - Cache configurations
+   - Run database seeders
    - Create storage links
+   - Cache configurations
+   - Set proper permissions
 
-### 5. Post-Deployment Setup
+### 5. Automated Setup
 
-After deployment, you may need to:
+The `railway-setup.sh` script automatically handles:
 
-1. **Run Seeders** (if needed):
-   ```bash
-   php artisan db:seed --force
-   ```
+✅ **Application Key Generation** - Creates APP_KEY if not exists  
+✅ **Database Migrations** - Runs all pending migrations  
+✅ **Database Seeders** - Populates initial data  
+✅ **Storage Links** - Creates public storage symlink  
+✅ **Configuration Caching** - Optimizes Laravel configs  
+✅ **Permissions** - Sets proper file permissions  
+✅ **Health Check** - Verifies application is running  
 
-2. **Set up Storage**:
-   ```bash
-   php artisan storage:link
-   ```
+### 6. Manual Commands (if needed)
 
-3. **Clear Caches** (if needed):
-   ```bash
-   php artisan config:clear
-   php artisan route:clear
-   php artisan view:clear
-   ```
+If you need to run commands manually after deployment:
+
+```bash
+# Generate application key
+php artisan key:generate
+
+# Run migrations
+php artisan migrate --force
+
+# Run seeders
+php artisan db:seed --force
+
+# Create storage link
+php artisan storage:link
+
+# Clear caches
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+
+# Cache configurations
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
 
 ## Configuration Files
 
@@ -102,13 +125,17 @@ After deployment, you may need to:
 - Configures the build and deployment process
 - Sets up health checks and restart policies
 
-### Procfile
-- Defines how to start the application
-- Uses `php artisan serve` with proper host and port
+### nixpacks.toml
+- Defines build phases and dependencies
+- Includes automated setup script execution
 
-### .env.example
-- Template for environment variables
-- Includes Railway-specific configurations
+### Dockerfile
+- Alternative deployment method
+- Includes all necessary setup steps
+
+### railway-setup.sh
+- Automated post-deployment setup script
+- Handles all initialization tasks
 
 ## Troubleshooting
 
@@ -117,6 +144,7 @@ After deployment, you may need to:
 1. **Database Connection Failed**:
    - Check if MySQL service is properly linked
    - Verify database environment variables
+   - Ensure migrations are compatible
 
 2. **500 Internal Server Error**:
    - Check application logs in Railway dashboard
@@ -128,14 +156,20 @@ After deployment, you may need to:
    - Check if frontend is making requests to the correct backend URL
 
 4. **Storage Issues**:
-   - Ensure `php artisan storage:link` runs during deployment
-   - Check file permissions
+   - The setup script automatically creates storage links
+   - Check file permissions if issues persist
+
+5. **Migration Errors**:
+   - Check database connection
+   - Verify migration files are compatible
+   - Check database user permissions
 
 ### Logs and Monitoring
 
 1. **View Logs**: Go to your service in Railway dashboard → "Deployments" → "View Logs"
 2. **Monitor Performance**: Use Railway's built-in monitoring
 3. **Health Checks**: Railway will automatically check `/` endpoint
+4. **Setup Script Logs**: Check the output of `railway-setup.sh` in deployment logs
 
 ## Security Considerations
 
@@ -143,6 +177,7 @@ After deployment, you may need to:
 2. **HTTPS**: Railway automatically provides SSL certificates
 3. **CORS**: Configure allowed origins properly
 4. **Database**: Use Railway's managed database service
+5. **Permissions**: Setup script sets proper file permissions
 
 ## Performance Optimization
 
@@ -150,9 +185,11 @@ After deployment, you may need to:
 2. **Database**: Use Railway's optimized database service
 3. **CDN**: Consider using a CDN for static assets
 4. **Monitoring**: Use Railway's performance monitoring
+5. **Autoloader**: Optimized composer autoloader
 
 ## Support
 
 - **Railway Documentation**: [docs.railway.app](https://docs.railway.app)
 - **Laravel Documentation**: [laravel.com/docs](https://laravel.com/docs)
-- **Community**: Railway Discord and Laravel Forums 
+- **Community**: Railway Discord and Laravel Forums
+- **Setup Script**: Check `railway-setup.sh` for detailed setup process 

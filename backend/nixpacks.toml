@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["php82", "composer", "git"]
+nixPkgs = ["php82", "composer", "git", "curl"]
 
 [phases.install]
 cmds = [
@@ -9,10 +9,8 @@ cmds = [
 
 [phases.build]
 cmds = [
-    "php artisan config:cache",
-    "php artisan route:cache", 
-    "php artisan view:cache"
+    "chmod +x railway-setup.sh"
 ]
 
 [start]
-cmd = "php artisan serve --host=0.0.0.0 --port=$PORT" 
+cmd = "bash railway-setup.sh && php artisan serve --host=0.0.0.0 --port=$PORT" 
