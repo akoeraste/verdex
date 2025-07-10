@@ -29,8 +29,9 @@ COPY . /var/www
 # Copy existing application directory permissions
 COPY --chown=www-data:www-data . /var/www
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install dependencies (skip problematic scripts)
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+RUN composer dump-autoload --optimize
 
 # Generate key if not exists
 RUN php artisan key:generate --no-interaction || true
