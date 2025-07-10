@@ -1,5 +1,17 @@
 <?php
 
+// Simple fallback for Railway deployment
+if (!file_exists(__DIR__.'/../vendor/autoload.php')) {
+    // If Laravel isn't installed, show a simple message
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'building',
+        'message' => 'Application is being built, please wait...',
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+    exit;
+}
+
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
@@ -44,12 +56,23 @@ require __DIR__.'/../vendor/autoload.php';
 |
 */
 
-$app = require_once __DIR__.'/../bootstrap/app.php';
+try {
+    $app = require_once __DIR__.'/../bootstrap/app.php';
 
-$kernel = $app->make(Kernel::class);
+    $kernel = $app->make(Kernel::class);
 
-$response = $kernel->handle(
-    $request = Request::capture()
-)->send();
+    $response = $kernel->handle(
+        $request = Request::capture()
+    )->send();
 
-$kernel->terminate($request, $response);
+    $kernel->terminate($request, $response);
+} catch (Exception $e) {
+    // If Laravel fails to start, show a simple response
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Application is starting up, please try again in a moment...',
+        'timestamp' => date('Y-m-d H:i:s'),
+        'error' => $e->getMessage()
+    ]);
+}
