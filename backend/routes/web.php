@@ -17,6 +17,17 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Test route for debugging
+Route::get('/test', function () {
+    return response()->json([
+        'status' => 'working',
+        'timestamp' => now(),
+        'environment' => config('app.env'),
+        'version' => '1.0.0',
+        'message' => 'Laravel is running!'
+    ]);
+});
+
 // Health check route for Railway
 Route::get('/health', function () {
     return response()->json([

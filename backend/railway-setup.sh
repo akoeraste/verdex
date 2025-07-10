@@ -42,6 +42,9 @@ log "APP_DEBUG: $APP_DEBUG"
 log "DB_CONNECTION: $DB_CONNECTION"
 log "DB_HOST: $DB_HOST"
 log "PORT: $PORT"
+log "PWD: $(pwd)"
+log "Current directory contents:"
+ls -la
 
 # 1. Generate Application Key if not exists
 log "🔑 Checking application key..."
@@ -111,8 +114,20 @@ chmod -R 775 public/storage 2>/dev/null || true
 
 log "✅ Permissions set"
 
-# 8. Create a simple health check endpoint
-log "🏥 Setting up health check..."
+# 8. Create a simple test endpoint
+log "🏥 Setting up test endpoints..."
+cat > public/test.php << 'EOF'
+<?php
+header('Content-Type: application/json');
+echo json_encode([
+    'status' => 'working',
+    'timestamp' => date('Y-m-d H:i:s'),
+    'environment' => $_ENV['APP_ENV'] ?? 'unknown',
+    'php_version' => PHP_VERSION,
+    'laravel_version' => '12.x'
+]);
+EOF
+
 cat > public/health.php << 'EOF'
 <?php
 header('Content-Type: application/json');
@@ -123,7 +138,7 @@ echo json_encode([
 ]);
 EOF
 
-log "✅ Health check endpoint created at /health.php"
+log "✅ Test endpoints created at /test.php and /health.php"
 
 # 9. Test application startup
 log "🚀 Testing application startup..."
@@ -139,4 +154,4 @@ fi
 log "🎉 Railway setup completed successfully!"
 log "📊 Application URL: https://$RAILWAY_STATIC_URL"
 log "🔍 Check logs at: https://railway.app/dashboard"
-log "🏥 Health check available at: /health.php" 
+log "🏥 Test endpoints available at: /test.php and /health.php" 
