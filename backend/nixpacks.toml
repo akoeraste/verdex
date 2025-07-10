@@ -1,8 +1,15 @@
 [phases.setup]
-nixPkgs = ["php82", "composer"]
+nixPkgs = ["php82", "composer", "git"]
 
 [phases.install]
-cmds = ["composer install --no-dev --optimize-autoloader --no-scripts"]
+cmds = ["composer install --no-dev --optimize-autoloader"]
+
+[phases.build]
+cmds = [
+    "php artisan key:generate --no-interaction || true",
+    "php artisan migrate --force --no-interaction || true",
+    "php artisan storage:link --no-interaction || true"
+]
 
 [start]
-cmd = "php -S 0.0.0.0:$PORT -t public index.php" 
+cmd = "php artisan serve --host=0.0.0.0 --port=$PORT" 
