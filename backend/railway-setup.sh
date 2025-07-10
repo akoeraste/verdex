@@ -43,8 +43,6 @@ log "DB_CONNECTION: $DB_CONNECTION"
 log "DB_HOST: $DB_HOST"
 log "PORT: $PORT"
 log "PWD: $(pwd)"
-log "Current directory contents:"
-ls -la
 
 # 1. Generate Application Key if not exists
 log "🔑 Checking application key..."
@@ -59,32 +57,7 @@ else
     log "✅ Application key already exists"
 fi
 
-# 2. Test database connection
-log "🗄️  Testing database connection..."
-if php artisan tinker --execute="echo 'Database connection test'; DB::connection()->getPdo(); echo 'Database connected successfully';" 2>/dev/null; then
-    log "✅ Database connection successful"
-else
-    log "❌ Database connection failed"
-    log "This might be due to missing environment variables or database not ready"
-fi
-
-# 3. Run Database Migrations (only if database is connected)
-log "🗄️  Running database migrations..."
-if php artisan migrate --force --no-interaction 2>/dev/null; then
-    log "✅ Database migrations completed"
-else
-    log "⚠️  Database migrations failed (this might be normal if database is not ready)"
-fi
-
-# 4. Run Database Seeders (if needed)
-log "🌱 Running database seeders..."
-if php artisan db:seed --force --no-interaction 2>/dev/null; then
-    log "✅ Database seeders completed"
-else
-    log "⚠️  Database seeders failed or no seeders found (this is normal)"
-fi
-
-# 5. Create Storage Link
+# 2. Create Storage Link
 log "🔗 Creating storage link..."
 if php artisan storage:link --no-interaction 2>/dev/null; then
     log "✅ Storage link created"
@@ -92,7 +65,7 @@ else
     log "⚠️  Storage link already exists or failed"
 fi
 
-# 6. Clear and Cache Configurations (with error handling)
+# 3. Clear and Cache Configurations (with error handling)
 log "⚡ Optimizing application..."
 
 # Clear caches first
@@ -107,14 +80,14 @@ run_artisan "view:cache" "Caching views"
 
 log "✅ Application optimization completed"
 
-# 7. Set proper permissions
+# 4. Set proper permissions
 log "🔐 Setting permissions..."
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 chmod -R 775 public/storage 2>/dev/null || true
 
 log "✅ Permissions set"
 
-# 8. Create a simple test endpoint
+# 5. Create test endpoints
 log "🏥 Setting up test endpoints..."
 cat > public/test.php << 'EOF'
 <?php
@@ -139,17 +112,6 @@ echo json_encode([
 EOF
 
 log "✅ Test endpoints created at /test.php and /health.php"
-
-# 9. Test application startup
-log "🚀 Testing application startup..."
-if php artisan serve --host=0.0.0.0 --port=$PORT --no-interaction &
-then
-    log "✅ Application started successfully"
-    sleep 5
-    pkill -f "php artisan serve" 2>/dev/null || true
-else
-    log "❌ Application failed to start"
-fi
 
 log "🎉 Railway setup completed successfully!"
 log "📊 Application URL: https://$RAILWAY_STATIC_URL"

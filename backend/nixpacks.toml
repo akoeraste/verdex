@@ -9,8 +9,9 @@ cmds = [
 
 [phases.build]
 cmds = [
-    "chmod +x railway-setup.sh"
+    "chmod +x railway-setup.sh",
+    "bash railway-setup.sh"
 ]
 
 [start]
-cmd = "bash railway-setup.sh && php artisan serve --host=0.0.0.0 --port=$PORT" 
+cmd = "php artisan serve --host=0.0.0.0 --port=$PORT" 
