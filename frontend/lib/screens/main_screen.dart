@@ -3,6 +3,7 @@ import 'package:verdex/screens/home_screen.dart';
 import 'package:verdex/screens/identify_screen.dart';
 import 'package:verdex/screens/settings_screen.dart';
 import '../widgets/bottom_nav_bar.dart';
+import '../widgets/network_aware_wrapper.dart';
 import '../services/auth_service.dart';
 import 'welcome_screen.dart';
 
@@ -47,15 +48,28 @@ class MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
-      bottomNavigationBar: BottomNavBar(
-        selectedIndex: _selectedIndex,
-        onTabSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
+    return NetworkAwareWrapper(
+      showOfflineBanner: true,
+      onConnectionRestored: () {
+        // Handle connection restoration
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Connection restored! Syncing data...'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      },
+      child: Scaffold(
+        body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
+        bottomNavigationBar: BottomNavBar(
+          selectedIndex: _selectedIndex,
+          onTabSelected: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+        ),
       ),
     );
   }

@@ -256,6 +256,44 @@ class PlantService {
     }
   }
 
+  /// Find a plant by its scientific name (used for plant identification results)
+  Future<Map<String, dynamic>?> findPlantByScientificName(String scientificName) async {
+    try {
+      debugPrint('Searching for plant with scientific name: $scientificName');
+      
+      // First try to get from cache
+      final cachedPlants = await loadCachedPlants();
+      final plantFromCache = cachedPlants.firstWhereOrNull(
+        (p) => p['scientific_name']?.toString().toLowerCase() == scientificName.toLowerCase(),
+      );
+      
+      if (plantFromCache != null) {
+        debugPrint('Found plant in cache: ${plantFromCache['scientific_name']}');
+        return _formatPlantData(plantFromCache);
+      }
+
+      // If not in cache, try to search via API
+      final searchResults = await searchPlants(scientificName);
+      if (searchResults.isNotEmpty) {
+        // Find exact match by scientific name
+        final exactMatch = searchResults.firstWhereOrNull(
+          (p) => p['scientific_name']?.toString().toLowerCase() == scientificName.toLowerCase(),
+        );
+        
+        if (exactMatch != null) {
+          debugPrint('Found plant via search: ${exactMatch['scientific_name']}');
+          return exactMatch;
+        }
+      }
+
+      debugPrint('Plant not found for scientific name: $scientificName');
+      return null;
+    } catch (e) {
+      debugPrint('Error finding plant by scientific name: $e');
+      return null;
+    }
+  }
+
   String _getFullImageUrl(String? relativeUrl) {
     if (relativeUrl == null || relativeUrl.isEmpty) {
       return '';

@@ -77,7 +77,10 @@ dependencies:
   
   # Utilities
   path: any
-  intl: ^0.19.0
+  intl: ^0.20.2
+  flutter_bloc: ^9.1.1
+  freezed_annotation: ^3.1.0
+  dartz: ^0.10.1
 
 dev_dependencies:
   flutter_test:
@@ -85,7 +88,7 @@ dev_dependencies:
 
   # Testing dependencies
   mockito: ^5.4.4
-  build_runner: ^2.4.8
+  build_runner: ^2.5.4
   http_mock_adapter: ^0.6.1
   test: ^1.24.9
   integration_test:
@@ -97,6 +100,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  freezed: ^3.1.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -113,8 +117,7 @@ flutter:
   assets:
     - assets/images/
     - assets/translations/
-    - assets/model/
-    - assets/model/plant_classifier_mobile.tflite
+    - assets/model/mobilenetv3_plant_classifier.tflite
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -187,7 +187,10 @@ export default function useAuth() {
                 const permissions = response.data
                 const { can, rules } = new AbilityBuilder(createMongoAbility)
 
-                can(permissions)
+                // Fix: Add a rule for each permission
+                permissions.forEach(permission => {
+                    can(permission, 'all')
+                })
 
                 ability.update(rules)
             })

@@ -122,14 +122,40 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
     if (plantId != null) {
       try {
         debugPrint('Fetching plant details for ID: $plantId');
-        // Use cached data by default, only fetch from API if not in cache
         final plant = await PlantService().getPlantById(plantId);
         if (mounted && plant != null) {
           debugPrint('Successfully loaded plant: ${plant['scientific_name']}');
+
+          // --- BEGIN: Custom logic for major/effective language translations ---
+          final translations = (plant['translations'] as List<dynamic>? ?? []);
+          final languageService = Provider.of<LanguageService>(context, listen: false);
+          final majorLang = languageService.majorLanguageCode;
+          final effectiveLang = languageService.effectiveLanguageCode;
+
+          // Always use major language for text
+          final majorTranslation = translations.firstWhere(
+            (t) => t['language_code'] == majorLang,
+            orElse: () => null,
+          );
+
+          // For audio, use effective language if available
+          final audioTranslation = translations.firstWhere(
+            (t) => t['language_code'] == effectiveLang && (t['audio_url'] ?? '').isNotEmpty,
+            orElse: () => null,
+          );
+
+          // Compose the _plant map for UI
+          final updatedPlant = Map<String, dynamic>.from(plant);
+          updatedPlant['name'] = majorTranslation?['common_name'] ?? plant['scientific_name'] ?? '';
+          updatedPlant['description'] = majorTranslation?['description'] ?? '';
+          updatedPlant['uses'] = majorTranslation?['uses'] ?? '';
+          updatedPlant['audio_url'] = audioTranslation?['audio_url'] ?? '';
+
           setState(() {
-            _plant = plant;
+            _plant = updatedPlant;
             _isLoading = false;
           });
+          // --- END: Custom logic ---
         } else {
           debugPrint('Plant not found or null for ID: $plantId');
           setState(() {
@@ -550,23 +576,22 @@ class _PlantDetailsScreenState extends State<PlantDetailsScreen>
                   ),
                 ],
               ),
-              child:
-                  _isPlayingAudio
-                      ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
+              child: _isPlayingAudio
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white,
                         ),
-                      )
-                      : const FaIcon(
-                        FontAwesomeIcons.volumeHigh,
-                        color: Colors.white,
-                        size: 24,
                       ),
+                    )
+                  : const FaIcon(
+                      FontAwesomeIcons.volumeHigh,
+                      color: Colors.white,
+                      size: 24,
+                    ),
             ),
           ),
       ],

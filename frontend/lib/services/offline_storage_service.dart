@@ -65,33 +65,67 @@ class OfflineStorageService {
     return null;
   }
 
-  // Cache user data
+  // Cache user data with validation
   Future<void> cacheUserData(Map<String, dynamic> userData) async {
+    // Validate user data before caching
+    if (userData.isEmpty) {
+      print('🗄️ [OfflineStorage] Cannot cache empty user data');
+      return;
+    }
+
+    // Ensure required fields are present
+    if (userData['id'] == null) {
+      print('🗄️ [OfflineStorage] User data missing required field: id');
+      return;
+    }
+
     _cachedUserData = userData; // Update cache
     _userDataLoaded = true;
 
-    await _secureStorage.write(
-      key: _cachedUserDataKey,
-      value: jsonEncode(userData),
-    );
-    await _setLastSyncTimestamp();
+    try {
+      await _secureStorage.write(
+        key: _cachedUserDataKey,
+        value: jsonEncode(userData),
+      );
+      await _setLastSyncTimestamp();
+      print('🗄️ [OfflineStorage] User data cached successfully');
+    } catch (e) {
+      print('🗄️ [OfflineStorage] Failed to cache user data: $e');
+      // Clear cache on error
+      _cachedUserData = null;
+      _userDataLoaded = false;
+    }
   }
 
-  // Get cached user data
+  // Get cached user data with validation
   Future<Map<String, dynamic>?> getCachedUserData() async {
     if (_userDataLoaded && _cachedUserData != null) {
       return _cachedUserData;
     }
 
-    final userDataJson = await _secureStorage.read(key: _cachedUserDataKey);
-    if (userDataJson != null) {
-      try {
-        _cachedUserData = jsonDecode(userDataJson) as Map<String, dynamic>;
+    try {
+      final userDataJson = await _secureStorage.read(key: _cachedUserDataKey);
+      if (userDataJson != null) {
+        final userData = jsonDecode(userDataJson) as Map<String, dynamic>;
+
+        // Validate cached data
+        if (userData.isEmpty || userData['id'] == null) {
+          print('🗄️ [OfflineStorage] Invalid cached user data, clearing...');
+          await _secureStorage.delete(key: _cachedUserDataKey);
+          return null;
+        }
+
+        _cachedUserData = userData;
         _userDataLoaded = true;
+        print('🗄️ [OfflineStorage] Cached user data loaded successfully');
         return _cachedUserData;
-      } catch (e) {
-        return null;
       }
+    } catch (e) {
+      print('🗄️ [OfflineStorage] Error loading cached user data: $e');
+      // Clear corrupted data
+      await _secureStorage.delete(key: _cachedUserDataKey);
+      _cachedUserData = null;
+      _userDataLoaded = false;
     }
     return null;
   }
@@ -184,29 +218,89 @@ class OfflineStorageService {
     await prefs.remove(_pendingActionsKey);
   }
 
-  // Clear all cached data
+  // Enhanced credential validation
+  Future<bool> areCachedCredentialsValid() async {
+    final credentials = await getCachedCredentials();
+    if (credentials == null) return false;
+
+    try {
+      final timestamp = DateTime.tryParse(credentials['timestamp'] ?? '');
+      if (timestamp == null) {
+        print('🗄️ [OfflineStorage] Invalid timestamp in cached credentials');
+        return false;
+      }
+
+      final daysSinceCached = DateTime.now().difference(timestamp).inDays;
+      final isValid = daysSinceCached <= 30; // Valid for 30 days
+
+      print(
+        '🗄️ [OfflineStorage] Credentials cached $daysSinceCached days ago, valid: $isValid',
+      );
+      return isValid;
+    } catch (e) {
+      print('🗄️ [OfflineStorage] Error validating cached credentials: $e');
+      return false;
+    }
+  }
+
+  // Validate cache integrity
+  Future<bool> validateCacheIntegrity() async {
+    try {
+      final userData = await getCachedUserData();
+      final credentials = await getCachedCredentials();
+
+      // Check if we have both user data and credentials
+      if (userData != null && credentials != null) {
+        // Validate that credentials match user data (basic check)
+        final userEmail = userData['email']?.toString().toLowerCase();
+        final credentialLogin = credentials['login']?.toString().toLowerCase();
+
+        if (userEmail != null && credentialLogin != null) {
+          final match = userEmail == credentialLogin;
+          print('🗄️ [OfflineStorage] Cache integrity check: $match');
+          return match;
+        }
+      }
+
+      return false;
+    } catch (e) {
+      print('🗄️ [OfflineStorage] Cache integrity check failed: $e');
+      return false;
+    }
+  }
+
+  // Enhanced cache cleanup
   Future<void> clearAllCachedData() async {
     print('🗄️ [OfflineStorage] Clearing all cached data...');
 
-    await _secureStorage.delete(key: _cachedCredentialsKey);
-    await _secureStorage.delete(key: _cachedUserDataKey);
-    print('🗄️ [OfflineStorage] Secure storage cleared');
+    try {
+      await _secureStorage.delete(key: _cachedCredentialsKey);
+      await _secureStorage.delete(key: _cachedUserDataKey);
+      print('🗄️ [OfflineStorage] Secure storage cleared');
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_lastSyncTimestampKey);
-    await prefs.remove(_pendingActionsKey);
-    await prefs.remove(_isOfflineModeKey);
-    await prefs.remove(_offlineModeEnabledKey);
-    print('🗄️ [OfflineStorage] Shared preferences cleared');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_lastSyncTimestampKey);
+      await prefs.remove(_pendingActionsKey);
+      await prefs.remove(_isOfflineModeKey);
+      await prefs.remove(_offlineModeEnabledKey);
+      print('🗄️ [OfflineStorage] Shared preferences cleared');
 
-    // Clear in-memory cache
-    _cachedUserData = null;
-    _cachedCredentials = null;
-    _userDataLoaded = false;
-    _credentialsLoaded = false;
-    print('🗄️ [OfflineStorage] In-memory cache cleared');
+      // Clear in-memory cache
+      _cachedUserData = null;
+      _cachedCredentials = null;
+      _userDataLoaded = false;
+      _credentialsLoaded = false;
+      print('🗄️ [OfflineStorage] In-memory cache cleared');
 
-    print('🗄️ [OfflineStorage] All cached data cleared successfully');
+      print('🗄️ [OfflineStorage] All cached data cleared successfully');
+    } catch (e) {
+      print('🗄️ [OfflineStorage] Error clearing cached data: $e');
+      // Force clear in-memory cache even if storage fails
+      _cachedUserData = null;
+      _cachedCredentials = null;
+      _userDataLoaded = false;
+      _credentialsLoaded = false;
+    }
   }
 
   // Clear only cached user data (keep credentials for offline login)
@@ -214,17 +308,5 @@ class OfflineStorageService {
     await _secureStorage.delete(key: _cachedUserDataKey);
     _cachedUserData = null;
     _userDataLoaded = false;
-  }
-
-  // Check if cached credentials are still valid (within 30 days)
-  Future<bool> areCachedCredentialsValid() async {
-    final credentials = await getCachedCredentials();
-    if (credentials == null) return false;
-
-    final timestamp = DateTime.tryParse(credentials['timestamp'] ?? '');
-    if (timestamp == null) return false;
-
-    final daysSinceCached = DateTime.now().difference(timestamp).inDays;
-    return daysSinceCached <= 30; // Valid for 30 days
   }
 }

@@ -81,7 +81,7 @@ export function usePlants() {
     // Get categories for dropdown
     const getCategories = async () => {
         try {
-            const response = await axios.get('/web/plant-categories-list')
+            const response = await axios.get('/api/plant-categories-list')
             categories.value = response.data
         } catch (err) {
             console.error('Failed to fetch categories:', err)
@@ -91,7 +91,7 @@ export function usePlants() {
     // Get languages for dropdown
     const getLanguages = async () => {
         try {
-            const response = await axios.get('/web/languages-list')
+            const response = await axios.get('/api/languages-list')
             languages.value = response.data
         } catch (err) {
             console.error('Failed to fetch languages:', err)

@@ -9,6 +9,7 @@ import '../services/language_service.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'plant_result_screen.dart';
+import '../services/plant_classifier_service.dart';
 
 class IdentifyScreen extends StatefulWidget {
   const IdentifyScreen({super.key});
@@ -512,10 +513,16 @@ class _IdentifyScreenState extends State<IdentifyScreen>
         },
       );
       if (confirmed == true) {
+        // Run prediction before navigating
+        final classifier = PlantClassifierService();
+        final predictionResult = await classifier.predict(tempFile);
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PlantResultScreen(imageFile: tempFile),
+            builder: (context) => PlantResultScreen(
+              imageFile: tempFile,
+              predictionResult: predictionResult,
+            ),
           ),
         );
       }

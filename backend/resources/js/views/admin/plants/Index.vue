@@ -9,7 +9,7 @@
           placeholder="Search plants..." 
           class="search-input"
         />
-        <router-link :to="{ name: 'plants.create' }" class="modern-btn">Add Plant</router-link>
+        <router-link v-if="can('plant-create')" :to="{ name: 'plants.create' }" class="modern-btn">Add Plant</router-link>
       </div>
     </div>
     <table class="modern-table">
@@ -67,6 +67,8 @@
 import { ref, onMounted, watch } from 'vue'
 import { usePlants } from '@/composables/plants'
 import Pagination from '@/components/Pagination.vue'
+import { useAbility } from '@casl/vue'
+const { can } = useAbility()
 
 const {
     plants,

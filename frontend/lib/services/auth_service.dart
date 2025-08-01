@@ -252,7 +252,7 @@ class AuthService {
         // Refresh from server in background (non-blocking)
         _refreshUserInBackground();
       } else {
-        // Only check cached credentials for offline login availability, don't auto-login
+        // Check if we have valid cached credentials for offline login
         print(
           '🔐 [AuthService] No token found, checking cached credentials...',
         );
@@ -263,8 +263,18 @@ class AuthService {
             print(
               '🔐 [AuthService] Valid cached credentials available for offline login',
             );
+            // Try to get cached user data
+            final cachedUser = await _offlineStorage.getCachedUserData();
+            if (cachedUser != null) {
+              _currentUser = cachedUser;
+              print(
+                '🔐 [AuthService] Loaded cached user data for offline mode',
+              );
+            }
           } else {
             print('🔐 [AuthService] Cached credentials have expired');
+            // Clear expired credentials
+            await _offlineStorage.clearAllCachedData();
           }
         } else {
           print('🔐 [AuthService] No cached credentials available');
@@ -325,7 +335,7 @@ class AuthService {
     print('🔐 [AuthService] Logout complete');
   }
 
-  // Check if user is authenticated (has token or valid cached credentials with user data)
+  // Enhanced authentication check with better offline support
   Future<bool> isAuthenticated() async {
     final token = await getToken();
     print(
@@ -353,7 +363,15 @@ class AuthService {
         print(
           '🔐 [AuthService] isAuthenticated - Cached user data: ${cachedUser != null ? "EXISTS" : "NULL"}',
         );
-        return cachedUser != null;
+
+        if (cachedUser != null) {
+          // Set current user for offline mode
+          _currentUser = cachedUser;
+          return true;
+        }
+      } else {
+        // Clear expired credentials
+        await _offlineStorage.clearAllCachedData();
       }
     }
 
@@ -363,23 +381,34 @@ class AuthService {
     return false;
   }
 
-  // Sync when coming back online
+  // Enhanced sync when coming back online with better error handling
   Future<void> syncWhenOnline() async {
-    if (!_connectivityService.isConnected) return;
+    if (!_connectivityService.isConnected ||
+        !_connectivityService.isReachable) {
+      print('🔐 [AuthService] Not connected or not reachable, skipping sync');
+      return;
+    }
 
     print('🔐 [AuthService] Syncing when back online...');
     final token = await getToken();
     if (token != null) {
-      // Refresh user data from server
-      await refreshUser();
+      try {
+        // Refresh user data from server
+        await refreshUser();
 
-      // Process pending actions
-      await _processPendingActions();
+        // Process pending actions
+        await _processPendingActions();
+
+        // Clear offline mode
+        await _offlineStorage.setOfflineMode(false);
+        print('🔐 [AuthService] Sync complete');
+      } catch (e) {
+        print('🔐 [AuthService] Sync failed: $e');
+        // Don't clear offline mode if sync failed
+      }
+    } else {
+      print('🔐 [AuthService] No token available for sync');
     }
-
-    // Clear offline mode
-    await _offlineStorage.setOfflineMode(false);
-    print('🔐 [AuthService] Sync complete');
   }
 
   // Process pending actions that were queued while offline

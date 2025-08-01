@@ -8,6 +8,13 @@
             <span>Dashboard</span>
           </router-link>
         </li>
+        <!-- Feedback -->
+        <li>
+          <router-link to="/admin/feedback" class="sidebar-link" :class="{ active: route.path.startsWith('/admin/feedback') }">
+            <span class="icon-wrap">📨</span>
+            <span>Feedback</span>
+          </router-link>
+        </li>
         <!-- Plant Management -->
         <li>
           <div class="sidebar-section" @click="toggle('plant')">

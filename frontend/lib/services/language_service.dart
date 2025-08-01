@@ -38,17 +38,20 @@ class LanguageService with ChangeNotifier {
       isMajor: true,
       minorLanguages: [
         Language(code: 'en-PG', name: 'Pidgin'),
-        Language(code: 'en-NS', name: 'Nso'),
-        Language(code: 'en-KM', name: 'Kom'),
-        Language(code: 'en-BI', name: 'Bambui'),
-        Language(code: 'en-BL', name: 'Bambili'),
+        Language(code: 'bm', name: 'Bambili'), // changed from 'en-BL' to 'bm'
       ],
     ),
     Language(
       code: 'fr',
       name: 'French',
       isMajor: true,
-      minorLanguages: [Language(code: 'fr-GO', name: 'Gombale')],
+      minorLanguages: [],
+    ),
+    Language(
+      code: 'gm',
+      name: 'Ngombale',
+      isMajor: false,
+      minorLanguages: [],
     ),
   ];
 

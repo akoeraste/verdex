@@ -48,7 +48,8 @@ class ProfileController extends Controller
     public function user(Request $request)
     {
         $user = $request->user();
-
-        return $this->successResponse($user, 'User found');
+        $userData = $user->toArray();
+        $userData['permissions'] = $user->getAllPermissions()->pluck('name');
+        return $this->successResponse($userData, 'User found');
     }
 }

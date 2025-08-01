@@ -48,8 +48,10 @@ class SplashScreenState extends State<SplashScreen> {
       if (mounted) {
         if (!isAuthenticated) {
           debugPrint(
-            'Splash: User not authenticated, redirecting to WelcomeScreen',
+            'Splash: User not authenticated, force logout and redirect to WelcomeScreen',
           );
+          // Force logout to clear all cached data and tokens
+          await AuthService().forceLogout();
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const WelcomeScreen()),
           );
@@ -65,6 +67,8 @@ class SplashScreenState extends State<SplashScreen> {
           );
         } else {
           debugPrint('Splash: Navigating to MainScreen');
+          // Ensure user info is loaded before entering the app
+          await AuthService().initializeUser();
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const MainScreen()),
           );
@@ -84,11 +88,12 @@ class SplashScreenState extends State<SplashScreen> {
   Future<bool> _checkAuthenticationStatus() async {
     debugPrint('Splash: Checking authentication status...');
 
-    // Don't call initializeUser here as it might set current user incorrectly
-    // Just check authentication status directly
     final authService = AuthService();
     final isAuthenticated = await authService.isAuthenticated();
-
+    if (!isAuthenticated) {
+      // Force logout to clear all cached data and tokens
+      await authService.forceLogout();
+    }
     debugPrint('Splash: Authentication result: $isAuthenticated');
     return isAuthenticated;
   }
